@@ -1,0 +1,52 @@
+<!--
+Copyright 2004, 2010 by Xavax, Inc. All Rights Reserved.
+Use of this software is allowed under the Xavax Open Software License.
+http://www.xavax.com/xosl.html
+-->
+
+<project name="xcore" default="jar" basedir=".">
+  <!-- Configure the context path for this application -->
+  <property name="project" value="xcore" />
+  <property file="local.properties" />
+  <property file="build.properties" />
+
+  <!-- Create the class path -->
+  <path id="classpath.xcore">
+    <pathelement location="${log4j.jar}" />
+    <pathelement location="${commons.lang.jar}" />
+  </path>
+
+  <!-- Executable Targets -->
+
+  <target name="init" >
+    <tstamp/>
+  </target>
+ 
+  <target name="build" depends="init">
+    <mkdir dir="build" />
+    <javac debug="${javac.debug}"
+	   includeantruntime="false"
+	   srcdir="src" destdir="build">
+      <classpath refid="classpath.xcore"/>
+      <include name="**/*.java" />
+    </javac>
+  </target>
+
+  <target name="jar" depends="build">
+    <echo message="Creating xcore.jar"/>
+    <jar destfile="xcore.jar" filesonly="true" >
+      <fileset dir="build" includes="**/*.class" />
+      <manifest>
+        <attribute name="Built-By" value="${built.by}" />
+        <attribute name="Built-On" value="${timestamp.isoformat}" />
+        <attribute name="Implementation-Version"  value="${xcore.version}" />
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="clean" >
+    <delete dir="build" />
+    <delete dir="test/build" />
+  </target>
+
+</project>
