@@ -1,0 +1,642 @@
+//
+// Copyright 2011 by Xavax, Inc. All Rights Reserved.
+// Use of this software is allowed under the Xavax Open Software License.
+// http://www.xavax.com/xosl.html
+//
+package com.xavax.json;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.util.List;
+
+import com.xavax.util.CollectionFactory;
+
+/**
+ * 
+ * @author Phil Harbison
+ */
+public class JSONParser {
+  public JSONParser() {
+    this.source = null;
+    this.reader = null;
+    init();
+  }
+
+  public JSONParser(Reader reader, String source) {
+    this.source = source;
+    this.reader = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
+    init();
+  }
+
+  private void init() {
+    line = 0;
+    level = 0;
+    cursor = 0;
+    length = 0;
+    array = null;
+    lineBuffer = null;
+    errors = null;
+  }
+
+  static public JSON parse(Reader reader, String source) {
+    JSON result = null;
+    if ( reader != null ) {
+      JSONParser parser = new JSONParser(reader, source);
+      result = parser.parse();
+    }
+    return result;
+  }
+
+  private void init(String input) {
+    source = null;
+    reader = new BufferedReader(new StringReader(input));
+    init();
+  }
+
+  public JSON parse(String input) {
+    init(input);
+    return parse();
+  }
+
+  public JSON parse() {
+    level = 0;
+    json = new JSON();
+    try {
+      if ( expect('{', true) ) {
+	parseItems(json);
+      }
+      if ( level != 0 ) {
+	addError("unmatched braces or brackets");
+      }
+    }
+    catch (EndOfInputException e) {
+      String msg = "unexpected end of input";
+      addError(msg);
+    }
+    if ( hasNext() ) {
+      addError("unexpected characters after closing brace");
+    }
+    return json;
+  }
+
+  public JSONArray parseArray(String input) {
+    init(input);
+    level = 0;
+    JSONArray list = new JSONArray();
+    try {
+      if ( expect('[', true) ) {
+	parseArrayItems(list);
+      }
+      if ( level != 0 ) {
+	addError("unmatched braces or brackets");
+      }
+    }
+    catch (EndOfInputException e) {
+      String msg = "unexpected end of input";
+      addError(msg);
+    }
+    if ( hasNext() ) {
+      addError("unexpected characters after closing brace");
+    }
+    return list;
+  }
+
+  private void parseItems(JSON map) {
+    boolean first = true;
+    while ( hasNext() ) {
+      if ( first ) {
+	first = false;
+	if ( scanFor('}') ) {
+	  break;
+	}
+      }
+      parseItem(map);
+      char c = next(true);
+      if ( c == '}' ) {
+	break;
+      }
+      else if ( c != ',' ) {
+	expected(',', c);
+	break;
+      }
+    }
+  }
+
+  private boolean parseItem(JSON map) {
+    boolean result = false;
+    String key = parseKey();
+    if ( key == null || key.equals("") ) {
+      expected("identifier", peek());
+    }
+    else {
+      if ( expect(':', true) ) {
+	Object value = parseValue();
+	map.put(key, value);
+	result = true;
+      }
+      else {
+	skipToNextItem(true);
+      }
+    }
+    return result;
+  }
+
+  private String parseKey() {
+    String key = null;
+    char c = next(true);
+    if ( c == '"' || c == '\'' ) {
+      key = parseIdentifier();
+      expect(c, false);
+    }
+    else {
+      pushback();
+      key = parseIdentifier();
+    }
+    return key;
+  }
+
+  private String parseIdentifier() {
+    StringBuilder sb = new StringBuilder();
+    char c = next(false);
+    if ( Character.isLetter(c) || c == '_' ) {
+      sb.append(c);
+      while ( hasNext() ) {
+	c = next(false);
+	if ( Character.isLetterOrDigit(c) || c == '_' ) {
+	  sb.append(c);
+	}
+	else {
+	  pushback();
+	  break;
+	}
+      }
+    }
+    else {
+      pushback();
+    }
+    return sb.toString();
+  }
+
+  private Object parseValue() {
+    Object result = null;
+    if ( hasNext() ) {
+      char c = next(true);
+      switch ( c ) {
+      case '"':
+      case '\'':
+	result = parseString(c);
+	break;
+      case '{':
+	JSON map = new JSON();
+	++level;
+	parseItems(map);
+	--level;
+	result = map;
+	break;
+      case '}':
+      case ',':
+	pushback();
+	expected("value", c);
+	break;
+      case '[':
+	JSONArray list = new JSONArray();
+	++level;
+	parseArrayItems(list);
+	--level;
+	result = list;
+	break;
+      case '-':
+      case '.':
+	pushback();
+	result = parseNumber();
+	break;
+      default:
+	if ( Character.isDigit(c) ) {
+	  pushback();
+	  result = parseNumber();
+	}
+	else if ( Character.isLetter(c) ) {
+	  int mark = cursor - 1;
+	  while ( hasNext() ) {
+	    c = next(false);
+	    if ( !Character.isLetter(c) ) {
+	      pushback();
+	      break;
+	    }
+	  }
+	  String word = lineBuffer.substring(mark, cursor);
+	  if ( ignoreCase ) {
+	    word = word.toLowerCase();
+	  }
+	  if ( word.equals("null") ) {
+	    result = null;
+	  }
+	  else if ( word.equals("true") ) {
+	    result = Boolean.TRUE;
+	  }
+	  else if ( word.equals("false") ) {
+	    result = Boolean.FALSE;
+	  }
+	  else {
+	    expected("true, false, or null", word);
+	  }
+	}
+	else {
+	  expected("value", c);
+	}
+	break;
+      }
+    }
+    return result;
+  }
+
+  private void parseArrayItems(JSONArray list) {
+    while ( hasNext() ) {
+      if ( scanFor(']') ) {
+	break;
+      }
+      Object value = parseValue();
+      list.add(value);
+      char c = next(true);
+      if ( c == ']' ) {
+	break;
+      }
+      else if ( c != ',' ) {
+	expected(',', c);
+	break;
+      }
+    }
+  }
+
+  private Object parseNumber() {
+    boolean done = false;
+    boolean isDouble = false;
+    boolean leadingZero = false;
+    int state = AcceptDigitSignRadix;
+    int mark = cursor;
+    StringBuilder sb = new StringBuilder();
+    while ( !done && hasNext() ) {
+      // Skip whitespace only for first character of number.
+      char c = next(state == AcceptDigitSignRadix);
+      switch ( state ) {
+      case AcceptDigitSignRadix:
+	if ( Character.isDigit(c) ) {
+	  state = AccumulateInitialDigits;
+	  if ( c == '0' ) {
+	    leadingZero = true;
+	  }
+	}
+	else if ( c == '-' ) {
+	  state = AcceptDigitRadix;
+	}
+	else if ( c == '.' ) {
+	  state = AccumulateFractionalDigits;
+	}
+	else {
+	  unexpectedNumericInput(mark, c);
+	  done = true;
+	}
+	break;
+      case AcceptDigitRadix:
+	if ( Character.isDigit(c) ) {
+	  state = AccumulateInitialDigits;
+	  if ( c == '0' ) {
+	    leadingZero = true;
+	  }
+	}
+	else if ( c == '.' ) {
+	  state = AccumulateFractionalDigits;
+	}
+	else {
+	  unexpectedNumericInput(mark, c);
+	  done = true;
+	}
+	break;
+      case AccumulateInitialDigits:
+	// Accumulating initial digits.
+	if ( c == '.' ) {
+	  state = AccumulateFractionalDigits;
+	}
+	else if ( c == 'e' || c == 'E' ) {
+	  state = AcceptExponentDigitSign;
+	}
+	else if ( Character.isDigit(c) ) {
+	  if ( leadingZero ) {
+	    invalid(mark, "leading zero");
+	  }
+	}
+	else {
+	  unexpectedNumericInput(mark, c);
+	  done = true;
+	}
+	break;
+      case AccumulateFractionalDigits:
+	isDouble = true;
+	if ( c == 'e' || c == 'E' ) {
+	  state = AcceptExponentDigitSign;
+	}
+	else if ( !Character.isDigit(c) ) {
+	  unexpectedNumericInput(mark, c);
+	  done = true;
+	}
+	break;
+      case AcceptExponentDigitSign:
+	isDouble = true;
+	if ( c == '-' || c == '+' ) {
+	  state = AccumulateExponentDigits;
+	}
+	else if ( !Character.isDigit(c) ) {
+	  unexpectedNumericInput(mark, c);
+	  done = true;
+	}
+	break;
+      case AccumulateExponentDigits:
+	if ( !Character.isDigit(c) ) {
+	  unexpectedNumericInput(mark, c);
+	  done = true;
+	}
+	break;
+      }
+      if ( !done ) {
+	sb.append(c);
+      }
+    }
+    String s = sb.toString();
+    // The casting is necessary to keep Java from converting the Long to a
+    // Double.
+    return isDouble ? (Object) Double.valueOf(s) : (Object) Long.valueOf(s);
+  }
+
+  private void unexpectedNumericInput(int mark, char c) {
+    if ( Character.isWhitespace(c) || c == ',' || c == '}' ) {
+      pushback();
+    }
+    else {
+      skipToNextItem(false);
+      invalidNumber(mark);
+    }
+  }
+
+  private String parseString(char sentinel) {
+    boolean escape = false;
+    String result = null;
+    StringBuilder sb = new StringBuilder();
+    while ( hasNext() ) {
+      char c = next(false);
+      char[] chars = empty;
+      if ( escape ) {
+	switch ( c ) {
+	case 'b':
+	  chars = backspace;
+	  break;
+	case 'f':
+	  chars = formfeed;
+	  break;
+	case 'n':
+	  chars = newline;
+	  break;
+	case 'r':
+	  chars = creturn;
+	  break;
+	case 't':
+	  chars = tab;
+	  break;
+	case 'u':
+	  chars = getUnicodeChar();
+	  break;
+	default:
+	  sb.append(c);
+	  break;
+	}
+	sb.append(chars);
+	escape = false;
+      }
+      else if ( c == '\\' ) {
+	escape = true;
+      }
+      else if ( c == sentinel ) {
+	result = sb.toString();
+	break;
+      }
+      else {
+	sb.append(c);
+      }
+    }
+    return result;
+  }
+
+  private char[] getUnicodeChar() {
+    char[] result = empty;
+    int mark = cursor - 2;
+    int codePoint = 0;
+    int i = 4;
+    while ( i > 0 && hasNext() ) {
+      char c = next(false);
+      int value = Character.digit(c, 16);
+      if ( value >= 0 ) {
+	codePoint = (codePoint << 4) + value;
+	--i;
+      }
+      else {
+	expected("hex-digit", c);
+	break;
+      }
+    }
+    if ( i == 0 ) {
+      result = Character.toChars(codePoint);
+    }
+    else {
+      invalidUnicode(mark);
+    }
+    return result;
+  }
+
+  private boolean expect(char expected, boolean skipWhitespace) {
+    boolean result = false;
+    char c = next(skipWhitespace);
+    if ( c == expected ) {
+      result = true;
+    }
+    else {
+      expected(expected, c);
+      pushback();
+    }
+    return result;
+  }
+
+  private boolean scanFor(char expected) {
+    char c = next(true);
+    boolean result = c == expected;
+    if ( !result ) {
+      pushback();
+    }
+    return result;
+  }
+
+  private boolean hasNext() {
+    return cursor < length || getNextLine();
+  }
+
+  private boolean getNextLine() {
+    boolean result = false;
+    try {
+      if ( reader.ready() ) {
+	lineBuffer = reader.readLine();
+	if ( lineBuffer != null ) {
+	  ++line;
+	  cursor = 0;
+	  length = lineBuffer.length();
+	  array = new char[length];
+	  lineBuffer.getChars(0, length, array, 0);
+	  result = true;
+	}
+      }
+    }
+    catch (IOException e) {
+      // Ignore this exception and assume there is no more input.
+    }
+    return result;
+  }
+
+  private char next(boolean skipWhitespace) {
+    char result = '\0';
+    do {
+      if ( hasNext() ) {
+	result = array[cursor++];
+      }
+      else {
+	throw new EndOfInputException();
+      }
+    } while ( skipWhitespace && Character.isWhitespace(result) );
+    return result;
+  }
+
+  private char peek() {
+    return cursor < array.length ? array[cursor] : 0;
+  }
+
+  private void pushback() {
+    --cursor;
+  }
+
+  private void skipToNextItem(boolean skipWhitespace) {
+    while ( hasNext() ) {
+      char c = next(false);
+      if ( (!skipWhitespace && Character.isWhitespace(c)) || c == ','
+	  || c == '}' ) {
+	pushback();
+	break;
+      }
+    }
+  }
+
+  private void expected(char expected, char received) {
+    String msg = "expected [" + expected + "] but received [" + received + "]";
+    addError(msg);
+  }
+
+  private void expected(String expected, char received) {
+    String s = "" + received;
+    expected(expected, s);
+  }
+
+  private void expected(String expected, String received) {
+    String msg = "expected [" + expected + "] but received [" + received + "]";
+    addError(msg);
+  }
+
+  private void invalidNumber(int mark) {
+    invalid(mark, "number");
+  }
+
+  private void invalidUnicode(int mark) {
+    invalid(mark, "Unicode escape sequence");
+  }
+
+  private void invalid(int mark, String detail) {
+    String msg = "invalid " + detail + " [" + lineBuffer.substring(mark, cursor)
+	+ "]";
+    addError(mark, msg);
+  }
+
+  private void addError(String msg) {
+    addError(cursor - 1, msg);
+  }
+
+  private void addError(int mark, String msg) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(source == null ? "JSON" : source)
+      .append(": error at line ").append(line)
+      .append(" position ").append(mark)
+      .append(" - ").append(msg);
+    if ( lineBuffer != null ) {
+      sb.append("\n").append(lineBuffer).append("\n");
+      for ( int i = 0; i < mark ; ++i ) {
+	sb.append(" ");
+      }
+      sb.append("^");
+    }
+    String s = sb.toString();
+    if ( errors == null ) {
+      errors = CollectionFactory.arrayList();
+    }
+    errors.add(s);
+    System.out.println(s);
+  }
+
+  public List<String> getErrors() {
+    return errors;
+  }
+
+  public int errorCount() {
+    return errors == null ? 0 : errors.size();
+  }
+
+  public boolean isValid() {
+    return errors == null;
+  }
+
+  public boolean ignoreCase() {
+    return this.ignoreCase;
+  }
+
+  public void ignoreCase(boolean ignoreCase) {
+    this.ignoreCase = ignoreCase;
+  }
+
+  static final int AcceptDigitSignRadix = 0;
+  static final int AcceptDigitRadix = 1;
+  static final int AccumulateInitialDigits = 2;
+  static final int AccumulateFractionalDigits = 3;
+  static final int AcceptExponentDigitSign = 4;
+  static final int AccumulateExponentDigits = 5;
+
+  private final static char[] empty = new char[] {};
+  private final static char[] backspace = new char[] { '\b' };
+  private final static char[] formfeed = new char[] { '\f' };
+  private final static char[] newline = new char[] { '\n' };
+  private final static char[] creturn = new char[] { '\r' };
+  private final static char[] tab = new char[] { '\t' };
+
+  private boolean ignoreCase = false;
+  private int cursor;
+  private int length;
+  private int level;
+  private int line;
+  private char[] array;
+  private String lineBuffer;
+  private String source;
+  private JSON json;
+  private List<String> errors;
+  private BufferedReader reader;
+
+  public final class EndOfInputException extends RuntimeException {
+    public EndOfInputException() {
+      super("UnexpectedEndOfInput");
+    }
+
+    public final static long serialVersionUID = 0;
+  }
+}

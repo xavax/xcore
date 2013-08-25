@@ -1,0 +1,27 @@
+{
+  cities: [
+    {
+      name: 'Atlanta',
+      x: 3.0000,
+      y: 4.0000,
+      pop: 4500000
+    },
+    {
+      name: 'Birmingham',
+      x: 1.0000,
+      y: 2.0000,
+      pop: 1250000,
+      people: [
+        {name: {first: 'Jack', last: 'Brown'}},
+        {name: {first: 'Judy', last: 'Jetson'}},
+        {name: {first: 'Cosmo', last: 'Spacely'}}
+      ]
+    },
+    {
+      name: 'Charlotte',
+      x: 5.0000,
+      y: 6.0000,
+      pop: 2000000
+    }    
+  ]
+}
