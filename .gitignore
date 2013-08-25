@@ -1,3 +1,6 @@
 /test-output
 /xcore.jar
 /local.properties
+/bin
+/test/bin
+/build
