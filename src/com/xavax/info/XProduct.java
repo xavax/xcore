@@ -1,7 +1,5 @@
 package com.xavax.info;
 
-import java.util.Formatter;
-
 /**
  * XProduct encapsulates information about a product including the product name,
  * version, and copyright statement. The copyright statement can be customized
@@ -41,11 +39,9 @@ public class XProduct {
   public String copyright()
   {
     if (copyright == null) {
-      StringBuilder sb = new StringBuilder();
-      Formatter fmt = new Formatter(sb);
-      fmt.format(template, copyrightBegin, copyrightEnd);
-      copyright = sb.toString();
-      fmt.close();
+      String year = String.format(copyrightEnd == 0 ? YEAR : YEAR_SPAN,
+	  copyrightBegin, copyrightEnd);
+      copyright = String.format(template, year);
     }
     return copyright;
   }
@@ -93,8 +89,10 @@ public class XProduct {
     return version;
   }
 
+  protected final String YEAR = "%1$d";
+  protected final String YEAR_SPAN = "%1$d, %2$d";
   protected final String defaultCopyright =
-      "Copyright %1$d, %2$d by Xavax, Inc. All Rights Reserved.\n"
+      "Copyright %s by Xavax, Inc. All Rights Reserved.\n"
 	  + "Use of this software is allowed under the Xavax Open Software License.\n"
 	  + "http://www.xavax.com/xosl.html";
 
