@@ -1,9 +1,22 @@
+//
+// Copyright 2010 by Xavax, Inc. All Rights Reserved.
+// Use of this software is allowed under the Xavax Open Software License.
+// http://www.xavax.com/xosl.html
+//
+
 package com.xavax.util;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 
+/**
+ * FilenameFormatter creates filenames from a template which can refer
+ * to the current time of day which is passed to the formatter as the
+ * first parameter
+ *
+ * @author alvitar@xavax.com
+ */
 public class FilenameFormatter {
   /**
    * Create a filename from a template. The first positional parameter passed

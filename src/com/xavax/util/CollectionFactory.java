@@ -3,6 +3,7 @@
 // Use of this software is allowed under the Xavax Open Software License.
 // http://www.xavax.com/xosl.html
 //
+
 package com.xavax.util;
 
 import java.util.ArrayList;
@@ -24,7 +25,13 @@ import java.util.TreeMap;
 import java.util.Vector;
 import java.util.WeakHashMap;
 
-
+/**
+ * CollectionFactory creates new collections from the Collections library.
+ * This reduces imports and in pre-Java7 code eliminates the need to
+ * specify the type parameters on the right side of a statement.
+ *
+ * @author alvitar@xavax.com
+ */
 public class CollectionFactory {
   /**
    * Returns a new array list.

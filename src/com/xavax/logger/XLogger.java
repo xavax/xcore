@@ -1,5 +1,5 @@
 //
-// Copyright 2007 by Xavax, Inc. All Rights Reserved.
+// Copyright 2007, 2013 by Xavax, Inc. All Rights Reserved.
 // Use of this software is allowed under the Xavax Open Software License.
 // http://www.xavax.com/xosl.html
 //
@@ -11,10 +11,14 @@ import java.util.Formatter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+/**
+ * XLogger is a logging utility class used in Xavax products.
+ *
+ * @author alvitar@xavax.com
+ */
 public class XLogger {
 
   public XLogger() {
-    // TODO Auto-generated constructor stub
   }
 
   /**

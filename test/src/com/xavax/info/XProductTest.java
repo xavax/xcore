@@ -1,3 +1,8 @@
+//
+// Copyright 2004, 2013 by Xavax, Inc. All Rights Reserved.
+// Use of this software is allowed under the Xavax Open Software License.
+// http://www.xavax.com/xosl.html
+//
 package com.xavax.info;
 
 import org.testng.annotations.BeforeMethod;
@@ -5,6 +10,11 @@ import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
 
+/**
+ * Test case for the XProduct class.
+ *
+ * @author alvitar@xavax.com
+ */
 public class XProductTest {
 
   private final static String NAME = "XBacon";

@@ -1,3 +1,8 @@
+//
+// Copyright 2004, 2013 by Xavax, Inc. All Rights Reserved.
+// Use of this software is allowed under the Xavax Open Software License.
+// http://www.xavax.com/xosl.html
+//
 package com.xavax.event;
 
 import org.testng.annotations.Test;
@@ -11,6 +16,11 @@ import com.xavax.event.TimeEvent;
 
 import static org.testng.Assert.*;
 
+/**
+ * Test cases for classes in the event package.
+ *
+ * @author alvitar@xavax.com
+ */
 public class TestEventHandling  {
 
   @BeforeMethod
