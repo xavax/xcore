@@ -3,5 +3,5 @@ common.home= /common
 javac.debug=true
 javac.debuglevel=lines,vars,source
 
-xcore.version=0.0.0
+xcore.rev=0.0.0
 built.by=nobody
