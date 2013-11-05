@@ -52,6 +52,16 @@ public class XProduct {
   }
 
   /**
+   * Returns the name of the product.
+   *
+   * @return the name of the product.
+   */
+  public String name()
+  {
+	  return this.name;
+  }
+
+  /**
    * Returns the major version number for the product.
    * 
    * @return the major version number for the product.
