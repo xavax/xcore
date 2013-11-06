@@ -16,6 +16,10 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author alvitar@xavax.com
  */
 public class TimeMetric {
+
+  public final static long SCALE_BY_MICROSECONDS = 1000;
+  public final static long SCALE_BY_MILLISECONDS = 1000000;
+
   /**
    * Result represents the results gathered by a TimeMetric object.
    */
