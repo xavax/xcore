@@ -15,7 +15,12 @@ import static org.testng.Assert.assertTrue;
 import static com.xavax.concurrent.ConcurrentBitSet.*;
 
 public class PageTest {
-  private final static String EXPECTED = "[0000.0000";
+  private final static String EXPECTED1 = "[01000000.00010000.00000100.00000001";
+  private final static String EXPECTED2 = "[11111111.11111111.11111111.11111111.11111111.11111111.11111111.11111111.00000000";
+  private final static String EXPECTED3 = "[00011111.11111111.11111111.11111111.11111111.11110000.00000000.00000000.00000000";
+  private final static String EXPECTED4 = "[11100000.00000000.00000000.00000000.00000000.00001111.11111111.11111111.00000000";
+  private final static String EXPECTED5 = "[00000000.00000000.00000000.00000000.00000000.00000000.00000000.11111111.00000000";
+  private final static String EXPECTED6 = "[11111111.00000000.00000000.00000000.00000000.00000000.00000000.11111111.00000000";
 
   private Page page;
 
@@ -25,30 +30,59 @@ public class PageTest {
   }
 
   @Test
-  public void testSetBits() {
-    page.setBit(31, true);
-    boolean value = page.getBit(31);
+  public void testSetBit() {
+    page.set(31, true);
+    boolean value = page.get(31);
     assertTrue(value);
-    page.setBit(31, false);
-    value = page.getBit(31);
+    page.set(31, false);
+    value = page.get(31);
     assertFalse(value);
-    page.setBit(32, true);
-    value = page.getBit(32);
+    page.set(32, true);
+    value = page.get(32);
     assertTrue(value);
-    page.setBit(32, false);
-    value = page.getBit(32);
+    page.set(32, false);
+    value = page.get(32);
     assertFalse(value);
     for ( int i = 0; i < BITS_PER_PAGE; ++i ) {
-      page.setBit(i, true);
+      page.set(i, true);
       checkBits(page, i, true);
-      page.setBit(i, false);
+      page.set(i, false);
       checkBits(page, i, false);
     }
   }
 
+  @Test
+  public void testSetBits() {
+    page.set(0,63);
+    String s = page.toString().substring(0, EXPECTED2.length());
+    assertEquals(s, EXPECTED2);
+    page = new Page();
+    page.set(3,43);
+    s = page.toString().substring(0, EXPECTED3.length());
+    assertEquals(s, EXPECTED3);
+  }
+
+  @Test
+  public void testClearBits() {
+    page.set(0,63);
+    String s = page.toString().substring(0, EXPECTED2.length());
+    assertEquals(s, EXPECTED2);
+    page.clear(3,43);
+    s = page.toString().substring(0, EXPECTED4.length());
+    assertEquals(s, EXPECTED4);
+    page.set(0,63);
+    page.clear(0,55);
+    s = page.toString().substring(0, EXPECTED5.length());
+    assertEquals(s, EXPECTED5);
+    page.set(0,63);
+    page.clear(8,55);
+    s = page.toString().substring(0, EXPECTED6.length());
+    assertEquals(s, EXPECTED6);
+  }
+
   private void checkBits(Page page, int index, boolean state) {
     for ( int i = 0; i < BITS_PER_PAGE; ++i ) {
-      boolean value = page.getBit(i);
+      boolean value = page.get(i);
       if ( i == index ) {
 	assertEquals(value, state);
       }
@@ -60,8 +94,12 @@ public class PageTest {
 
   @Test
   public void testToString() {
-    String s = page.toString().substring(0, EXPECTED.length());
-    assertEquals(s, EXPECTED);
+    page.set(1, true);
+    page.set(11, true);
+    page.set(21, true);
+    page.set(31, true);
+    String s = page.toString().substring(0, EXPECTED1.length());
+    assertEquals(s, EXPECTED1);
   }
 
   // @Test(expectedExceptions = AssertionError.class)

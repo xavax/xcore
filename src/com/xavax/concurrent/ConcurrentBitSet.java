@@ -31,7 +31,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author alvitar@xavax.com Phillip L Harbison
  */
 public class ConcurrentBitSet {
-  final static int LOG2_BITS_PER_INT = 5;
+  final static int LOG2_BITS_PER_BYTE = 3;
+  final static int LOG2_BITS_PER_INT  = 5;
   final static int LOG2_BITS_PER_LONG = 6;
   final static int LOG2_BITS_PER_PAGE = 9;
   final static int BITS_PER_INT = 1 << LOG2_BITS_PER_INT;
@@ -175,6 +176,7 @@ public class ConcurrentBitSet {
    */
   void resize(long size) {
     synchronized ( segmentMap ) {
+      // Check again since the map may already be resized by another thread.
       if ( size > currentMapSize ) {
 	int newSize = currentMapSize;
 	do {
@@ -247,10 +249,10 @@ public class ConcurrentBitSet {
     private final ConcurrentBitSet parent;
 
     /**
-     * Construct a segment with a bitmap of size 2 ^ logSize. The bitmap is
-     * stored in an array of Page objects. Each Page has a small
-     * array of longs that store BITS_PER_ENTRY bits, so the array size is
-     * logSize - log2(BITS_PER_ENTRY)
+     * Construct a segment with a bitmap of size 2 ^ logSize. The bitmap
+     * is stored in an array of Page objects. Each Page has a small array
+     * of longs that store BITS_PER_PAGE bits, so the array size is:
+     *   2 ^ (logSize - log2(BITS_PER_PAGE))
      *
      * @param parent  the parent of this segment.
      * @param logSize log2 of the size of the bitmap.
@@ -262,8 +264,8 @@ public class ConcurrentBitSet {
     }
 
     /**
-     * Returns the value of the bit at the specified index in this segment. If
-     * the corresponding page does not exist, return false.
+     * Returns the value of the bit at the specified index in this segment.
+     * If the corresponding page does not exist, return false.
      *
      * @param index  the index of the desired bit in this segment.
      * @return the value of the bit at the specified index.
@@ -271,16 +273,16 @@ public class ConcurrentBitSet {
     public boolean get(int index) {
       boolean result = false;
       int bitIndex = index & BIT_INDEX_MASK;
-      Page entry = getPage(index, false);
-      if ( entry != null ) {
-	result = entry.getBit(bitIndex);
+      Page page = getPage(index, false);
+      if ( page != null ) {
+	result = page.get(bitIndex);
       }
       return result;
     }
 
     /**
-     * Sets the bit at the specified into to the specified value. If the bit map
-     * entry does not exist, only create it if the specified value is true;
+     * Sets the bit at the specified into to the specified value. If the
+     * page does not exist, only create it if the specified value is true;
      * otherwise, do nothing.
      * 
      * @param index  the index of the desired bit in this segment.
@@ -288,16 +290,16 @@ public class ConcurrentBitSet {
      */
     public void set(int index, boolean value) {
       int bitIndex = index & BIT_INDEX_MASK;
-      Page entry = getPage(index, value);
-      if ( entry != null ) {
-	entry.setBit(bitIndex, value);
+      Page page = getPage(index, value);
+      if ( page != null ) {
+	page.set(bitIndex, value);
       }
     }
 
     /**
      * Returns the page that contains the bit at a specified index. If
-     * the page does not exist and require is true, create the entry
-     * and update the map.
+     * the page does not exist and require is true, create the page and
+     * update the map.
      *
      * @param index    the index of the desired bit.
      * @param require  true if a non-existent entry should be created.
@@ -345,42 +347,101 @@ public class ConcurrentBitSet {
    * of a bit set.
    */
   static class Page {
-    final static int BIT_MAP_ARRAY_SIZE = 1 << (LOG2_BITS_PER_PAGE - LOG2_BITS_PER_LONG);
-    final static int BIT_MAP_INDEX_MASK = (1 << LOG2_BITS_PER_LONG) - 1;
+    final static int BIT_MAP_ARRAY_SIZE = 1 << (LOG2_BITS_PER_PAGE - LOG2_BITS_PER_BYTE);
+    final static int BIT_MAP_INDEX_MASK = (1 << LOG2_BITS_PER_BYTE) - 1;
 
-    private long[] bits;
+    private byte[] bits;
 
     /**
      * Construct a Page.
      */
     public Page() {
-      bits = new long[BIT_MAP_ARRAY_SIZE];
+      bits = new byte[BIT_MAP_ARRAY_SIZE];
     }
 
     /**
      * Returns the value of the specified bit as a boolean.
      *
-     * @param index  the index of a bit within the long value.
+     * @param index  the index of a bit within the page.
      * @return the value of the specified bit.
      */
-    public synchronized boolean getBit(int index) {
+    public boolean get(int index) {
       // assert(index >= 0 && index < BITS_PER_PAGE);
-      return (bits[index >> LOG2_BITS_PER_LONG] & (1L << (index & BIT_MAP_INDEX_MASK))) != 0;
+      return (bits[index >> LOG2_BITS_PER_BYTE] & (1 << (~index & BIT_MAP_INDEX_MASK))) != 0;
     }
 
     /**
      * Sets the value of the specified bit.
      *
-     * @param index  the index of a bit within the long value.
+     * @param index  the index of a bit within the page.
      * @param flag   the new value of the specified bit.
      */
-    public synchronized void setBit(int index, boolean flag) {
+    public void set(int index, boolean flag) {
       // assert(index >= 0 && index < BITS_PER_PAGE);
-      int lindex = index >> LOG2_BITS_PER_LONG;
-      long mask = 1L << (index & BIT_MAP_INDEX_MASK);
-      boolean current = (bits[lindex] & mask) != 0;
-      if ( flag != current ) {
-	bits[lindex] ^= mask;
+      int byteIndex = index >> LOG2_BITS_PER_BYTE;
+      int mask = 1 << (~index & BIT_MAP_INDEX_MASK);
+      synchronized (this) {
+	boolean current = (bits[byteIndex] & mask) != 0;
+	if ( flag != current ) {
+	  bits[byteIndex] ^= mask;
+	}
+      }
+    }
+
+    /**
+     * Sets a range of bits beginning with the bit at fromIndex and
+     * ending with the bit at toIndex (inclusive).
+     *
+     * @param fromIndex  index of the first bit to set.
+     * @param toIndex    index of the last bit to set.
+     */
+    public void set(int fromIndex, int toIndex) {
+      // assert(fromIndex >= 0 && toIndex > fromIndex);
+      int firstByte = fromIndex >> LOG2_BITS_PER_BYTE;
+      int lastByte = toIndex >> LOG2_BITS_PER_BYTE;
+      int leftMask = leftMasks[fromIndex & BIT_MAP_INDEX_MASK];
+      int rightMask = rightMasks[toIndex & BIT_MAP_INDEX_MASK];
+      synchronized ( this ) {
+	for ( int i = firstByte; i <= lastByte; ++i ) {
+	  if ( i == firstByte ) {
+	    bits[i] |= leftMask;
+	  }
+	  else if ( i == lastByte ) {
+	    bits[i] |= rightMask;
+	  }
+	  else {
+	    bits[i] = (byte) 0x0FF;
+	  }
+	}
+      }
+    }
+
+    /**
+     * Clears a range of bits beginning with the bit at fromIndex and
+     * ending with the bit at toIndex (inclusive).
+     *
+     * @param fromIndex  index of the first bit to clear.
+     * @param toIndex    index of the last bit to clear.
+     */
+    public void clear(int fromIndex, int toIndex) {
+      if ( fromIndex >= 0 && toIndex > fromIndex ) {
+	int firstByte = fromIndex >> LOG2_BITS_PER_BYTE;
+    	int lastByte = toIndex >> LOG2_BITS_PER_BYTE;
+    	int leftMask = ~leftMasks[fromIndex & BIT_MAP_INDEX_MASK] & 0x0FF;
+    	int rightMask = ~rightMasks[toIndex & BIT_MAP_INDEX_MASK] & 0x0FF;
+    	synchronized (this) {
+    	  for ( int i = firstByte; i <= lastByte; ++i ) {
+    	    if ( i == firstByte ) {
+    	      bits[i] &= leftMask;
+    	    }
+    	    else if ( i == lastByte ) {
+    	      bits[i] &= rightMask;
+    	    }
+    	    else {
+    	      bits[i] = 0;
+    	    }
+    	  }
+    	}
       }
     }
 
@@ -393,25 +454,32 @@ public class ConcurrentBitSet {
       StringBuilder sb = new StringBuilder(100);
       boolean first = true;
       sb.append("[");
-      for ( long l : bits ) {
+      for ( byte b : bits ) {
 	if ( first ) {
 	  first = false;
 	}
 	else {
-	  sb.append(", ");
+	  sb.append(".");
 	}
-	for ( int i = 0; i < 16; ++i ) {
-	  int nibble = (int) (l & 0x0F);
-	  l >>= 4;
-	  if ( i != 0 ) {
-	    sb.append(".");
-	  }
-	  sb.append(nibbles[nibble]);
-	}
+	sb.append(nibbles[(b & 0xF0) >> 4])
+	  .append(nibbles[b & 0x0F]);
       }
       sb.append("]");
       return sb.toString();
     }
+
+    private final static String[] nibbles = new String[] {
+        "0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111",
+        "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"
+    };
+
+    private final static short[] leftMasks = new short[] {
+      0xFF, 0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01
+    };
+
+    private final static short[] rightMasks = new short[] {
+      0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE, 0xFF
+    };
   }
 
   /**
@@ -537,10 +605,4 @@ public class ConcurrentBitSet {
       segmentsCreated.incrementAndGet();
     }
   }
-
-  private final static String[] nibbles = new String[] {
-      "0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111",
-      "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"
-  };
-
 }
