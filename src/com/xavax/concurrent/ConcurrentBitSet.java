@@ -151,6 +151,15 @@ public class ConcurrentBitSet {
     set(index, true);
   }
 
+  public long nextSetBit(long fromIndex) {
+    if ( fromIndex < 0 ) {
+      throw new RangeException(0, Long.MAX_VALUE, fromIndex);
+    }
+    long result = 0;
+    
+    return result;
+  }
+
   public long nextClearBit(long fromIndex) {
     if ( fromIndex < 0 ) {
       throw new RangeException(0, Long.MAX_VALUE, fromIndex);
@@ -305,7 +314,7 @@ public class ConcurrentBitSet {
     public boolean get(int index) {
       boolean result = false;
       int bitIndex = index & BIT_INDEX_MASK;
-      Page page = getPage(index, false);
+      Page page = getPageContaining(index, false);
       if ( page != null ) {
 	result = page.get(bitIndex);
       }
@@ -322,37 +331,114 @@ public class ConcurrentBitSet {
      */
     public void set(int index, boolean value) {
       int bitIndex = index & BIT_INDEX_MASK;
-      Page page = getPage(index, value);
+      Page page = getPageContaining(index, value);
       if ( page != null ) {
 	page.set(bitIndex, value);
       }
     }
 
     /**
-     * Returns the page that contains the bit at a specified index. If
-     * the page does not exist and require is true, create the page and
-     * update the map.
+     * Sets a range of bits beginning with the bit at fromIndex and
+     * ending with the bit at toIndex (inclusive).
      *
-     * @param index    the index of the desired bit.
-     * @param require  true if a non-existent entry should be created.
-     * @return the page containing the specified bit, or null if no
-     *         such page exists and was not created.
+     * @param fromIndex  index of the first bit to set.
+     * @param toIndex    index of the last bit to set.
      */
-    Page getPage(int index, boolean require) {
-      int mapIndex = index >> LOG2_BITS_PER_PAGE;
-      Page page = map[mapIndex];
-      if ( page == null && require ) {
-	synchronized ( map ) {
-	  page = map[mapIndex];
-	  if ( page == null ) {
-	    page = new Page();
-	    map[mapIndex] = page;
-	    ++pageCount;
-	    parent.metrics.pageCreated();
+    public void set(int fromIndex, int toIndex) {
+      // assert(fromIndex >= 0 && toIndex > fromIndex);
+      int pageIndex = fromIndex >> LOG2_BITS_PER_PAGE;
+      int lastPage = toIndex >> LOG2_BITS_PER_PAGE;
+      int firstBit = fromIndex & BIT_INDEX_MASK;
+      int lastBit = toIndex & BIT_INDEX_MASK;
+      int end = BITS_PER_PAGE - 1;
+      for ( ; pageIndex <= lastPage; ++pageIndex ) {
+	Page page = getPage(pageIndex, true);
+	if ( page != null ) {
+	  page.set(firstBit, pageIndex == lastPage ? lastBit : end);
+	}
+	firstBit = 0;
+      }
+    }
+
+    /**
+     * Clears a range of bits beginning with the bit at fromIndex and
+     * ending with the bit at toIndex (inclusive).
+     *
+     * @param fromIndex  index of the first bit to clear.
+     * @param toIndex    index of the last bit to clear.
+     */
+    public void clear(int fromIndex, int toIndex) {
+      // assert(fromIndex >= 0 && toIndex > fromIndex);
+      int pageIndex = fromIndex >> LOG2_BITS_PER_PAGE;
+      int lastPage = toIndex >> LOG2_BITS_PER_PAGE;
+      int firstBit = fromIndex & BIT_INDEX_MASK;
+      int lastBit = toIndex & BIT_INDEX_MASK;
+      int end = BITS_PER_PAGE - 1;
+      for ( ; pageIndex <= lastPage; ++pageIndex ) {
+	Page page = getPage(pageIndex, false);
+	if ( page != null ) {
+	  page.clear(firstBit, pageIndex == lastPage ? lastBit : end);
+	}
+	firstBit = 0;
+      }
+    }
+
+    /**
+     * Finds the next set bit starting at fromIndex.
+     *
+     * @param fromIndex  the index of the bit to begin searching.
+     * @return the index of the next set bit, or -1 if not found.
+     */
+    public int nextSetBit(int fromIndex) {
+      int result = -1;
+      int bitIndex = fromIndex & BIT_INDEX_MASK;
+      int pageIndex = fromIndex >> LOG2_BITS_PER_PAGE;
+      for ( ; pageIndex < map.length; ++pageIndex ) {
+	Page page = map[pageIndex];
+	if ( page != null ) {
+	  int index = page.nextSetBit(bitIndex);
+	  if ( index >= 0 ) {
+	    result = index;
+	    break;
 	  }
+	  bitIndex = 0;
 	}
       }
-      return page;
+      if ( result >= 0 ) {
+	result += pageIndex << LOG2_BITS_PER_PAGE;
+      }
+      return result;
+    }
+
+    /**
+     * Finds the next clear bit starting at fromIndex.
+     *
+     * @param fromIndex  the index of the bit to begin searching.
+     * @return the index of the next clear bit, or -1 if not found.
+     */
+    public int nextClearBit(int fromIndex) {
+      int result = -1;
+      int bitIndex = fromIndex & BIT_INDEX_MASK;
+      int pageIndex = fromIndex >> LOG2_BITS_PER_PAGE;
+      for ( ; pageIndex < map.length; ++pageIndex ) {
+	Page page = map[pageIndex];
+	if ( page == null ) {
+	  result = 0;
+	  break;
+	}
+	else {
+	  int index = page.nextClearBit(bitIndex);
+	  if ( index >= 0 ) {
+	    result = index;
+	    break;
+	  }
+	}
+	bitIndex = 0;
+      }
+      if ( result >= 0 ) {
+	result += pageIndex << LOG2_BITS_PER_PAGE;
+      }
+      return result;
     }
 
     /**
@@ -371,6 +457,56 @@ public class ConcurrentBitSet {
      */
     public String toString() {
       return Arrays.toString(map);
+    }
+
+    /**
+     * Returns the page that contains the bit at a specified index. If
+     * the page does not exist and require is true, create the page and
+     * update the map.
+     *
+     * @param index    the index of the desired bit.
+     * @param require  true if a non-existent entry should be created.
+     * @return the page containing the specified bit, or null if no
+     *         such page exists and was not created.
+     */
+    Page getPageContaining(int index, boolean require) {
+      return getPage(index >> LOG2_BITS_PER_PAGE, require);
+    }
+
+    /**
+     * Returns the page at the specified index in the page map. If the
+     * page does not exist and require is true, create the page.
+     *
+     * @param require   true if a missing page should be created.
+     * @param mapIndex  the index of the desired page.
+     * @return the page at the specified index.
+     */
+    Page getPage(int mapIndex, boolean require) {
+      Page page = map[mapIndex];
+      if ( page == null && require ) {
+	page = createPage(mapIndex);
+      }
+      return page;
+    }
+
+    /**
+     * Create a new page at the specified index in the page map.
+     *
+     * @param mapIndex  the index for the new page.
+     * @return a new page.
+     */
+    Page createPage(int mapIndex) {
+      Page page = null;
+      synchronized ( map ) {
+        page = map[mapIndex];
+        if ( page == null ) {
+          page = new Page();
+          map[mapIndex] = page;
+          ++pageCount;
+          parent.metrics.pageCreated();
+        }
+      }
+      return page;
     }
   }
 
@@ -480,7 +616,7 @@ public class ConcurrentBitSet {
     /**
      * Finds the next set bit starting at fromIndex.
      *
-     * @param fromIndex  the index of the bit to being searching.
+     * @param fromIndex  the index of the bit to begin searching.
      * @return the index of the next set bit, or -1 if not found.
      */
     public int nextSetBit(int fromIndex) {
@@ -508,7 +644,7 @@ public class ConcurrentBitSet {
     /**
      * Finds the next clear bit starting at fromIndex.
      *
-     * @param fromIndex  the index of the bit to being searching.
+     * @param fromIndex  the index of the bit to begin searching.
      * @return the index of the next clear bit, or -1 if not found.
      */
     public int nextClearBit(int fromIndex) {
