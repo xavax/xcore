@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 
 import com.xavax.concurrent.ConcurrentBitSet;
+import com.xavax.exception.RangeException;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -38,12 +39,25 @@ public class ConcurrentBitSetTest {
   public void testConstructors() {
     bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, LOG2_SEGMENT_SIZE);
     assertNotNull(bitSet);
-    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, INVALID_SEGMENT_SIZE);
-    assertNotNull(bitSet);
     bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE);
     assertNotNull(bitSet);
     bitSet = new ConcurrentBitSet();
     assertNotNull(bitSet);
+  }
+
+  @Test(expectedExceptions = RangeException.class)
+  public void testSegmentSizeTooLarge() {
+    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, INVALID_SEGMENT_SIZE);
+  }
+
+  @Test(expectedExceptions = RangeException.class)
+  public void testSegmentSizeNegative() {
+    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, -1);
+  }
+
+  @Test(expectedExceptions = RangeException.class)
+  public void testInitialSizeNegative() {
+    bitSet = new ConcurrentBitSet(-1, LOG2_SEGMENT_SIZE);
   }
 
   @Test
@@ -88,7 +102,6 @@ public class ConcurrentBitSetTest {
       assertEquals(data[i], bitSet.get(i));
     }
     showMetrics();
-    // System.out.println(bitSet.toString());
   }
 
   private void showMetrics() {

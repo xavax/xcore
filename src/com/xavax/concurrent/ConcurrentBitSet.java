@@ -85,8 +85,7 @@ public class ConcurrentBitSet {
     if ( logSegmentSize < 0 || logSegmentSize > LOG2_MAX_SEGMENT_SIZE ) {
       throw new RangeException(0, LOG2_MAX_SEGMENT_SIZE, logSegmentSize);
     }
-    this.logSegmentSize = logSegmentSize <= LOG2_MAX_SEGMENT_SIZE
-	? logSegmentSize : LOG2_DEFAULT_SEGMENT_SIZE;
+    this.logSegmentSize = logSegmentSize;
     this.segmentSize = 1 << this.logSegmentSize;
     this.segmentMask = this.segmentSize - 1;
     int size = (int) (initialSize + segmentSize - 1) >> logSegmentSize;
