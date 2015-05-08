@@ -80,6 +80,45 @@ public class PageTest {
     assertEquals(s, EXPECTED6);
   }
 
+  @Test
+  public void testNextSetBit() {
+    page.set(0, true);
+    page.set(13, true);
+    page.set(23, true);
+    page.set(33, true);
+    page.set(43, true);
+    page.set(53, true);
+    page.set(63, true);
+    assertEquals(page.nextSetBit(0), 0);
+    assertEquals(page.nextSetBit(1), 13);
+    assertEquals(page.nextSetBit(14), 23);
+    assertEquals(page.nextSetBit(24), 33);
+    assertEquals(page.nextSetBit(34), 43);
+    assertEquals(page.nextSetBit(44), 53);
+    assertEquals(page.nextSetBit(54), 63);
+    assertEquals(page.nextSetBit(64), -1);
+  }
+
+  @Test
+  public void testNextClearBit() {
+    page.set(0,BITS_PER_PAGE - 1);
+    page.set(0, false);
+    page.set(13, false);
+    page.set(23, false);
+    page.set(33, false);
+    page.set(43, false);
+    page.set(53, false);
+    page.set(63, false);
+    assertEquals(page.nextClearBit(0), 0);
+    assertEquals(page.nextClearBit(1), 13);
+    assertEquals(page.nextClearBit(14), 23);
+    assertEquals(page.nextClearBit(24), 33);
+    assertEquals(page.nextClearBit(34), 43);
+    assertEquals(page.nextClearBit(44), 53);
+    assertEquals(page.nextClearBit(54), 63);
+    assertEquals(page.nextClearBit(64), -1);
+  }
+
   private void checkBits(Page page, int index, boolean state) {
     for ( int i = 0; i < BITS_PER_PAGE; ++i ) {
       boolean value = page.get(i);

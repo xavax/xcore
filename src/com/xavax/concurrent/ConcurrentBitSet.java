@@ -9,6 +9,8 @@ package com.xavax.concurrent;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.xavax.exception.RangeException;
+
 /**
  * ConcurrentBitSet encapsulates and manages an extendable bit set. The size
  * of the bit set is extended as necessary after it is created. To use memory
@@ -77,6 +79,12 @@ public class ConcurrentBitSet {
    * @param logSegmentSize  log2 of the segment size.
    */
   public ConcurrentBitSet(long initialSize, int logSegmentSize) {
+    if ( initialSize < 0 ) {
+      throw new RangeException(0, Long.MAX_VALUE, initialSize);
+    }
+    if ( logSegmentSize < 0 || logSegmentSize > LOG2_MAX_SEGMENT_SIZE ) {
+      throw new RangeException(0, LOG2_MAX_SEGMENT_SIZE, logSegmentSize);
+    }
     this.logSegmentSize = logSegmentSize <= LOG2_MAX_SEGMENT_SIZE
 	? logSegmentSize : LOG2_DEFAULT_SEGMENT_SIZE;
     this.segmentSize = 1 << this.logSegmentSize;
@@ -108,6 +116,9 @@ public class ConcurrentBitSet {
    * @return the value of the bit at the specified index.
    */
   public boolean get(long index) {
+    if ( index < 0 ) {
+      throw new RangeException(0, Long.MAX_VALUE, index);
+    }
     metrics.incrementOperations();
     Segment segment = getSegment(index, false);
     return segment == null ? false : segment.get((int) (index & segmentMask));
@@ -120,12 +131,33 @@ public class ConcurrentBitSet {
    * @param value  the new value of the specified bit.
    */
   public void set(long index, boolean value) {
+    if ( index < 0 ) {
+      throw new RangeException(0, Long.MAX_VALUE, index);
+    }
     metrics.incrementOperations();
     Segment segment = getSegment(index, value);
     if ( segment != null ) {
       int offset = (int) (index & segmentMask);
       segment.set(offset, value);
     }
+  }
+
+  /**
+   * Sets the value of the bit at the specified index.
+   *
+   * @param index  the index of the bit to be set.
+   */
+  public void set(long index) {
+    set(index, true);
+  }
+
+  public long nextClearBit(long fromIndex) {
+    if ( fromIndex < 0 ) {
+      throw new RangeException(0, Long.MAX_VALUE, fromIndex);
+    }
+    long result = 0;
+    
+    return result;
   }
 
   /**
@@ -443,6 +475,62 @@ public class ConcurrentBitSet {
     	  }
     	}
       }
+    }
+
+    /**
+     * Finds the next set bit starting at fromIndex.
+     *
+     * @param fromIndex  the index of the bit to being searching.
+     * @return the index of the next set bit, or -1 if not found.
+     */
+    public int nextSetBit(int fromIndex) {
+      boolean run = true;
+      int result = -1;
+      int firstByte = fromIndex >> LOG2_BITS_PER_BYTE;
+      int leftMask = leftMasks[fromIndex & BIT_MAP_INDEX_MASK];
+      for ( int i = firstByte; run && i < BIT_MAP_ARRAY_SIZE; ++i ) {
+	int masked = (i == firstByte ? leftMask : 0xFF) & bits[i];
+	if ( masked != 0 ) {
+	  int mask = 0x80;
+	  for ( int j = 0; j < 8; ++j ) {
+	    if ( (mask & masked) != 0 ) {
+	      result = (i << LOG2_BITS_PER_BYTE) + j;
+	      run = false;
+	      break;
+	    }
+	    mask >>= 1;
+	  }
+	}
+      }
+      return result;
+    }
+
+    /**
+     * Finds the next clear bit starting at fromIndex.
+     *
+     * @param fromIndex  the index of the bit to being searching.
+     * @return the index of the next clear bit, or -1 if not found.
+     */
+    public int nextClearBit(int fromIndex) {
+      boolean run = true;
+      int result = -1;
+      int firstByte = fromIndex >> LOG2_BITS_PER_BYTE;
+      int leftMask = leftMasks[fromIndex & BIT_MAP_INDEX_MASK];
+      for ( int i = firstByte; run && i < BIT_MAP_ARRAY_SIZE; ++i ) {
+	int masked = (i == firstByte ? leftMask : 0xFF) & ~bits[i];
+	if ( masked != 0 ) {
+	  int mask = 0x80;
+	  for ( int j = 0; j < 8; ++j ) {
+	    if ( (mask & masked) != 0 ) {
+	      result = (i << LOG2_BITS_PER_BYTE) + j;
+	      run = false;
+	      break;
+	    }
+	    mask >>= 1;
+	  }
+	}
+      }
+      return result;
     }
 
     /**
