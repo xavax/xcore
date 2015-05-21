@@ -9,36 +9,35 @@ package com.xavax.concurrent;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 
-import com.xavax.concurrent.ConcurrentBitSet;
-import com.xavax.concurrent.ConcurrentBitSet.Page;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.*;
 import static com.xavax.concurrent.ConcurrentBitSet.*;
 
+/**
+ * Test the ConcurrentBitSet.Segment class.
+ */
 public class SegmentTest {
   private final static int MAX_BIT_INDEX = 1 << LOG2_DEFAULT_SEGMENT_SIZE;
   private final static int MAX_ENTRY_INDEX = 1 << (LOG2_DEFAULT_SEGMENT_SIZE - LOG2_BITS_PER_PAGE);
-
   private final static String EXPECTED = "[null, null";
 
-  private ConcurrentBitSet bitSet;
   private Segment segment;
 
+  /**
+   * Set up performed before each test.
+   */
   @BeforeMethod
   public void setup() {
-    bitSet = new ConcurrentBitSet();
-    segment = new Segment(bitSet, LOG2_DEFAULT_SEGMENT_SIZE);
+    segment = new Segment(new ConcurrentBitSet(), LOG2_DEFAULT_SEGMENT_SIZE);
   }
 
+  /**
+   * Test the getPage method.
+   */
   @Test
   public void testGetPage() {
     assertEquals(segment.pageCount(), 0);
     for ( int index = 0; index < MAX_ENTRY_INDEX; ++index ) {
-      int bitIndex = index << LOG2_BITS_PER_PAGE;
+      final int bitIndex = index << LOG2_BITS_PER_PAGE;
       Page entry = segment.getPageContaining(bitIndex, false);
       assertNull(entry);
       assertEquals(segment.pageCount(), index);
@@ -51,6 +50,9 @@ public class SegmentTest {
     }
   }
 
+  /**
+   * Test the get and set methods.
+   */
   @Test
   public void testGetSet() {
     assertEquals(segment.pageCount(), 0);
@@ -65,12 +67,18 @@ public class SegmentTest {
     }
   }
 
+  /**
+   * Test the toString method.
+   */
   @Test
   public void testToString() {
-    String s = segment.toString().substring(0, EXPECTED.length());
-    assertEquals(s, EXPECTED);
+    final String result = segment.toString().substring(0, EXPECTED.length());
+    assertEquals(result, EXPECTED);
   }
 
+  /**
+   * Test the set multiple bits method.
+   */
   @Test
   public void testSetBits() {
     segment.set(0,2222);
@@ -80,6 +88,9 @@ public class SegmentTest {
     assertFalse(segment.get(2224));
   }
 
+  /**
+   * Test the clear multiple bits method.
+   */
   @Test
   public void testClearBits() {
     segment.set(0,4095);
@@ -94,6 +105,9 @@ public class SegmentTest {
     assertTrue(segment.get(2224));
   }
 
+  /**
+   * Test the nextSetBit method.
+   */
   @Test
   public void testNextSetBit() {
     segment.set(0, true);
@@ -103,10 +117,10 @@ public class SegmentTest {
     segment.set(4444, true);
     segment.set(5555, true);
     segment.set(6666, true);
-    long i = segment.nextSetBit(0);
-    assertEquals(i, 0);
-    i = segment.nextSetBit(1);
-    assertEquals(i, 1111);
+    long next = segment.nextSetBit(0);
+    assertEquals(next, 0);
+    next = segment.nextSetBit(1);
+    assertEquals(next, 1111);
     assertEquals(segment.nextSetBit(1112), 2222);
     assertEquals(segment.nextSetBit(2223), 3333);
     assertEquals(segment.nextSetBit(3334), 4444);
@@ -115,6 +129,9 @@ public class SegmentTest {
     assertEquals(segment.nextSetBit(6667), -1);
   }
 
+  /**
+   * Test the nextClearBit method.
+   */
   @Test
   public void testNextClearBit() {
     segment.set(0,8191);
@@ -127,10 +144,10 @@ public class SegmentTest {
     segment.set(6666, false);
     segment.set(7777, false);
     assertFalse(segment.get(6666));
-    long i = segment.nextClearBit(0);
-    assertEquals(i, 0);
-    i = segment.nextClearBit(1);
-    assertEquals(i, 1111);
+    long next = segment.nextClearBit(0);
+    assertEquals(next, 0);
+    next = segment.nextClearBit(1);
+    assertEquals(next, 1111);
     assertEquals(segment.nextClearBit(1112), 2222);
     assertEquals(segment.nextClearBit(2223), 3333);
     assertEquals(segment.nextClearBit(3334), 4444);

@@ -8,6 +8,7 @@ package com.xavax.concurrent;
 
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.xavax.exception.RangeException;
 
@@ -50,7 +51,9 @@ public class ConcurrentBitSet {
   private int currentMapSize;
   private long segmentMask;
   private long segmentSize;
-  private InternalMetrics metrics = new InternalMetrics();
+  // private long maxBitIndex;
+  final private InternalMetrics metrics = new InternalMetrics();
+  private ReentrantLock segmentMapLock;
   private SegmentMapEntry[] segmentMap;
 
   /**
@@ -67,7 +70,7 @@ public class ConcurrentBitSet {
    *
    * @param initialSize the initial size of the bit set.
    */
-  public ConcurrentBitSet(long initialSize) {
+  public ConcurrentBitSet(final long initialSize) {
     this(initialSize, LOG2_DEFAULT_SEGMENT_SIZE);
   }
 
@@ -78,7 +81,7 @@ public class ConcurrentBitSet {
    * @param initialSize     the initial size of the bit set.
    * @param logSegmentSize  log2 of the segment size.
    */
-  public ConcurrentBitSet(long initialSize, int logSegmentSize) {
+  public ConcurrentBitSet(final long initialSize, final int logSegmentSize) {
     if ( initialSize < 0 ) {
       throw new RangeException(0, Long.MAX_VALUE, initialSize);
     }
@@ -88,9 +91,10 @@ public class ConcurrentBitSet {
     this.logSegmentSize = logSegmentSize;
     this.segmentSize = 1 << this.logSegmentSize;
     this.segmentMask = this.segmentSize - 1;
-    int size = (int) (initialSize + segmentSize - 1) >> logSegmentSize;
+    final int size = (int) (initialSize + segmentSize - 1) >>> logSegmentSize;
     this.currentMapSize = size;
     this.segmentMap = new SegmentMapEntry[size];
+    this.segmentMapLock = new ReentrantLock();
     initMap(segmentMap, 0, size);
   }
 
@@ -101,9 +105,9 @@ public class ConcurrentBitSet {
    * @param start  the starting map index.
    * @param end    the ending map index.
    */
-  private void initMap(SegmentMapEntry[] map, int start, int end) {
+  private void initMap(SegmentMapEntry[] map, final int start, final int end) {
     for ( int i = start; i < end; ++i ) {
-      SegmentMapEntry entry = new SegmentMapEntry();
+      final SegmentMapEntry entry = new SegmentMapEntry();
       map[i] = entry;
     }
   }
@@ -114,12 +118,12 @@ public class ConcurrentBitSet {
    * @param index  the index of the desired bit.
    * @return the value of the bit at the specified index.
    */
-  public boolean get(long index) {
+  public boolean get(final long index) {
     if ( index < 0 ) {
       throw new RangeException(0, Long.MAX_VALUE, index);
     }
     metrics.incrementOperations();
-    Segment segment = getSegment(index, false);
+    final Segment segment = getSegment(index, false);
     return segment == null ? false : segment.get((int) (index & segmentMask));
   }
 
@@ -129,15 +133,14 @@ public class ConcurrentBitSet {
    * @param index  the index of the bit to be set.
    * @param value  the new value of the specified bit.
    */
-  public void set(long index, boolean value) {
+  public void set(final long index, final boolean value) {
     if ( index < 0 ) {
       throw new RangeException(0, Long.MAX_VALUE, index);
     }
     metrics.incrementOperations();
-    Segment segment = getSegment(index, value);
+    final Segment segment = getSegment(index, value);
     if ( segment != null ) {
-      int offset = (int) (index & segmentMask);
-      segment.set(offset, value);
+      segment.set((int) (index & segmentMask), value);
     }
   }
 
@@ -146,24 +149,62 @@ public class ConcurrentBitSet {
    *
    * @param index  the index of the bit to be set.
    */
-  public void set(long index) {
+  public void set(final long index) {
     set(index, true);
   }
 
-  public long nextSetBit(long fromIndex) {
+  /**
+   * Sets a range of bits beginning with the bit at fromIndex and
+   * ending with the bit at toIndex (exclusive).
+   *
+   * @param fromIndex  index of the first bit to set.
+   * @param toIndex    index of the last bit to set.
+   */
+  public void set(final int fromIndex, final int toIndex) {
     if ( fromIndex < 0 ) {
       throw new RangeException(0, Long.MAX_VALUE, fromIndex);
     }
-    long result = 0;
+    if ( toIndex <= fromIndex ) {
+      throw new RangeException(fromIndex + 1, Long.MAX_VALUE, toIndex);
+    }
+    // int segmentIndex = (int) (fromIndex >>> logSegmentSize);
+  }
+
+  /**
+   * Clears the value of the bit at the specified index.
+   *
+   * @param index  the index of the bit to be set.
+   */
+  public void clear(final long index) {
+    set(index, false);
+  }
+
+  /**
+   * Finds the next set bit beginning with the bit at fromIndex.
+   *
+   * @param fromIndex  the index of the bit to begin the search.
+   * @return the index of the next set bit.
+   */
+  public long nextSetBit(final long fromIndex) {
+    if ( fromIndex < 0 ) {
+      throw new RangeException(0, Long.MAX_VALUE, fromIndex);
+    }
+    final long result = 0;
     
     return result;
   }
 
-  public long nextClearBit(long fromIndex) {
+  /**
+   * Finds the next clear bit beginning with the bit at fromIndex.
+   *
+   * @param fromIndex  the index of the bit to begin the search.
+   * @return the index of the next clear bit.
+   */
+  public long nextClearBit(final long fromIndex) {
     if ( fromIndex < 0 ) {
       throw new RangeException(0, Long.MAX_VALUE, fromIndex);
     }
-    long result = 0;
+    final long result = 0;
     
     return result;
   }
@@ -185,12 +226,12 @@ public class ConcurrentBitSet {
    * @param require  true if a nonexistent segment should be created.
    * @return the segment containing the specified bit.
    */
-  Segment getSegment(long index, boolean require) {
-    int segmentIndex = (int) index >> logSegmentSize;
+  Segment getSegment(final long index, final boolean require) {
+    final int segmentIndex = (int) index >>> logSegmentSize;
     if ( segmentIndex > currentMapSize ) {
       resize(segmentIndex);
     }
-    SegmentMapEntry entry = segmentMap[segmentIndex];
+    final SegmentMapEntry entry = segmentMap[segmentIndex];
     Segment segment = entry.get();
     if ( segment == null && require ) {
       synchronized ( entry ) {
@@ -214,21 +255,25 @@ public class ConcurrentBitSet {
    *
    * @param size the new minimum size.
    */
-  void resize(long size) {
-    synchronized ( segmentMap ) {
+  void resize(final long size) {
+    try {
+      segmentMapLock.lock();
       // Check again since the map may already be resized by another thread.
       if ( size > currentMapSize ) {
 	int newSize = currentMapSize;
 	do {
 	  newSize *= 2;
 	} while ( size > newSize );
-	SegmentMapEntry[] map = Arrays.copyOf(segmentMap, newSize);
+	final SegmentMapEntry[] map = Arrays.copyOf(segmentMap, newSize);
 	initMap(map, currentMapSize, newSize);
 	segmentMap = map;
 	currentMapSize = newSize;
       }
     }
-    metrics.segmentMapLocked();
+    finally {
+      segmentMapLock.unlock();
+      metrics.segmentMapLocked();
+    }
   }
 
   /**
@@ -247,15 +292,19 @@ public class ConcurrentBitSet {
    * entry rather than the entire segment map.
    */
   static class SegmentMapEntry {
-    private Segment segment = null;
+    private Segment segment;
 
     /**
      * Get the segment for this map entry.
      *
      * @return the segment.
      */
-    public synchronized Segment get() {
-      return segment;
+    public Segment get() {
+      Segment result;
+      synchronized (this) {
+	result = this.segment;
+      }
+      return result;
     }
 
     /**
@@ -263,8 +312,10 @@ public class ConcurrentBitSet {
      *
      * @param segment the new segment for this map entry.
      */
-    public synchronized void set(Segment segment) {
-      this.segment = segment;
+    public void set(final Segment segment) {
+      synchronized (this) {
+	this.segment = segment;
+      }
     }
 
     /**
@@ -284,7 +335,7 @@ public class ConcurrentBitSet {
   static class Segment {
     final static int BIT_INDEX_MASK = (1 << LOG2_BITS_PER_PAGE) - 1;
 
-    private int pageCount = 0;
+    private int pageCount;
     private final Page[] map;
     private final ConcurrentBitSet parent;
 
@@ -297,9 +348,9 @@ public class ConcurrentBitSet {
      * @param parent  the parent of this segment.
      * @param logSize log2 of the size of the bitmap.
      */
-    public Segment(ConcurrentBitSet parent, int logSize) {
+    public Segment(final ConcurrentBitSet parent, final int logSize) {
       this.parent = parent;
-      int size = 1 << (logSize - LOG2_BITS_PER_PAGE);
+      final int size = 1 << (logSize - LOG2_BITS_PER_PAGE);
       map = new Page[size];
     }
 
@@ -310,10 +361,10 @@ public class ConcurrentBitSet {
      * @param index  the index of the desired bit in this segment.
      * @return the value of the bit at the specified index.
      */
-    public boolean get(int index) {
+    public boolean get(final int index) {
       boolean result = false;
-      int bitIndex = index & BIT_INDEX_MASK;
-      Page page = getPageContaining(index, false);
+      final int bitIndex = index & BIT_INDEX_MASK;
+      final Page page = getPageContaining(index, false);
       if ( page != null ) {
 	result = page.get(bitIndex);
       }
@@ -328,9 +379,9 @@ public class ConcurrentBitSet {
      * @param index  the index of the desired bit in this segment.
      * @param value  the new value of the bit.
      */
-    public void set(int index, boolean value) {
-      int bitIndex = index & BIT_INDEX_MASK;
-      Page page = getPageContaining(index, value);
+    public void set(final int index, final boolean value) {
+      final int bitIndex = index & BIT_INDEX_MASK;
+      final Page page = getPageContaining(index, value);
       if ( page != null ) {
 	page.set(bitIndex, value);
       }
@@ -343,15 +394,15 @@ public class ConcurrentBitSet {
      * @param fromIndex  index of the first bit to set.
      * @param toIndex    index of the last bit to set.
      */
-    public void set(int fromIndex, int toIndex) {
+    public void set(final int fromIndex, final int toIndex) {
       // assert(fromIndex >= 0 && toIndex > fromIndex);
-      int pageIndex = fromIndex >> LOG2_BITS_PER_PAGE;
-      int lastPage = toIndex >> LOG2_BITS_PER_PAGE;
+      int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
+      final int lastPage = toIndex >>> LOG2_BITS_PER_PAGE;
       int firstBit = fromIndex & BIT_INDEX_MASK;
-      int lastBit = toIndex & BIT_INDEX_MASK;
-      int end = BITS_PER_PAGE - 1;
+      final int lastBit = toIndex & BIT_INDEX_MASK;
+      final int end = BITS_PER_PAGE - 1;
       for ( ; pageIndex <= lastPage; ++pageIndex ) {
-	Page page = getPage(pageIndex, true);
+	final Page page = getPage(pageIndex, true);
 	if ( page != null ) {
 	  page.set(firstBit, pageIndex == lastPage ? lastBit : end);
 	}
@@ -366,15 +417,15 @@ public class ConcurrentBitSet {
      * @param fromIndex  index of the first bit to clear.
      * @param toIndex    index of the last bit to clear.
      */
-    public void clear(int fromIndex, int toIndex) {
+    public void clear(final int fromIndex, final int toIndex) {
       // assert(fromIndex >= 0 && toIndex > fromIndex);
-      int pageIndex = fromIndex >> LOG2_BITS_PER_PAGE;
-      int lastPage = toIndex >> LOG2_BITS_PER_PAGE;
+      int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
+      final int lastPage = toIndex >>> LOG2_BITS_PER_PAGE;
       int firstBit = fromIndex & BIT_INDEX_MASK;
-      int lastBit = toIndex & BIT_INDEX_MASK;
-      int end = BITS_PER_PAGE - 1;
+      final int lastBit = toIndex & BIT_INDEX_MASK;
+      final int end = BITS_PER_PAGE - 1;
       for ( ; pageIndex <= lastPage; ++pageIndex ) {
-	Page page = getPage(pageIndex, false);
+	final Page page = getPage(pageIndex, false);
 	if ( page != null ) {
 	  page.clear(firstBit, pageIndex == lastPage ? lastBit : end);
 	}
@@ -388,14 +439,14 @@ public class ConcurrentBitSet {
      * @param fromIndex  the index of the bit to begin searching.
      * @return the index of the next set bit, or -1 if not found.
      */
-    public int nextSetBit(int fromIndex) {
+    public int nextSetBit(final int fromIndex) {
       int result = -1;
       int bitIndex = fromIndex & BIT_INDEX_MASK;
-      int pageIndex = fromIndex >> LOG2_BITS_PER_PAGE;
+      int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
       for ( ; pageIndex < map.length; ++pageIndex ) {
-	Page page = map[pageIndex];
+	final Page page = map[pageIndex];
 	if ( page != null ) {
-	  int index = page.nextSetBit(bitIndex);
+	  final int index = page.nextSetBit(bitIndex);
 	  if ( index >= 0 ) {
 	    result = index;
 	    break;
@@ -415,18 +466,18 @@ public class ConcurrentBitSet {
      * @param fromIndex  the index of the bit to begin searching.
      * @return the index of the next clear bit, or -1 if not found.
      */
-    public int nextClearBit(int fromIndex) {
+    public int nextClearBit(final int fromIndex) {
       int result = -1;
       int bitIndex = fromIndex & BIT_INDEX_MASK;
-      int pageIndex = fromIndex >> LOG2_BITS_PER_PAGE;
+      int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
       for ( ; pageIndex < map.length; ++pageIndex ) {
-	Page page = map[pageIndex];
+	final Page page = map[pageIndex];
 	if ( page == null ) {
 	  result = 0;
 	  break;
 	}
 	else {
-	  int index = page.nextClearBit(bitIndex);
+	  final int index = page.nextClearBit(bitIndex);
 	  if ( index >= 0 ) {
 	    result = index;
 	    break;
@@ -468,8 +519,8 @@ public class ConcurrentBitSet {
      * @return the page containing the specified bit, or null if no
      *         such page exists and was not created.
      */
-    Page getPageContaining(int index, boolean require) {
-      return getPage(index >> LOG2_BITS_PER_PAGE, require);
+    Page getPageContaining(final int index, final boolean require) {
+      return getPage(index >>> LOG2_BITS_PER_PAGE, require);
     }
 
     /**
@@ -480,7 +531,7 @@ public class ConcurrentBitSet {
      * @param mapIndex  the index of the desired page.
      * @return the page at the specified index.
      */
-    Page getPage(int mapIndex, boolean require) {
+    Page getPage(final int mapIndex, final boolean require) {
       Page page = map[mapIndex];
       if ( page == null && require ) {
 	page = createPage(mapIndex);
@@ -494,7 +545,7 @@ public class ConcurrentBitSet {
      * @param mapIndex  the index for the new page.
      * @return a new page.
      */
-    Page createPage(int mapIndex) {
+    Page createPage(final int mapIndex) {
       Page page = null;
       synchronized ( map ) {
         page = map[mapIndex];
@@ -517,6 +568,19 @@ public class ConcurrentBitSet {
     final static int BIT_MAP_ARRAY_SIZE = 1 << (LOG2_BITS_PER_PAGE - LOG2_BITS_PER_BYTE);
     final static int BIT_MAP_INDEX_MASK = (1 << LOG2_BITS_PER_BYTE) - 1;
 
+    private final static String[] NIBBLES = new String[] {
+        "0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111",
+        "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"
+    };
+
+    private final static short[] LEFT_MASKS = new short[] {
+      0xFF, 0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01
+    };
+
+    private final static short[] RIGHT_MASKS = new short[] {
+      0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE, 0xFF
+    };
+
     private byte[] bits;
 
     /**
@@ -532,9 +596,9 @@ public class ConcurrentBitSet {
      * @param index  the index of a bit within the page.
      * @return the value of the specified bit.
      */
-    public boolean get(int index) {
+    public boolean get(final int index) {
       // assert(index >= 0 && index < BITS_PER_PAGE);
-      return (bits[index >> LOG2_BITS_PER_BYTE] & (1 << (~index & BIT_MAP_INDEX_MASK))) != 0;
+      return (bits[index >>> LOG2_BITS_PER_BYTE] & (1 << (~index & BIT_MAP_INDEX_MASK))) != 0;
     }
 
     /**
@@ -543,12 +607,12 @@ public class ConcurrentBitSet {
      * @param index  the index of a bit within the page.
      * @param flag   the new value of the specified bit.
      */
-    public void set(int index, boolean flag) {
+    public void set(final int index, final boolean flag) {
       // assert(index >= 0 && index < BITS_PER_PAGE);
-      int byteIndex = index >> LOG2_BITS_PER_BYTE;
-      int mask = 1 << (~index & BIT_MAP_INDEX_MASK);
+      final int byteIndex = index >>> LOG2_BITS_PER_BYTE;
+      final int mask = 1 << (~index & BIT_MAP_INDEX_MASK);
       synchronized (this) {
-	boolean current = (bits[byteIndex] & mask) != 0;
+	final boolean current = (bits[byteIndex] & mask) != 0;
 	if ( flag != current ) {
 	  bits[byteIndex] ^= mask;
 	}
@@ -562,12 +626,12 @@ public class ConcurrentBitSet {
      * @param fromIndex  index of the first bit to set.
      * @param toIndex    index of the last bit to set.
      */
-    public void set(int fromIndex, int toIndex) {
+    public void set(final int fromIndex, final int toIndex) {
       // assert(fromIndex >= 0 && toIndex > fromIndex);
-      int firstByte = fromIndex >> LOG2_BITS_PER_BYTE;
-      int lastByte = toIndex >> LOG2_BITS_PER_BYTE;
-      int leftMask = leftMasks[fromIndex & BIT_MAP_INDEX_MASK];
-      int rightMask = rightMasks[toIndex & BIT_MAP_INDEX_MASK];
+      final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
+      final int lastByte = toIndex >>> LOG2_BITS_PER_BYTE;
+      final int leftMask = LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK];
+      final int rightMask = RIGHT_MASKS[toIndex & BIT_MAP_INDEX_MASK];
       synchronized ( this ) {
 	for ( int i = firstByte; i <= lastByte; ++i ) {
 	  if ( i == firstByte ) {
@@ -590,12 +654,12 @@ public class ConcurrentBitSet {
      * @param fromIndex  index of the first bit to clear.
      * @param toIndex    index of the last bit to clear.
      */
-    public void clear(int fromIndex, int toIndex) {
+    public void clear(final int fromIndex, final int toIndex) {
       if ( fromIndex >= 0 && toIndex > fromIndex ) {
-	int firstByte = fromIndex >> LOG2_BITS_PER_BYTE;
-    	int lastByte = toIndex >> LOG2_BITS_PER_BYTE;
-    	int leftMask = ~leftMasks[fromIndex & BIT_MAP_INDEX_MASK] & 0x0FF;
-    	int rightMask = ~rightMasks[toIndex & BIT_MAP_INDEX_MASK] & 0x0FF;
+	final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
+	final int lastByte = toIndex >>> LOG2_BITS_PER_BYTE;
+	final int leftMask = ~LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK] & 0x0FF;
+	final int rightMask = ~RIGHT_MASKS[toIndex & BIT_MAP_INDEX_MASK] & 0x0FF;
     	synchronized (this) {
     	  for ( int i = firstByte; i <= lastByte; ++i ) {
     	    if ( i == firstByte ) {
@@ -618,13 +682,13 @@ public class ConcurrentBitSet {
      * @param fromIndex  the index of the bit to begin searching.
      * @return the index of the next set bit, or -1 if not found.
      */
-    public int nextSetBit(int fromIndex) {
+    public int nextSetBit(final int fromIndex) {
       boolean run = true;
       int result = -1;
-      int firstByte = fromIndex >> LOG2_BITS_PER_BYTE;
-      int leftMask = leftMasks[fromIndex & BIT_MAP_INDEX_MASK];
+      final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
+      final int leftMask = LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK];
       for ( int i = firstByte; run && i < BIT_MAP_ARRAY_SIZE; ++i ) {
-	int masked = (i == firstByte ? leftMask : 0xFF) & bits[i];
+	final int masked = (i == firstByte ? leftMask : 0xFF) & bits[i];
 	if ( masked != 0 ) {
 	  int mask = 0x80;
 	  for ( int j = 0; j < 8; ++j ) {
@@ -633,7 +697,7 @@ public class ConcurrentBitSet {
 	      run = false;
 	      break;
 	    }
-	    mask >>= 1;
+	    mask >>>= 1;
 	  }
 	}
       }
@@ -646,13 +710,13 @@ public class ConcurrentBitSet {
      * @param fromIndex  the index of the bit to begin searching.
      * @return the index of the next clear bit, or -1 if not found.
      */
-    public int nextClearBit(int fromIndex) {
+    public int nextClearBit(final int fromIndex) {
       boolean run = true;
       int result = -1;
-      int firstByte = fromIndex >> LOG2_BITS_PER_BYTE;
-      int leftMask = leftMasks[fromIndex & BIT_MAP_INDEX_MASK];
+      final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
+      final int leftMask = LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK];
       for ( int i = firstByte; run && i < BIT_MAP_ARRAY_SIZE; ++i ) {
-	int masked = (i == firstByte ? leftMask : 0xFF) & ~bits[i];
+	final int masked = (i == firstByte ? leftMask : 0xFF) & ~bits[i];
 	if ( masked != 0 ) {
 	  int mask = 0x80;
 	  for ( int j = 0; j < 8; ++j ) {
@@ -661,7 +725,7 @@ public class ConcurrentBitSet {
 	      run = false;
 	      break;
 	    }
-	    mask >>= 1;
+	    mask >>>= 1;
 	  }
 	}
       }
@@ -674,41 +738,30 @@ public class ConcurrentBitSet {
      * @return a string representation of this page.
      */
     public String toString() {
-      StringBuilder sb = new StringBuilder(100);
+      final StringBuilder buffer = new StringBuilder(100);
       boolean first = true;
-      sb.append("[");
-      for ( byte b : bits ) {
+      buffer.append('[');
+      for ( final byte b : bits ) {
 	if ( first ) {
 	  first = false;
 	}
 	else {
-	  sb.append(".");
+	  buffer.append('.');
 	}
-	sb.append(nibbles[(b & 0xF0) >> 4])
-	  .append(nibbles[b & 0x0F]);
+	buffer.append(NIBBLES[(b & 0xF0) >>> 4])
+	  .append(NIBBLES[b & 0x0F]);
       }
-      sb.append("]");
-      return sb.toString();
+      buffer.append(']');
+      return buffer.toString();
     }
-
-    private final static String[] nibbles = new String[] {
-        "0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111",
-        "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"
-    };
-
-    private final static short[] leftMasks = new short[] {
-      0xFF, 0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01
-    };
-
-    private final static short[] rightMasks = new short[] {
-      0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE, 0xFF
-    };
   }
 
   /**
    * Metrics is a public snapshot of the internal metrics.
    */
   public static class Metrics {
+    private final static int DEFAULT_BUFFER_SIZE = 128;
+
     private final long pagesCreated;
     private final long segmentMapLocks;
     private final long segmentsCreated;
@@ -719,7 +772,7 @@ public class ConcurrentBitSet {
      * 
      * @param metrics the internal metrics.
      */
-    Metrics(InternalMetrics metrics) {
+    Metrics(final InternalMetrics metrics) {
       pagesCreated = metrics.pagesCreated.get();
       segmentMapLocks = metrics.segmentMapLocks.get();
       segmentsCreated = metrics.segmentsCreated.get();
@@ -769,14 +822,13 @@ public class ConcurrentBitSet {
      * @return the metrics as a string.
      */
     public String toString() {
-      StringBuilder sb = new StringBuilder();
-      sb.append("{ ")
-	  .append("pc: ").append(pagesCreated)
-	  .append(", sc: ").append(segmentsCreated)
-	  .append(", sml: ").append(segmentMapLocks)
-	  .append(", ops: ").append(totalOperations)
-	  .append(" }");
-      return sb.toString();
+      final StringBuilder buffer = new StringBuilder(DEFAULT_BUFFER_SIZE);
+      buffer.append("{ pc: ").append(pagesCreated)
+	    .append(", sc: ").append(segmentsCreated)
+	    .append(", sml: ").append(segmentMapLocks)
+	    .append(", ops: ").append(totalOperations)
+	    .append(" }");
+      return buffer.toString();
     }
   }
 

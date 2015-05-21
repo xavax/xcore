@@ -14,6 +14,9 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static com.xavax.concurrent.ConcurrentBitSet.*;
 
+/**
+ * Test the ConcurrentBitSet.Page class.
+ */
 public class PageTest {
   private final static String EXPECTED1 = "[01000000.00010000.00000100.00000001";
   private final static String EXPECTED2 = "[11111111.11111111.11111111.11111111.11111111.11111111.11111111.11111111.00000000";
@@ -24,11 +27,17 @@ public class PageTest {
 
   private Page page;
 
+  /**
+   * Set up performed before each test.
+   */
   @BeforeMethod
   public void beforeMethod() {
     page = new Page();
   }
 
+  /**
+   * Test the set method.
+   */
   @Test
   public void testSetBit() {
     page.set(31, true);
@@ -51,35 +60,44 @@ public class PageTest {
     }
   }
 
+  /**
+   * Test the set multiple bits method.
+   */
   @Test
   public void testSetBits() {
     page.set(0,63);
-    String s = page.toString().substring(0, EXPECTED2.length());
-    assertEquals(s, EXPECTED2);
+    String result = page.toString().substring(0, EXPECTED2.length());
+    assertEquals(result, EXPECTED2);
     page = new Page();
     page.set(3,43);
-    s = page.toString().substring(0, EXPECTED3.length());
-    assertEquals(s, EXPECTED3);
+    result = page.toString().substring(0, EXPECTED3.length());
+    assertEquals(result, EXPECTED3);
   }
 
+  /**
+   * Test the clear multiple bits method.
+   */
   @Test
   public void testClearBits() {
     page.set(0,63);
-    String s = page.toString().substring(0, EXPECTED2.length());
-    assertEquals(s, EXPECTED2);
+    String result = page.toString().substring(0, EXPECTED2.length());
+    assertEquals(result, EXPECTED2);
     page.clear(3,43);
-    s = page.toString().substring(0, EXPECTED4.length());
-    assertEquals(s, EXPECTED4);
+    result = page.toString().substring(0, EXPECTED4.length());
+    assertEquals(result, EXPECTED4);
     page.set(0,63);
     page.clear(0,55);
-    s = page.toString().substring(0, EXPECTED5.length());
-    assertEquals(s, EXPECTED5);
+    result = page.toString().substring(0, EXPECTED5.length());
+    assertEquals(result, EXPECTED5);
     page.set(0,63);
     page.clear(8,55);
-    s = page.toString().substring(0, EXPECTED6.length());
-    assertEquals(s, EXPECTED6);
+    result = page.toString().substring(0, EXPECTED6.length());
+    assertEquals(result, EXPECTED6);
   }
 
+  /**
+   * Test the nextSetBit method.
+   */
   @Test
   public void testNextSetBit() {
     page.set(0, true);
@@ -99,6 +117,9 @@ public class PageTest {
     assertEquals(page.nextSetBit(64), -1);
   }
 
+  /**
+   * Test the nextClearBit method.
+   */
   @Test
   public void testNextClearBit() {
     page.set(0,BITS_PER_PAGE - 1);
@@ -119,9 +140,16 @@ public class PageTest {
     assertEquals(page.nextClearBit(64), -1);
   }
 
-  private void checkBits(Page page, int index, boolean state) {
+  /**
+   * Check that a bit in a page is the specified state.
+   *
+   * @param page   the page.
+   * @param index  the bit index.
+   * @param state  the expected state.
+   */
+  private void checkBits(final Page page, final int index, final boolean state) {
     for ( int i = 0; i < BITS_PER_PAGE; ++i ) {
-      boolean value = page.get(i);
+      final boolean value = page.get(i);
       if ( i == index ) {
 	assertEquals(value, state);
       }
@@ -131,14 +159,17 @@ public class PageTest {
     }
   }
 
+  /**
+   * Test the toString method.
+   */
   @Test
   public void testToString() {
     page.set(1, true);
     page.set(11, true);
     page.set(21, true);
     page.set(31, true);
-    String s = page.toString().substring(0, EXPECTED1.length());
-    assertEquals(s, EXPECTED1);
+    final String result = page.toString().substring(0, EXPECTED1.length());
+    assertEquals(result, EXPECTED1);
   }
 
   // @Test(expectedExceptions = AssertionError.class)
