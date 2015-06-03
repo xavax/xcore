@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" output="test/bin" path="test/src"/>
 	<classpathentry kind="src" output="bin" path="src"/>
+	<classpathentry kind="src" path="tools/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="var" path="COMMON"/>
 	<classpathentry kind="var" path="TOMCAT"/>
