@@ -17,7 +17,15 @@ import java.util.Formatter;
  *
  * @author alvitar@xavax.com
  */
-public class FilenameFormatter {
+public final class FilenameFormatter {
+  private final static int DEFAULT_BUFFER_SIZE = 32;
+
+  /**
+   * Construct a FilenameFormatter. This exists only to prevent the
+   * compiler from generating a default constructor.
+   */
+  private FilenameFormatter() {}
+
   /**
    * Create a filename from a template. The first positional parameter passed
    * to the formatter is the current date and time. The template can use this
@@ -28,15 +36,27 @@ public class FilenameFormatter {
    * @param extraParams  extra parameters that can be used in formatting.
    * @return
    */
-  static public String filename(String template, String... extraParams) {
-    StringBuilder sb = new StringBuilder();
-    Date date = new Date();
-    Calendar calendar = Calendar.getInstance();
-    calendar.setTime(date);
-    Formatter formatter = new Formatter(sb);
-    formatter.format(template, calendar, extraParams);
-    formatter.close();
-    return sb.toString();
+  public static String filename(final String template, final String... extraParams) {
+    return filename(template, new Date(), extraParams);
   }
 
+  /**
+   * Create a filename from a template. The first positional parameter passed
+   * to the formatter is the specified date and time. The template can use this
+   * to create a filename that includes a timestamp. Additional parameters
+   * are passed to the formatter and can be referenced by the template.
+   *
+   * @param template     the template to use as the format string.
+   * @param extraParams  extra parameters that can be used in formatting.
+   * @return
+   */
+  public static String filename(final String template, final Date date, final String... extraParams) {
+    final Calendar calendar = Calendar.getInstance();
+    calendar.setTime(date);
+    final StringBuilder buffer = new StringBuilder(DEFAULT_BUFFER_SIZE);
+    final Formatter formatter = new Formatter(buffer);
+    formatter.format(template, calendar, extraParams);
+    formatter.close();
+    return buffer.toString();
+  }
 }

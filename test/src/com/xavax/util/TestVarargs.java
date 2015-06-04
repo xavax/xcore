@@ -41,6 +41,9 @@ public class TestVarargs {
     assertNotNull(varargs);
   }
 
+  /**
+   * Test the append(Object) method.
+   */
   @Test
   public void testAppendObject() {
     final Object[] args =
@@ -49,6 +52,9 @@ public class TestVarargs {
     assertEquals(output, "[A1, B1]");
   }
 
+  /**
+   * Test the append(Object[]) method.
+   */
   @Test
   public void appendArray() {
     final Object[] args =
@@ -57,6 +63,9 @@ public class TestVarargs {
     assertEquals(output, "[[A1, A2, A3], [B1, B2, B3]]");
   }
 
+  /**
+   * Test the append(Collection<?>) method.
+   */
   @Test
   public void appendCollection() {
     final Object[] args =
@@ -65,6 +74,9 @@ public class TestVarargs {
     assertEquals(output, "[{A1, A2, A3}, {B1, B2, B3}]");
   }
 
+  /**
+   * Test the flatten(Object[]) method.
+   */
   @Test
   public void flattenArray() {
     final Object[] args =
@@ -73,6 +85,9 @@ public class TestVarargs {
     assertEquals(output, FLATTENED);
   }
 
+  /**
+   * Test the flatten(Collection<?>) method.
+   */
   @Test
   public void flattenCollection() {
     final Object[] args =
