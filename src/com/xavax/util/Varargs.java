@@ -64,7 +64,7 @@ public class Varargs {
    * @param parameter  the parameter to append.
    * @return this Varargs object.
    */
-  public Varargs append(final Object[] parameter) {
+  public Varargs append(final Object... parameter) {
     list.add(parameter);
     return this; 
   }
@@ -86,9 +86,11 @@ public class Varargs {
    * @param parameters  the array of parameters to append.
    * @return this Varargs object.
    */
-  public Varargs flatten(final Object[] parameters) {
-    for ( final Object object : parameters ) {
-      list.add(object);
+  public Varargs flatten(final Object... parameters) {
+    if ( parameters != null ) {
+      for ( final Object object : parameters ) {
+	list.add(object);
+      }
     }
     return this;
   }
@@ -100,8 +102,10 @@ public class Varargs {
    * @return this Varargs object.
    */
   public Varargs flatten(final Collection<?> collection) {
-    for ( final Object object : collection ) {
-      list.add(object);
+    if ( collection != null ) {
+      for ( final Object object : collection ) {
+	list.add(object);
+      }
     }
     return this;
   }

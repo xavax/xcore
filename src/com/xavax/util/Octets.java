@@ -10,46 +10,52 @@ package com.xavax.util;
  * Octets converts between long integers and strings containing 8
  * octets (byte values in hexadecimal) separated by colon delimiters.
  */
-public class Octets {
+public final class Octets {
+
+  /**
+   * Private constructor provided to keep the compiler from generating
+   * a public default constructor.
+   */
+  private Octets() {}
+
   /**
    * Convert a long to a string of octets delimited by colons. If
    * escape is true, use the HTML entity "%3A" instead of a colon.
    *
-   * @param l  the value to be converted.
+   * @param value   the value to be converted.
    * @param escape  true if the delimiter should be escaped.
    * @return a string containing colon-delimited octets.
    */
-  public static String toString(long l, boolean escape) {
+  public static String toString(final long value, final boolean escape) {
+    long lvalue = value;
     byte[] octets = new byte[8];
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder buffer = new StringBuilder();
     for ( int i = 7; i >= 0; --i ) {
-      octets[i] = (byte) (l & 0xFF);
-      l >>= 8;
+      octets[i] = (byte) (lvalue & 0xFF);
+      lvalue >>= 8;
     }
     for ( int i = 0; i < 8; ++i ) {
       if ( i > 0 ) {
-	sb.append(escape ? "%3A" : ":");
+	buffer.append(escape ? "%3A" : ":");
       }
-      String s = String.format("%02X", octets[i]);
-      sb.append(s);
+      buffer.append(String.format("%02X", octets[i]));
     }
-    return sb.toString();
+    return buffer.toString();
   }
 
   /**
    * Parse a string containing colon-delimited octets and return
    * the corresponding long value.
    *
-   * @param s  a string containing colon-delimited octets.
+   * @param value  a string containing colon-delimited octets.
    * @return  the long value corresponding to the octets.
    */
-  public static long toLong(String s) {
-    long l = 0;
-    String[] octets = s.split(":");
-    for ( String octet: octets ) {
-      int i = Integer.parseInt(octet, 16);
-      l = (l << 8) + i;
+  public static long toLong(final String value) {
+    long result = 0;
+    final String[] octets = value.split(":");
+    for ( final String octet: octets ) {
+      result = (result << 8) + Integer.parseInt(octet, 16);
     }
-    return l;
+    return result;
   }
 }

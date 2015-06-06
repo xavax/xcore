@@ -11,110 +11,129 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 import java.util.TreeMap;
-import java.util.Vector;
 import java.util.WeakHashMap;
 
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
 
 import static org.testng.Assert.*;
 
+/**
+ * Test cases for CollectionFactory.
+ */
 public class TestCollectionFactory {
+  public final static int INITIAL_CAPACITY = 32;
 
-  @BeforeMethod
-  public void setUp() {
-  }
-
+  /**
+   * Test the arrayList method.
+   */
   @Test
   public void testArrayListFactory() {
-    List<String> l = CollectionFactory.arrayList();
-    assertTrue(l instanceof ArrayList);
+    assertTrue(CollectionFactory.arrayList() instanceof ArrayList);
+    assertTrue(CollectionFactory.arrayList(INITIAL_CAPACITY) instanceof ArrayList);
   }
 
+  /**
+   * Test the hashMap method.
+   */
   @Test
   public void testHashMapFactory() {
-    Map<String, String> map = CollectionFactory.hashMap();
-    assertTrue(map instanceof HashMap);
+    assertTrue(CollectionFactory.hashMap() instanceof HashMap);
   }
 
+  /**
+   * Test the hashSet method.
+   */
   @Test
   public void testHashSetFactory() {
-    Set<String> set = CollectionFactory.hashSet();
-    assertTrue(set instanceof HashSet);
+    assertTrue(CollectionFactory.hashSet() instanceof HashSet);
   }
 
+  /**
+   * Test the iterableEnumeration method.
+   */
   @Test
   public void testIterableEnumerationFactory() {
-    String[] sa = new String[] {};
-    List<String> l = Arrays.asList(sa);
-    Enumeration<String> en = Collections.enumeration(l);
-    IterableEnumeration<String> ie =
-	CollectionFactory.iterableEnumeration(en);
-    assertTrue(ie instanceof IterableEnumeration);
+    final Enumeration<String> enumeration = Collections.enumeration(Arrays.asList(new String[] {}));
+    assertTrue(CollectionFactory.iterableEnumeration(enumeration) instanceof IterableEnumeration);
   }
 
+  /**
+   * Test the linkedList method.
+   */
   @Test
   public void testLinkedListFactory() {
-    List<String> l = CollectionFactory.linkedList();
-    assertTrue(l instanceof LinkedList);
+    assertTrue(CollectionFactory.linkedList() instanceof LinkedList);
   }
 
+  /**
+   * Test the linkedHashMap method.
+   */
   @Test
   public void testLinkedHashMapFactory() {
-    Map<String, String> map = CollectionFactory.linkedHashMap();
-    assertTrue(map instanceof LinkedHashMap);
+    assertTrue(CollectionFactory.linkedHashMap() instanceof LinkedHashMap);
   }
 
+  /**
+   * Test the linkedHashSet method.
+   */
   @Test
   public void testLinkedHashSetFactory() {
-    Set<String> set = CollectionFactory.linkedHashSet();
-    assertTrue(set instanceof LinkedHashSet);
+    assertTrue(CollectionFactory.linkedHashSet() instanceof LinkedHashSet);
   }
 
+  /**
+   * Test the priorityQueue method.
+   */
   @Test
   public void testPriorityQueueFactory() {
-    Queue<String> queue = CollectionFactory.priorityQueue();
-    assertTrue(queue instanceof PriorityQueue);
+    assertTrue(CollectionFactory.priorityQueue() instanceof PriorityQueue);
   }
 
+  /**
+   * Test the stack method.
+   */
   @Test
   public void testStackFactory() {
-    Stack<String> stack = CollectionFactory.stack();
-    assertTrue(stack instanceof Stack);
+    assertTrue(CollectionFactory.stack() instanceof Stack);
   }
 
+  /**
+   * Test the treeMap method.
+   */
   @Test
   public void testTreeMapFactory() {
-    Map<String, String> map = CollectionFactory.treeMap();
-    assertTrue(map instanceof TreeMap);
+    assertTrue(CollectionFactory.treeMap() instanceof TreeMap);
   }
 
+  /**
+   * Test the treeMap method.
+   */
+  @Test
+  public void testTreeMapFactoryWithComparator() {
+    assertTrue(CollectionFactory.treeMap(Strings.comparator()) instanceof TreeMap);
+  }
+
+  /**
+   * Test the treeSet method.
+   */
   @Test
   public void testTreeSetFactory() {
-    Set<String> set = CollectionFactory.treeSet();
-    assertTrue(set instanceof TreeSet);
+    assertTrue(CollectionFactory.treeSet() instanceof TreeSet);
   }
 
-  @Test
-  public void testVectorFactory() {
-    Vector<String> v = CollectionFactory.vector();
-    assertTrue(v instanceof Vector);
-  }
-
+  /**
+   * Test the weakHashMap method.
+   */
   @Test
   public void testWeakHashMap() {
-    Map<String, String> map = CollectionFactory.weakHashMap();
-    assertTrue(map instanceof WeakHashMap);
+    assertTrue(CollectionFactory.weakHashMap() instanceof WeakHashMap);
   }
+
 }

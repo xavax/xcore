@@ -17,7 +17,7 @@ final public class Joiner {
    * @param parameters  parameters to be joined.
    * @return a string representation of the array.
    */
-  public static String join(final Object[] parameters) {
+  public static String join(final Object... parameters) {
     final StringBuilder buffer = new StringBuilder();
     join(buffer, parameters);
     return buffer.toString();
@@ -85,7 +85,10 @@ final public class Joiner {
    * @param parameter  the parameter to append.
    */
   private static void join(final StringBuilder buffer, final Object parameter) {
-    if ( parameter instanceof Object[] ) {
+    if ( parameter == null ) {
+      buffer.append("null");
+    }
+    else if ( parameter instanceof Object[] ) {
       join(buffer, (Object[]) parameter);
     }
     else if ( parameter instanceof Collection<?> ) {

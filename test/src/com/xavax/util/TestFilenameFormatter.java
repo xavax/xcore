@@ -73,5 +73,7 @@ public class TestFilenameFormatter {
     assertEquals(output, PARAM_EXPECTED);
     output = FilenameFormatter.filename(PARAM_TEMPLATE, PARAMS);
     assertEquals(output, PARAM_EXPECTED);
+    output = FilenameFormatter.filename(DEFAULT_TEMPLATE, birthday, (String[]) null);
+    assertEquals(output, EXPECTED);
   }
 }

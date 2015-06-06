@@ -1,6 +1,7 @@
 package com.xavax.util;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.testng.annotations.Test;
@@ -15,6 +16,8 @@ import static org.testng.Assert.*;
 public class TestVarargs {
   private final static int CAPACITY = 32;
   private final static String FLATTENED = "[A1, A2, A3, B1, B2, B3]";
+  private final static String NESTED1 = "[[A1, A2, A3], [B1, B2, B3]]";
+  private final static String NESTED2 = "[{A1, A2, A3}, {B1, B2, B3}]";
   private final static String PARAMA1 = "A1";
   private final static String PARAMA2 = "A2";
   private final static String PARAMA3 = "A3";
@@ -58,9 +61,12 @@ public class TestVarargs {
   @Test
   public void appendArray() {
     final Object[] args =
-	Varargs.getInstance().append(APARAMS).append(BPARAMS).toArray();
+	Varargs.getInstance()
+	       .append((Object[]) APARAMS)
+	       .append((Object[]) BPARAMS)
+	       .toArray();
     final String output = Joiner.join(args);
-    assertEquals(output, "[[A1, A2, A3], [B1, B2, B3]]");
+    assertEquals(output, NESTED1);
   }
 
   /**
@@ -69,9 +75,13 @@ public class TestVarargs {
   @Test
   public void appendCollection() {
     final Object[] args =
-	Varargs.getInstance().append(ALIST).append(BLIST).toArray();
+	Varargs.getInstance()
+	       .append(ALIST)
+	       .append(BLIST)
+	       .toArray();
     final String output = Joiner.join(args);
-    assertEquals(output, "[{A1, A2, A3}, {B1, B2, B3}]");
+    assertEquals(output, NESTED2);
+    
   }
 
   /**
@@ -80,7 +90,11 @@ public class TestVarargs {
   @Test
   public void flattenArray() {
     final Object[] args =
-	Varargs.getInstance().flatten(APARAMS).flatten(BPARAMS).toArray();
+	Varargs.getInstance()
+	       .flatten((Object[]) null)
+	       .flatten((Object[]) APARAMS)
+	       .flatten((Object[]) BPARAMS)
+	       .toArray();
     final String output = Joiner.join(args);
     assertEquals(output, FLATTENED);
   }
@@ -91,7 +105,11 @@ public class TestVarargs {
   @Test
   public void flattenCollection() {
     final Object[] args =
-	Varargs.getInstance().flatten(ALIST).flatten(BLIST).toArray();
+	Varargs.getInstance()
+	       .flatten(ALIST)
+	       .flatten(BLIST)
+	       .flatten((Collection<String>) null)
+	       .toArray();
     final String output = Joiner.join(args);
     assertEquals(output, FLATTENED);
   }

@@ -13,56 +13,109 @@ import java.util.StringTokenizer;
  * so it can be used in for-each statements.
  */
 public class IterableStringTokenizer implements Iterable<String> {
-  public IterableStringTokenizer(String str) {
-    tokenizer = new StringTokenizer(str);
+  private final StringTokenizer tokenizer;
+
+  /**
+   * Construct an IterableStringTokenizer from the specified string.
+   * @param string  the string to be tokenized.
+   */
+  public IterableStringTokenizer(final String string) {
+    tokenizer = new StringTokenizer(string);
   }
 
-  public IterableStringTokenizer(String str, String delim) {
-    tokenizer = new StringTokenizer(str, delim);
+  /**
+   * Construct an IterableStringTokenizer from the specified string
+   * using the specified delimiters.
+   *
+   * @param string  the string to be tokenized.
+   * @param delim   the delimiters.
+   */
+  public IterableStringTokenizer(final String string, final String delim) {
+    tokenizer = new StringTokenizer(string, delim);
   }
 
-  public IterableStringTokenizer(String str, String delim,
-				 boolean returnDelims) {
-    tokenizer = new StringTokenizer(str, delim, returnDelims);
+  /**
+   * Construct an IterableStringTokenizer from the specified string
+   * using the specified delimiters and return delimiters flag.
+   *
+   * @param string  the string to be tokenized.
+   * @param delim   the delimiters.
+   * @param returnDelims  true if delimiters should be returned as tokens.
+   */
+  public IterableStringTokenizer(final String string, final String delim,
+				 final boolean returnDelims) {
+    tokenizer = new StringTokenizer(string, delim, returnDelims);
   }
 
+  /**
+   * Returns the number of tokens.
+   *
+   * @return the number of tokens.
+   */
   public int countTokens() {
     return tokenizer.countTokens();
   }
 
+  /**
+   * Returns true if this iterator has more tokens.
+   *
+   * @return true if this iterator has more tokens.
+   */
   public boolean hasMoreTokens() {
     return tokenizer.hasMoreTokens();
   }
 
+  /**
+   * Returns the next token.
+   *
+   * @return the next token.
+   */
   public String nextToken() {
     return tokenizer.nextToken();
   }
 
-  public String nextToken(String delim) {
+  /**
+   * Returns the next token after changing delimiters.
+   *
+   * @param delim  the new delimiters.
+   * @return the next token.
+   */
+  public String nextToken(final String delim) {
     return tokenizer.nextToken(delim);
   }
 
   /**
-   * Returns an Iterator for the underlying Enumeration, thereby making it
-   * Iterable.
+   * Returns an Iterator for the underlying Enumeration, thereby
+   * making it Iterable.
    * 
    * @return an Iterator for this enumeration.
    */
   public Iterator<String> iterator() {
     return new Iterator<String>() {
+      /**
+       * Returns true if this iterator has more tokens.
+       *
+       * @return true if this iterator has more tokens.
+       */
       public boolean hasNext() {
 	return tokenizer.hasMoreElements();
       }
 
+      /**
+       * Returns the next token.
+       *
+       * @return the next token.
+       */
       public String next() {
 	return tokenizer.nextToken();
       }
 
+      /**
+       * This method of the Iterator interface is not supported.
+       */
       public void remove() {
 	throw new UnsupportedOperationException();
       }
     };
   }
-
-  private StringTokenizer tokenizer;
 }

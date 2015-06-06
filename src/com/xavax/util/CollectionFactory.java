@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 import java.util.TreeMap;
-import java.util.Vector;
 import java.util.WeakHashMap;
 
 /**
@@ -32,7 +31,14 @@ import java.util.WeakHashMap;
  *
  * @author alvitar@xavax.com
  */
-public class CollectionFactory {
+public final class CollectionFactory {
+
+  /**
+   * Private constructor provided to keep the compiler from generating
+   * a public default constructor.
+   */
+  private CollectionFactory() {}
+
   /**
    * Returns a new array list.
    *
@@ -49,7 +55,7 @@ public class CollectionFactory {
    * @param capacity  the initial capacity of the list.
    * @return a new array list.
    */
-  public static <T> List<T> arrayList(int capacity)
+  public static <T> List<T> arrayList(final int capacity)
   {
     return new ArrayList<T>(capacity);
   }
@@ -136,7 +142,7 @@ public class CollectionFactory {
    * @param comparator  the comparator used to compare keys.
    * @return a new tree map.
    */
-  public static <K, V> Map<K,V> treeMap(Comparator<? super Object> comparator)
+  public static <K, V> Map<K,V> treeMap(final Comparator<K> comparator)
   {
     return new TreeMap<K,V>(comparator);
   }
@@ -148,16 +154,6 @@ public class CollectionFactory {
    */
   public static <E> Set<E> treeSet() {
     return new TreeSet<E>();
-  }
-
-  /**
-   * Returns a new vector.
-   *
-   * @return a new vector.
-   */
-  public static <T> Vector<T> vector()
-  {
-    return new Vector<T>();
   }
 
   /**
@@ -175,7 +171,7 @@ public class CollectionFactory {
    * @return a new iterable enumeration.
    */
   public static <T> IterableEnumeration<T>
-    iterableEnumeration(Enumeration<T> enumeration) {
+    iterableEnumeration(final Enumeration<T> enumeration) {
     return new IterableEnumeration<T>(enumeration);
   }
 }

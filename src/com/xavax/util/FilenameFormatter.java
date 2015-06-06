@@ -55,7 +55,9 @@ public final class FilenameFormatter {
     calendar.setTime(date);
     final StringBuilder buffer = new StringBuilder(DEFAULT_BUFFER_SIZE);
     final Formatter formatter = new Formatter(buffer);
-    formatter.format(template, calendar, extraParams);
+    final int capacity = extraParams == null ? 1 : extraParams.length + 1;
+    formatter.format(template, Varargs.getInstance(capacity).append(calendar)
+				      .flatten((Object[]) extraParams).toArray());
     formatter.close();
     return buffer.toString();
   }

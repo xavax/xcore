@@ -6,12 +6,21 @@
 
 package com.xavax.util;
 
+import java.util.Comparator;
+
 /**
  * Useful String utilities.
  */
-public class Strings {
+public final class Strings {
   private final static int DEFAULT_BUFFER_SIZE = 256;
   private final static String EMPTY = "";
+  private final static StringComparator COMPARATOR = new StringComparator();
+
+  /**
+   * Private constructor provided to keep the compiler from generating
+   * a public default constructor.
+   */
+  private Strings() {}
 
   /**
    * Returns true if two strings are equal or both null.
@@ -90,5 +99,29 @@ public class Strings {
       }
     }
     return packed;
+  }
+
+  /**
+   * Return a string comparator.
+   *
+   * @return a string comparator.
+   */
+  public static Comparator<String> comparator() {
+    return COMPARATOR;
+  }
+
+  /**
+   * A comparator for Strings that can be passed to collection constructors.
+   */
+  private static class StringComparator implements Comparator<String> {
+
+    /**
+     * Returns true if string1 equals string2.
+     */
+    @Override
+    public int compare(final String string1, final String string2) {
+      return string1 == null ? (string2 == null ? 0 : -1) : string1.compareTo(string2);
+    }
+    
   }
 }

@@ -16,10 +16,12 @@ import java.util.Iterator;
  *   http://www.javaspecialists.eu/archive/Issue107.html
  */
 public class IterableEnumeration<T> implements Iterable<T> {
+  private final Enumeration<T> enumeration;
+
   /**
    * Construct an InterableEnumeration from an existing enumeration.
    */
-  public IterableEnumeration(Enumeration<T> enumeration) {
+  public IterableEnumeration(final Enumeration<T> enumeration) {
     this.enumeration = enumeration;
   }
 
@@ -31,14 +33,27 @@ public class IterableEnumeration<T> implements Iterable<T> {
    */
   public Iterator<T> iterator() {
     return new Iterator<T>() {
+      /**
+       * Returns true if this iterator has more items.
+       *
+       * @return true if this iterator has more items.
+       */
       public boolean hasNext() {
         return enumeration.hasMoreElements();
       }
 
+      /**
+       * Returns the next item.
+       *
+       * @return the next item.
+       */
       public T next() {
         return enumeration.nextElement();
       }
 
+      /**
+       * This method of the Iterator interface is not supported.
+       */
       public void remove() {
         throw new UnsupportedOperationException();
       }
@@ -48,9 +63,7 @@ public class IterableEnumeration<T> implements Iterable<T> {
   /**
    * Returns an IterableEnumeration created from the enumeration.
    */
-  public static <T> IterableEnumeration<T> create(Enumeration<T> enumeration) {
+  public static <T> IterableEnumeration<T> create(final Enumeration<T> enumeration) {
     return new IterableEnumeration<T>(enumeration);
   }
-
-  private final Enumeration<T> enumeration;
 }

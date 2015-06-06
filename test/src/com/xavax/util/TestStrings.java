@@ -6,6 +6,8 @@
 
 package com.xavax.util;
 
+import java.util.Comparator;
+
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -102,5 +104,17 @@ public class TestStrings {
     final String[] items = new String[] { ALPHARETTA, BIRMINGHAM, NAMES[0] };
     packed = Strings.pack(items);
     assertTrue(items == packed);
+  }
+
+  /**
+   * Test the comparator method.
+   */
+  @Test
+  public void testComparator() {
+    final Comparator<String> comparator = Strings.comparator();
+    assertTrue(comparator.compare(ALPHARETTA, BIRMINGHAM) < 0);
+    assertTrue(comparator.compare(BIRMINGHAM, ALPHARETTA) > 0);
+    assertTrue(comparator.compare(null, BIRMINGHAM) < 0);
+    assertTrue(comparator.compare(null, null) == 0);
   }
 }

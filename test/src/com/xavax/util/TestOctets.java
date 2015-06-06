@@ -8,25 +8,30 @@ package com.xavax.util;
 
 import org.testng.annotations.Test;
 
-import com.xavax.util.Octets;
-
 import static org.testng.Assert.*;
 
+/**
+ * Test cases for the Octets utility class.
+ */
 public class TestOctets {
-  final static String expected = "01:23:45:67:89:AB:CD:EF";
-  final static String escaped = "01%3A23%3A45%3A67%3A89%3AAB%3ACD%3AEF";
-  final static long el = 0x0123456789ABCDEFL;
+  final static String EXPECTED = "01:23:45:67:89:AB:CD:EF";
+  final static String ESCAPED = "01%3A23%3A45%3A67%3A89%3AAB%3ACD%3AEF";
+  final static long VALUE = 0x0123456789ABCDEFL;
 
+  /**
+   * Test the toString method.
+   */
   @Test
   public void testToString() {
-    String s = Octets.toString(el, false);
-    assertEquals(s, expected);
-    s = Octets.toString(el, true);
-    assertEquals(s, escaped);
+    assertEquals(Octets.toString(VALUE, false), EXPECTED);
+    assertEquals(Octets.toString(VALUE, true), ESCAPED);
   }
 
+  /**
+   * Test the toLong method.
+   */
+  @Test
   public void testToLong() {
-    long l = Octets.toLong(expected);
-    assertEquals(l, el);
+    assertEquals(Octets.toLong(EXPECTED), VALUE);
   }
 }
