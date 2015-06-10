@@ -20,16 +20,123 @@ public class TimeMetric {
   public final static long SCALE_BY_MICROSECONDS = 1000;
   public final static long SCALE_BY_MILLISECONDS = 1000000;
 
+  private long min;
+  private long max;
+  private long scaleFactor;
+  private AtomicLong count;
+  private AtomicLong totalTime;
+  private AtomicLong totalTimeSquared;
+
+  /**
+   * Construct a TimeMetric object.
+   */
+  public TimeMetric() {
+    this(1);
+  }
+
+  /**
+   * Construct a TimeMetric with the specified scale factor.
+   *
+   * @param scaleFactor  the scale factor for scaling elapsed times.
+   */
+  public TimeMetric(final long scaleFactor) {
+    this.scaleFactor = scaleFactor;
+    min = Long.MAX_VALUE;
+    max = 0;
+    count = new AtomicLong();
+    totalTime = new AtomicLong();
+    totalTimeSquared = new AtomicLong();
+  }
+
+  /**
+   * Add a transaction to this metric with the specified start
+   * and stop times.
+   *
+   * @param start  the start time.
+   * @param stop   the stop time.
+   */
+  public void addTransaction(final long start, final long stop) {
+    long elapsed = stop - start;
+    if ( scaleFactor != 1 ) {
+      elapsed /= scaleFactor;
+    }
+    if ( elapsed < min ) {
+      min = elapsed;
+    }
+    if ( elapsed > max ) {
+      max = elapsed;
+    }
+    count.incrementAndGet();
+    totalTime.addAndGet(elapsed);
+    totalTimeSquared.addAndGet(elapsed * elapsed);
+  }
+
+  /**
+   * Add a transaction to this metric with the specified start
+   * time. The stop time is determined by calling System.nanoTime.
+   *
+   * @param start  the start time.
+   */
+  public void addTransaction(final long start) {
+    addTransaction(start, currentTime());
+  }
+
+  /**
+   * Returns the time in nanoseconds as produced by System.nanoTime.
+   * Override this method to use a different time base.
+   */
+  public long currentTime() {
+    return System.nanoTime();
+  }
+
+  /**
+   * Reset this metric.
+   */
+  public void reset() {
+    min = Long.MAX_VALUE;
+    max = 0;
+    count.set(0);
+    totalTime.set(0);
+    totalTimeSquared.set(0);
+  }
+
+  /**
+   * Return a snapshot of the results for this metric.
+   *
+   * @return  a snapshot of the results for this metric.
+   */
+  public Result result() {
+    return new Result(this);
+  }
+
+  /**
+   * Return a string representation of this result.
+   *
+   * @return a string representation of this result.
+   */
+  public String toString() {
+    final Result result = new Result(this);
+    return result.toString();
+  }
+
   /**
    * Result represents the results gathered by a TimeMetric object.
    */
-  public class Result {
+  public static class Result {
+    private final long count;
+    private final long min;
+    private final long max;
+    private final long totalTime;
+    private final long totalTimeSquared;
+    private double mean;
+    private double deviation;
+
     /**
      * Construct a Result for a TimeMetric object.
      *
      * @param timeMetric  the TimeMetric object to be examined.
      */
-    public Result(TimeMetric timeMetric) {
+    public Result(final TimeMetric timeMetric) {
       this.min = timeMetric.min;
       this.max = timeMetric.max;
       this.count = timeMetric.count.get();
@@ -37,7 +144,7 @@ public class TimeMetric {
       this.totalTimeSquared = timeMetric.totalTimeSquared.get();
       if ( count > 0 ) {
 	this.mean = (double) totalTime / (double) count;
-	this.deviation = Math.sqrt((double) totalTimeSquared/count - (mean * mean));
+	this.deviation = Math.sqrt((double) totalTimeSquared/count - mean * mean);
       }
       else {
 	this.mean = 0;
@@ -114,115 +221,8 @@ public class TimeMetric {
      * @return a string representation of this result.
      */
     public String toString() {
-      String fmt = "(%d, %d, %d, %.2f, %.2f)";
-      return String.format(fmt, count, min, max, mean, deviation);
+      final String format = "(%d, %d, %d, %.2f, %.2f)";
+      return String.format(format, count, min, max, mean, deviation);
     }
-
-    private long count;
-    private long min;
-    private long max;
-    private long totalTime;
-    private long totalTimeSquared;
-    private double mean;
-    private double deviation;
   }
-
-  /**
-   * Construct a TimeMetric object.
-   */
-  public TimeMetric() {
-    this(1);
-  }
-
-  /**
-   * Construct a TimeMetric with the specified scale factor.
-   *
-   * @param scaleFactor  the scale factor for scaling elapsed times.
-   */
-  public TimeMetric(long scaleFactor) {
-    this.scaleFactor = scaleFactor;
-    min = Long.MAX_VALUE;
-    max = 0;
-    count = new AtomicLong();
-    totalTime = new AtomicLong();
-    totalTimeSquared = new AtomicLong();
-  }
-
-  /**
-   * Add a transaction to this metric with the specified start
-   * and stop times.
-   *
-   * @param start  the start time.
-   * @param stop   the stop time.
-   */
-  public void addTransaction(long start, long stop) {
-    long elapsed = stop - start;
-    if ( scaleFactor != 1 ) {
-      elapsed /= scaleFactor;
-    }
-    if ( elapsed < min ) {
-      min = elapsed;
-    }
-    if ( elapsed > max ) {
-      max = elapsed;
-    }
-    count.incrementAndGet();
-    totalTime.addAndGet(elapsed);
-    totalTimeSquared.addAndGet(elapsed * elapsed);
-  }
-
-  /**
-   * Add a transaction to this metric with the specified start
-   * time. The stop time is determined by calling System.nanoTime.
-   *
-   * @param start  the start time.
-   */
-  public void addTransaction(long start) {
-    addTransaction(start, currentTime());
-  }
-
-  /**
-   * Returns the time in nanoseconds as produced by System.nanoTime.
-   * Override this method to use a different time base.
-   */
-  public long currentTime() {
-    return System.nanoTime();
-  }
-
-  /**
-   * Reset this metric.
-   */
-  public void reset() {
-    min = Long.MAX_VALUE;
-    max = 0;
-    count.set(0);
-    totalTime.set(0);
-    totalTimeSquared.set(0);
-  }
-
-  /**
-   * Return a snapshot of the results for this metric.
-   *
-   * @return  a snapshot of the results for this metric.
-   */
-  public Result result() {
-    return new Result(this);
-  }
-
-  /**
-   * Return a string representation of this result.
-   *
-   * @return a string representation of this result.
-   */
-  public String toString() {
-    Result result = new Result(this);
-    return result.toString();
-  }
-
-  private long min;
-  private long max;
-  private long scaleFactor;
-  private AtomicLong count;
-  private AtomicLong totalTime;
-  private AtomicLong totalTimeSquared;
 }

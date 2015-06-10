@@ -26,16 +26,25 @@ public class XProductTest {
 
   private XProduct product;
 
+  /**
+   * Test setup.
+   */
   @BeforeMethod
   public void setup() {
     product = new XProduct(NAME, 1, 2, 3, 2001, 2027, TEMPLATE);
   }
 
+  /**
+   * Test the banner method.
+   */
   @Test
   public void banner() {
     assertEquals(product.banner(), VERSION + "\n\n" + COPYRIGHT2);
   }
 
+  /**
+   * Test the copyright method.
+   */
   @Test
   public void copyright() {
     assertEquals(product.copyright(), COPYRIGHT2);
@@ -43,6 +52,9 @@ public class XProductTest {
     assertEquals(product.copyright(), COPYRIGHT1);
   }
 
+  /**
+   * Test the version method.
+   */
   @Test
   public void version() {
     assertEquals(product.version(), VERSION);

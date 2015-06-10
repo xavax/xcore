@@ -13,8 +13,37 @@ package com.xavax.info;
  * Xavax Open Source License.
  */
 public class XProduct {
-  public XProduct(String name, int major, int minor, int patch,
-		  int copyrightBegin, int copyrightEnd, String copyright) {
+
+  protected final static String YEAR = "%1$d";
+  protected final static String YEAR_SPAN = "%1$d, %2$d";
+  protected final static String DEFAULT_COPYRIGHT =
+      "Copyright %s by Xavax, Inc. All Rights Reserved.\n"
+	  + "Use of this software is allowed under the Xavax Open Software License.\n"
+	  + "http://www.xavax.com/xosl.html";
+
+  protected String copyright;
+  protected String version;
+  protected final String name;
+  protected final String template;
+  protected final int copyrightBegin;
+  protected final int copyrightEnd;
+  protected final int major;
+  protected final int minor;
+  protected final int patch;
+
+  /**
+   * Construct an XProduct.
+   *
+   * @param name   the product name.
+   * @param major  the major version number.
+   * @param minor  the minor version number.
+   * @param patch  the patch level.
+   * @param copyrightBegin  the copyright begin year.
+   * @param copyrightEnd    the copyright end year.
+   * @param copyright       the copyright message template.
+   */
+  public XProduct(final String name, final int major, final int minor, final int patch,
+                  final int copyrightBegin, final int copyrightEnd, final String copyright) {
     this.name = name;
     this.major = major;
     this.minor = minor;
@@ -23,7 +52,7 @@ public class XProduct {
     this.copyrightBegin = copyrightBegin;
     this.copyrightEnd = copyrightEnd;
     this.copyright = null;
-    this.template = copyright == null ? defaultCopyright : copyright;
+    this.template = copyright == null ? DEFAULT_COPYRIGHT : copyright;
   }
 
   /**
@@ -44,7 +73,7 @@ public class XProduct {
   public String copyright()
   {
     if (copyright == null) {
-      String year = String.format(copyrightEnd == 0 ? YEAR : YEAR_SPAN,
+      final String year = String.format(copyrightEnd == 0 ? YEAR : YEAR_SPAN,
 	  copyrightBegin, copyrightEnd);
       copyright = String.format(template, year);
     }
@@ -103,21 +132,4 @@ public class XProduct {
     }
     return version;
   }
-
-  protected final String YEAR = "%1$d";
-  protected final String YEAR_SPAN = "%1$d, %2$d";
-  protected final String defaultCopyright =
-      "Copyright %s by Xavax, Inc. All Rights Reserved.\n"
-	  + "Use of this software is allowed under the Xavax Open Software License.\n"
-	  + "http://www.xavax.com/xosl.html";
-
-  protected String copyright = null;
-  protected String version = null;
-  protected final String name;
-  protected final String template;
-  protected final int copyrightBegin;
-  protected final int copyrightEnd;
-  protected final int major;
-  protected final int minor;
-  protected final int patch;
 }

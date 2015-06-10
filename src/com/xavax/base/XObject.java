@@ -1,5 +1,5 @@
 //
-// Copyright 2007 by Xavax, Inc. All Rights Reserved.
+// Copyright 2007, 2015 by Xavax, Inc. All Rights Reserved.
 // Use of this software is allowed under the Xavax Open Software License.
 // http://www.xavax.com/xosl.html
 //
@@ -14,10 +14,14 @@ import org.apache.log4j.Logger;
 import com.xavax.logger.XLogger;
 
 /**
- * XObject (eXtended Object) is an abstract base class for objects that
+ * XObject (eXtended Object) is a base class for objects that
  * use a Logger to trace program flow.
  */
-abstract public class XObject {
+public class XObject {
+
+  protected String prefix;
+  protected final Logger logger;
+
   /**
    * Construct a XObject using the Logger for the class of this
    * object.
@@ -33,7 +37,7 @@ abstract public class XObject {
    *
    * @param logger  the logger to use for this object.
    */
-  protected XObject(Logger logger)
+  protected XObject(final Logger logger)
   {
     this.logger = logger;
     init();
@@ -46,8 +50,8 @@ abstract public class XObject {
    */
   private void init()
   {
-    String s = getClass().getSimpleName() + ".";
-    this.prefix = s.intern();		
+    final String prefix = getClass().getSimpleName() + ".";
+    this.prefix = prefix.intern();		
   }
 
   /**
@@ -55,21 +59,19 @@ abstract public class XObject {
    */
   public boolean debugEnabled()
   {
-    boolean result = logger != null ? logger.isDebugEnabled() : false;
-    return result;
+    return logger == null ? false : logger.isDebugEnabled();
   }
 
   /**
    * Write a message to the log at debug level.
    *
-   * @param method  the method name.
-   * @param msg     the message to display.
+   * @param method   the method name.
+   * @param message  the message to display.
    */
-  public void debug(String method, String msg)
+  public void debug(final String method, final String message)
   {
     if ( logger != null && logger.isDebugEnabled() ) {
-      msg = format(method, msg);
-      logger.debug(msg);
+      logger.debug(format(method, message));
     }
   }
 
@@ -80,25 +82,23 @@ abstract public class XObject {
    * @param format  the message format string.
    * @param params  the message parameters.
    */
-  public void debug(String method, String format, Object... params)
+  public void debug(final String method, final String format, final Object... params)
   {
     if ( logger != null && logger.isDebugEnabled() ) {
-      String msg = format(method, format, params);
-      logger.debug(msg);
+      logger.debug(format(method, format, params));
     }
   }
 
   /**
    * Write a message to the log at error level.
    *
-   * @param method  the method name.
-   * @param msg     the message to be written to the log.
+   * @param method   the method name.
+   * @param message  the message to be written to the log.
    */
-  public void error(String method, String msg)
+  public void error(final String method, final String message)
   {
     if ( logger != null && logger.isEnabledFor(Level.ERROR) ) {
-      msg = format(method, msg);
-      logger.error(msg);
+      logger.error(format(method, message));
     }
   }
 
@@ -109,57 +109,53 @@ abstract public class XObject {
    * @param format  the message format string.
    * @param params  the message parameters.
    */
-  public void error(String method, String format, Object... params)
+  public void error(final String method, final String format, final Object... params)
   {
     if ( logger != null && logger.isEnabledFor(Level.ERROR) ) {
-      String msg = format(method, format, params);
-      logger.error(msg);
+      logger.error(format(method, format, params));
     }
   }
 
   /**
    * Write a message to the log at error level.
    *
-   * @param method  the method name.
-   * @param cause  the cause of the error.
-   * @param msg    the message to be written to the log.
+   * @param method   the method name.
+   * @param cause    the cause of the error.
+   * @param message  the message to be written to the log.
    */
-  public void error(String method, Throwable cause, String msg)
+  public void error(final String method, final Throwable cause, final String message)
   {
     if ( logger != null && logger.isEnabledFor(Level.ERROR) ) {
-      msg = format(method, msg);
-      logger.error(msg, cause);
+      logger.error(format(method, message), cause);
     }
   }
 
   /**
    * Format and write a message to the log at error level.
    *
-   * @param method  the method name.
-   * @param msg    the message to be written to the log.
-   * @param format  the message format string.
-   * @param params  the message parameters.
+   * @param method   the method name.
+   * @param message  the message to be written to the log.
+   * @param format   the message format string.
+   * @param params   the message parameters.
    */
-  public void error(String method, Throwable cause, String format,
-		    Object... params)
+  public void error(final String method, final Throwable cause,
+                    final String format, final Object... params)
   {
     if ( logger != null && logger.isEnabledFor(Level.ERROR) ) {
-      String msg = format(method, format, params);
-      logger.error(msg, cause);
+      logger.error(format(method, format, params), cause);
     }
   }
 
   /**
    * Write a message to the log at fatal level.
    *
-   * @param method  the method name.
-   * @param msg     the message to be written to the log.
+   * @param method   the method name.
+   * @param message  the message to be written to the log.
    */
-  public void fatal(String method, String msg)
+  public void fatal(final String method, final String message)
   {
     if ( logger != null ) {
-      msg = format(method, msg);
-      logger.fatal(msg);
+      logger.fatal(format(method, message));
     }
   }
 
@@ -170,57 +166,53 @@ abstract public class XObject {
    * @param format  the message format string.
    * @param params  the message parameters.
    */
-  public void fatal(String method, String format, Object... params)
+  public void fatal(final String method, final String format, final Object... params)
   {
     if ( logger != null ) {
-      String msg = format(method, format, params);
-      logger.fatal(msg);
+      logger.fatal(format(method, format, params));
     }
   }
 
   /**
    * Write a message to the log at fatal level.
    *
-   * @param method  the method name.
-   * @param cause  the cause of the fatal.
-   * @param msg    the message to be written to the log.
+   * @param method   the method name.
+   * @param cause    the cause of the fatal.
+   * @param message  the message to be written to the log.
    */
-  public void fatal(String method, Throwable cause, String msg)
+  public void fatal(final String method, final Throwable cause, final String message)
   {
     if ( logger != null ) {
-      msg = format(method, msg);
-      logger.fatal(msg, cause);
+      logger.fatal(format(method, message), cause);
     }
   }
 
   /**
    * Format and write a message to the log at fatal level.
    *
-   * @param method  the method name.
-   * @param msg    the message to be written to the log.
-   * @param format  the message format string.
-   * @param params  the message parameters.
+   * @param method   the method name.
+   * @param message  the message to be written to the log.
+   * @param format   the message format string.
+   * @param params   the message parameters.
    */
-  public void fatal(String method, Throwable cause, String format,
-		    Object... params)
+  public void fatal(final String method, final Throwable cause,
+                    final String format, final Object... params)
   {
     if ( logger != null ) {
-      String msg = format(method, format, params);
-      logger.fatal(msg, cause);
+      logger.fatal(format(method, format, params), cause);
     }
   }
 
   /**
    * Write a message to the log at info level.
    *
-   * @param method  the method name.
-   * @param msg     the message to be written to the log.
+   * @param method   the method name.
+   * @param message  the message to be written to the log.
    */
-  public void info(String method, String msg)
+  public void info(final String method, final String message)
   {
     if ( logger != null && logger.isEnabledFor(Level.INFO) ) {
-      msg = format(method, msg);
-      logger.info(msg);
+      logger.info(format(method, message));
     }
   }
 
@@ -231,26 +223,24 @@ abstract public class XObject {
    * @param format  the message format string.
    * @param params  the message parameters.
    */
-  public void info(String method, String format, Object... params)
+  public void info(final String method, final String format, final Object... params)
   {
     if ( logger != null && logger.isEnabledFor(Level.INFO) ) {
-      String msg = format(method, format, params);
-      logger.info(msg);
+      logger.info(format(method, format, params));
     }
   }
 
   /**
    * Write a message to the log at info level.
    *
-   * @param method  the method name.
-   * @param msg    the message to be written to the log.
-   * @param cause  the cause of the info.
+   * @param method   the method name.
+   * @param message  the message to be written to the log.
+   * @param cause    the cause of the info.
    */
-  public void info(String method, Throwable cause, String msg)
+  public void info(final String method, final Throwable cause, final String message)
   {
     if ( logger != null && logger.isEnabledFor(Level.INFO) ) {
-      msg = format(method, msg);
-      logger.info(msg, cause);
+      logger.info(format(method, message), cause);
     }
   }
 
@@ -262,26 +252,24 @@ abstract public class XObject {
    * @param format  the message format string.
    * @param params  the message parameters.
    */
-  public void info(String method, Throwable cause, String format,
-		    Object... params)
+  public void info(final String method, final Throwable cause,
+                   final String format, final Object... params)
   {
     if ( logger != null && logger.isEnabledFor(Level.INFO) ) {
-      String msg = format(method, format, params);
-      logger.info(msg, cause);
+      logger.info(format(method, format, params), cause);
     }
   }
 
   /**
    * Write a message to the log at warn level.
    *
-   * @param method  the method name.
-   * @param msg     the message to be written to the log.
+   * @param method   the method name.
+   * @param message  the message to be written to the log.
    */
-  public void warn(String method, String msg)
+  public void warn(final String method, final String message)
   {
     if ( logger != null && logger.isEnabledFor(Level.WARN) ) {
-      msg = format(method, msg);
-      logger.warn(msg);
+      logger.warn(format(method, message));
     }
   }
 
@@ -292,66 +280,64 @@ abstract public class XObject {
    * @param format  the message format string.
    * @param params  the message parameters.
    */
-  public void warn(String method, String format, Object... params)
+  public void warn(final String method, final String format,
+                   final Object... params)
   {
     if ( logger != null && logger.isEnabledFor(Level.WARN) ) {
-      String msg = format(method, format, params);
-      logger.warn(msg);
+      logger.warn(format(method, format, params));
     }
   }
 
   /**
    * Write a message to the log at warn level.
    *
-   * @param method  the method name.
-   * @param cause  the cause of the error.
-   * @param msg    the message to be written to the log.
+   * @param method   the method name.
+   * @param cause    the cause of the error.
+   * @param message  the message to be written to the log.
    */
-  public void warn(String method, Throwable cause, String msg)
+  public void warn(final String method, final Throwable cause, final String message)
   {
     if ( logger != null && logger.isEnabledFor(Level.WARN) ) {
-      msg = format(method, msg);
-      logger.warn(msg, cause);
+      logger.warn(format(method, message), cause);
     }
   }
 
   /**
    * Format and write a message to the log at warn level.
    *
-   * @param method  the method name.
-   * @param msg    the message to be written to the log.
-   * @param format  the message format string.
-   * @param params  the message parameters.
+   * @param method   the method name.
+   * @param message  the message to be written to the log.
+   * @param format   the message format string.
+   * @param params   the message parameters.
    */
-  public void warn(String method, Throwable cause, String format,
-		    Object... params)
+  public void warn(final String method, final Throwable cause,
+                   final String format, final Object... params)
   {
     if ( logger != null && logger.isEnabledFor(Level.WARN) ) {
-      String msg = format(method, format, params);
-      logger.warn(msg, cause);
+      logger.warn(format(method, format, params), cause);
     }
   }
 
   /**
    * Returns true if trace is enabled.
+   *
+   * @return true if trace is enabled.
    */
   public boolean traceEnabled()
   {
-    boolean result = logger != null ? logger.isTraceEnabled() : false;
-    return result;
+    return logger == null ? false : logger.isTraceEnabled();
   }
 
   /**
    * Write a message to the log at trace level.
    *
-   * @param method  the method name.
-   * @param msg     the message to display.
+   * @param method   the method name.
+   * @param message  the message to display.
    */
-  public void trace(String method, String msg)
+  public void trace(final String method, final String message)
   {
     if ( logger != null && logger.isTraceEnabled() ) {
-      msg = format(method, msg);
-      logger.trace(msg);
+      logger.trace(format(method, message));
     }
   }
 
@@ -360,11 +346,10 @@ abstract public class XObject {
    *
    * @param method  the method name.
    */
-  public void enter(String method)
+  public void enter(final String method)
   {
     if ( logger != null && logger.isTraceEnabled() ) {
-      String msg = format(method, "enter");
-      logger.trace(msg);
+      logger.trace(format(method, XLogger.ENTER));
     }
   }
 
@@ -373,11 +358,10 @@ abstract public class XObject {
    *
    * @param method  the method name.
    */
-  public void leave(String method)
+  public void leave(final String method)
   {
     if ( logger.isTraceEnabled() ) {
-      String msg = format(method, "leave");
-      logger.trace(msg);
+      logger.trace(format(method, XLogger.LEAVE));
     }
   }
 
@@ -387,12 +371,11 @@ abstract public class XObject {
    * @param method  the method name.
    * @param result  the method's return value.
    */
-  public void leave(String method, Object result)
+  public void leave(final String method, final Object result)
   {
     if ( logger != null && logger.isTraceEnabled() ) {
-      String s = result == null ? "null" : result.toString();
-      String msg = formatLeave(method, s);
-      logger.trace(msg);
+      logger.trace(formatLeave(method,
+	  result == null ? XLogger.NULLSTR : result.toString()));
     }
   }
 
@@ -402,27 +385,27 @@ abstract public class XObject {
    * @param method  the method name.
    * @param result  the method's return value.
    */
-  public void leave(String method, boolean result)
+  public void leave(final String method, final boolean result)
   {
     if ( logger != null && logger.isTraceEnabled() ) {
-      String msg = formatLeave(method, String.valueOf(result));
-      logger.trace(msg);
+      logger.trace(formatLeave(method, String.valueOf(result)));
     }
   }
 
   /**
    * Format a message with the class and method name inserted.
    *
-   * @param sb       the string builder for building the message.
+   * @param builder  the string builder for building the message.
    * @param method   the name of the method being traced.
    * @param message  the message to be included in the log entry.
    */
-  private void format(StringBuilder sb, String method, String message)
+  private void format(final StringBuilder builder, final String method,
+                      final String message)
   {
-    sb.append(method == null ? "<unknown>" : method);
-    sb.append(": ");
+    builder.append(method == null ? XLogger.UNKNOWN : method);
+    builder.append(": ");
     if ( message != null ) {
-      sb.append(message);
+      builder.append(message);
     }
   }
 
@@ -433,11 +416,11 @@ abstract public class XObject {
    * @param message  the message to be included in the log entry.
    * @return a formatted message.
    */
-  private String format(String method, String message)
+  private String format(final String method, final String message)
   {
-    StringBuilder sb = new StringBuilder(prefix);
-    format(sb, method, message);
-    return sb.toString();
+    final StringBuilder builder = new StringBuilder(prefix);
+    format(builder, method, message);
+    return builder.toString();
   }
 
   /**
@@ -448,13 +431,13 @@ abstract public class XObject {
    * @param result  the method's return value.
    * @return a formatted message.
    */
-  private String formatLeave(String method, String result)
+  private String formatLeave(final String method, final String result)
   {
-    StringBuilder sb = new StringBuilder(prefix);
-    format(sb, method, XLogger.leaveMsg);
-    sb.append(result == null ? "<null>" : result);
-    sb.append("]");
-    return sb.toString();
+    final StringBuilder builder = new StringBuilder(prefix);
+    format(builder, method, XLogger.LEAVE_MESSAGE);
+    builder.append(result == null ? XLogger.NULLBRK : result)
+    	   .append(']');
+    return builder.toString();
   }
 
   /**
@@ -466,17 +449,15 @@ abstract public class XObject {
    * @param params  the message parameters.
    * @return a formatted message.
    */
-  protected String format(String method, String format, Object... params)
+  protected String format(final String method, final String format,
+                          final Object... params)
   {
-    StringBuilder sb = new StringBuilder(prefix);
-    sb.append(method == null ? "<unknown>" : method);
-    sb.append(": ");
-    Formatter formatter = new Formatter(sb);
+    final StringBuilder builder = new StringBuilder(prefix);
+    builder.append(method == null ? XLogger.UNKNOWN : method)
+    	   .append(": ");
+    final Formatter formatter = new Formatter(builder);
     formatter.format(format, params);
     formatter.close();
-    return sb.toString();
+    return builder.toString();
   }
-
-  protected String prefix;
-  protected Logger logger;
 }

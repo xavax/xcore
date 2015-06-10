@@ -8,8 +8,6 @@ package com.xavax.base;
 
 import org.testng.annotations.Test;
 
-import com.xavax.base.XObject;
-
 /**
  * Test cast for XObject.
  *
@@ -17,14 +15,23 @@ import com.xavax.base.XObject;
  */
 public class TestXObject extends XObject {
 
+  /**
+   * Test the debug logging method.
+   */
   @Test
-  public void test()
+  public void testLogging()
   {
-    Example example = new Example();
+    final Example example = new Example();
     example.hello();
   }
 
+  /**
+   * Example is an example use of XObject.
+   */
   public class Example extends XObject {
+    /**
+     * Writes a "hello" message to the log at debug level.
+     */
     public void hello()
     {
       final String method = "hello";

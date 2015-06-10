@@ -10,14 +10,20 @@ package com.xavax.test;
  * 
  * @author alvitar@xavax.com
  */
-public class XTestUtils {
+public final class XTestUtils {
+
+  /**
+   * Private constructor provided to keep the compiler from generating
+   * a public default constructor.
+   */
+  private XTestUtils() {}
 
   /**
    * Sleep the specified number of milliseconds.
    * 
    * @param interval the amount of time in milliseconds to sleep.
    */
-  public static void sleep(long interval) {
+  public static void sleep(final long interval) {
     try {
       Thread.sleep(interval);
     }
