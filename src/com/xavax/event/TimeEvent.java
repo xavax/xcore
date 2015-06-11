@@ -6,14 +6,17 @@
 
 package com.xavax.event;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import com.xavax.util.Dates;
 
 /**
  * TimeEvent extends BasicEvent by adding a timestamp as well as a
  * general purpose "info" field that can store any object.
  */
 public class TimeEvent extends BasicEvent {
+
+  protected long timestamp;
+  protected Object info;
+
   /**
    * Construct a TimeEvent with the specified type.
    *
@@ -22,9 +25,7 @@ public class TimeEvent extends BasicEvent {
    */
   public TimeEvent(int type, Object info)
   {
-    super(type);
-    this.info = info;
-    this.timestamp = System.currentTimeMillis();
+    this(type, info, System.currentTimeMillis());
   }
 
   /**
@@ -88,16 +89,8 @@ public class TimeEvent extends BasicEvent {
    */
   public String toString()
   {
-    Date date = new Date(timestamp);
-    String d = formatter.format(date);
     String s = info != null ? info.toString() : "null";
-    String result = "TE(" + type + "," + d + "," + s + ")";
+    String result = "TE(" + type + "," + Dates.timestamp(timestamp) + "," + s + ")";
     return result;
   }
-
-  protected static SimpleDateFormat formatter =
-    new SimpleDateFormat("yyyy/MM/dd,HH:mm:ss.SSS");
-
-  protected long timestamp;
-  protected Object info;
 }
