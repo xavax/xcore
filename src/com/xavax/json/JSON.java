@@ -17,109 +17,126 @@ import com.xavax.util.CollectionFactory;
  * JSON represents a JSON object as nested hashmaps.
  */
 public class JSON extends HashMap<String, Object> {
+  private static final char RIGHT_BRACE = '}';
+  private static final char LEFT_BRACE = '{';
+  private static final char COLON = ':';
+  private static final char COMMA = ',';
+  public final static long serialVersionUID = 0;
+
   /**
-   * Format describes how a JSON should be formatted when converted to a string.
+   * Construct an empty JSON.
    */
-  public static class Format {
-    // Single line, no whitespace.
-    public final static Format COMPACT =
-	new Format(false, "", "'", "", "", "", "", "", "", "", "");
-    // Single line, some whitespace.
-    public final static Format EXPANDED =
-	new Format(false, "", "'", "", "", "", " ", " ", " ", " ", "");
-    // Multiple lines with whitespace.
-    public final static Format VERBOSE =
-	new Format(true, "", "'", "", "", "", "\n", " ", "\n", "\n", "");
-
-    public final boolean indent;
-    public final String quoteIdentifier;
-    public final String quoteString;
-    public final String preColon;
-    public final String preComma;
-    public final String preOpenBrace;
-    public final String preCloseBrace;
-    public final String postColon;
-    public final String postComma;
-    public final String postOpenBrace;
-    public final String postCloseBrace;
-
-    public Format(boolean indent, String quoteIdentifier, String quoteString,
-		  String preColon, String preComma, String preOpenBrace,
-		  String preCloseBrace, String postColon, String postComma,
-		  String postOpenBrace, String postCloseBrace) {
-      this.indent = indent;
-      this.quoteIdentifier = quoteIdentifier;
-      this.quoteString = quoteString;
-      this.preColon = preColon;
-      this.preComma = preComma;
-      this.preOpenBrace = preOpenBrace;
-      this.preCloseBrace = preCloseBrace;
-      this.postColon = postColon;
-      this.postComma = postComma;
-      this.postOpenBrace = postOpenBrace;
-      this.postCloseBrace = postCloseBrace;
-    }
-
-    public String indentation(int level) {
-      return indent ? tabs.substring(0, level) : "";
-    }
-
-    private final static String tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-  }
-
   public JSON() {
+    // Nothing to see here.
   }
 
-  public JSON(Map<String, Object> map) {
-    for (Map.Entry<String, Object> entry : map.entrySet()) {
+  /**
+   * Construct a JSON from the data in a map.
+   *
+   * @param map  a map to populate the new JSON
+   */
+  public JSON(final Map<String, Object> map) {
+    for ( final Map.Entry<String, Object> entry : map.entrySet()) {
       super.put(entry.getKey(), entry.getValue());
     }
   }
-  
-  public JSON(JSON json) {
-    for (Map.Entry<String, Object> entry : json.entrySet()) {
-      Object o = entry.getValue();
-      if ( o instanceof JSON ) {
-	o = new JSON((JSON) o);
+
+  /**
+   * Construct a JSON that is a copy of another JSON.
+   *
+   * @param json  the JSON to copy.
+   */
+  public JSON(final JSON json) {
+    for ( final Map.Entry<String, Object> entry : json.entrySet() ) {
+      Object object = entry.getValue();
+      if ( object instanceof JSON ) {
+	object = new JSON((JSON) object);
       }
-      else if ( o instanceof JSONArray ) {
-	o = new JSONArray((JSONArray) o);
+      else if ( object instanceof JSONArray ) {
+	object = new JSONArray((JSONArray) object);
       }
-      super.put(entry.getKey(), o);
+      super.put(entry.getKey(), object);
     }
   }
 
+  /**
+   * Create a new JSON.
+   * 
+   * @return a new JSON.
+   */
   public JSON create() {
     return new JSON();
   }
 
-  public JSON put(String key, Object value) {
+  /**
+   * Put a key:value pair into the JSON.
+   *
+   * @param key    the key for the value.
+   * @param value  the value to be inserted.
+   * @return this JSON.
+   */
+  public JSON put(final String key, final Object value) {
     super.put(key, value);
     return this;
   }
 
-  public JSON put(String key, Collection<Object> value) {
+  /**
+   * Put a key:value pair into the JSON.
+   *
+   * @param key    the key for the value.
+   * @param value  the value to be inserted.
+   * @return this JSON.
+   */
+  public JSON put(final String key, final Collection<Object> value) {
     super.put(key, new JSONArray(value));
     return this;
   }
 
-  public JSON put(String key, Object[] value) {
+  /**
+   * Put a key:value pair into the JSON.
+   *
+   * @param key    the key for the value.
+   * @param value  the value to be inserted.
+   * @return this JSON.
+   */
+  public JSON put(final String key, final Object... value) {
     super.put(key, new JSONArray(value));
     return this;
   }
 
-  public JSON put(String key, Map<String, Object> value) {
-    JSON json = new JSON(value);
+  /**
+   * Put a key:value pair into the JSON.
+   *
+   * @param key    the key for the value.
+   * @param value  the value to be inserted.
+   * @return this JSON.
+   */
+  public JSON put(final String key, final Map<String, Object> value) {
+    final JSON json = new JSON(value);
     super.put(key, json);
     return this;
   }
 
-  public JSON put(String key, JSON json) {
+  /**
+   * Put a key:value pair into the JSON.
+   *
+   * @param key   the key for the value.
+   * @param json  the value to be inserted.
+   * @return this JSON.
+   */
+  public JSON put(final String key, final JSON json) {
     super.put(key, json);
     return this;
   }
 
-  public JSON put(String key, JSONArray array) {
+  /**
+   * Put a key:value pair into the JSON.
+   *
+   * @param key    the key for the value.
+   * @param array  the value to be inserted.
+   * @return this JSON.
+   */
+  public JSON put(final String key, final JSONArray array) {
       super.put(key, array);
       return this;
   }
@@ -137,20 +154,20 @@ public class JSON extends HashMap<String, Object> {
    *          an array of integers to be used to index into arrays.
    * @return the value specified by path, or null if the path is not valid.
    */
-  public Object get(JSONPath path, int... params) {
+  public Object get(final JSONPath path, final int... params) {
     int count = 0;
     int level = 1;
-    int levels = path.size();
+    final int levels = path.size();
     Object result = null;
     JSON map = this;
-    for (String s : path) {
+    for ( final String s : path ) {
       result = map.get(s);
       if ( result instanceof JSON ) {
 	map = (JSON) result;
       }
       else if ( result instanceof JSONArray ) {
 	if ( level < levels ) {
-	  int index = params.length > count ? params[count++] : 0;
+	  final int index = params.length > count ? params[count++] : 0;
 	  result = ((JSONArray) result).get(index);
 	  if ( result instanceof JSON ) {
 	    map = (JSON) result;
@@ -179,225 +196,478 @@ public class JSON extends HashMap<String, Object> {
    * index parameters. The compiler cannot distinguish that from a call to
    * get(Object).
    */
-  public Object get(Object key) {
+  public Object get(final Object key) {
     return key instanceof JSONPath ? get((JSONPath) key, 0) : super.get(key);
   }
 
-  public JSONArray getArray(String key) {
-    Object o = get(key);
-    return o != null && o instanceof JSONArray ? (JSONArray) o : null;
+  /**
+   * Returns the array field with the specified name.
+   *
+   * @param key  the name of the array field to get.
+   * @return the array field with the specified name.
+   */
+  public JSONArray getArray(final String key) {
+    final Object object = get(key);
+    return object != null && object instanceof JSONArray ? (JSONArray) object : null;
   }
 
-  public JSONArray getArray(JSONPath path, int... params) {
-    Object o = get(path, params);
-    return o != null && o instanceof JSONArray ? (JSONArray) o : null;
+  /**
+   * Returns the array field at the specified path.
+   *
+   * @param path    the path of the array field.
+   * @param params  the parameters to use while traversing the path.
+   * @return the array field at the specified path.
+   */
+  public JSONArray getArray(final JSONPath path, final int... params) {
+    final Object object = get(path, params);
+    return object != null && object instanceof JSONArray ? (JSONArray) object : null;
   }
 
-  private Boolean getBoolean(Object o) {
+  /**
+   * Convert a field to a Boolean if necessary.
+   *
+   * @param object  the value to convert.
+   * @return a value converted to a Boolean.
+   */
+  private Boolean getBoolean(final Object object) {
     Boolean result = null;
-    if ( o instanceof Boolean ) {
-      result = (Boolean) o;
+    if ( object instanceof Boolean ) {
+      result = (Boolean) object;
     }
-    else if ( o instanceof String ) {
-      result = Boolean.valueOf((String) o);
+    else if ( object instanceof String ) {
+      result = Boolean.valueOf((String) object);
     }
     return result;
   }
 
-  public Boolean getBoolean(String key) {
+  /**
+   * Return the boolean field with the specified key.
+   *
+   * @param key  the name of the field.
+   * @return a boolean field.
+   */
+  public Boolean getBoolean(final String key) {
     return getBoolean(get(key));
   }
 
-  public Boolean getBoolean(JSONPath path, int... params) {
+  /**
+   * Get the boolean field with the specified name. If the field is missing
+   * or null, return the specified default value.
+   *
+   * @param key  the name of the field.
+   * @param defaultValue  the value to return if the field is null.
+   * @return the boolean field with the specified name.
+   */
+  public boolean getBoolean(final String key, final boolean defaultValue) {
+    final Boolean flag = getBoolean(key);
+    return flag == null ? defaultValue : flag.booleanValue();
+  }
+
+  /**
+   * Get the boolean field at the specified path.
+   *
+   * @param path    the path of the specified field.
+   * @param params  the parameters to use when traversing the path.
+   * @return the boolean field at the specified path.
+   */
+  public Boolean getBoolean(final JSONPath path, final int... params) {
     return getBoolean(get(path, params));
   }
 
-  public boolean getBoolean(String key, boolean defaultValue) {
-    Boolean b = getBoolean(key);
-    return b == null ? defaultValue : b.booleanValue();
-  }
-
-  private Double getDouble(Object o) {
+  /**
+   * Convert a value to a Double if necessary.
+   *
+   * @param value  the value to be converted.
+   * @return a value converted to a Double.
+   */
+  private Double getDouble(final Object value) {
     Double result = null;
-    if ( o instanceof Double ) {
-      result = (Double) o;
+    if ( value instanceof Double ) {
+      result = (Double) value;
     }
-    else if ( o instanceof String ) {
-      result = Double.valueOf((String) o);
+    else if ( value instanceof String ) {
+      result = Double.valueOf((String) value);
     }
     return result;
   }
 
-  public Double getDouble(String key) {
+  /**
+   * Get the double field with the specified name.
+   *
+   * @param key  the name of the field.
+   * @return the double field with the specified name.
+   */
+  public Double getDouble(final String key) {
     return getDouble(get(key));
   }
 
-  public Double getDouble(JSONPath path, int... params) {
+  /**
+   * Get the double field with the specified name. If the field is missing
+   * or null, return the specified default value.
+   *
+   * @param key  the name of the field.
+   * @param defaultValue  the value to return if the field is null.
+   * @return the double field with the specified name.
+   */
+  public double getDouble(final String key, final double defaultValue) {
+    final Double value = getDouble(key);
+    return value == null ? defaultValue : value.doubleValue();
+  }
+
+  /**
+   * Get the double field at the specified path.
+   *
+   * @param path    the path of the specified field.
+   * @param params  the parameters to use when traversing the path.
+   * @return the double field at the specified path.
+   */
+  public Double getDouble(final JSONPath path, final int... params) {
     return getDouble(get(path, params));
   }
 
-  public double getDouble(String key, double defaultValue) {
-    Double d = getDouble(key);
-    return d == null ? defaultValue : d.doubleValue();
-  }
-
-  private Long getLong(Object o) {
+  /**
+   * Convert a value to a Long if necessary.
+   *
+   * @param object  the object to convert.
+   * @return a value converted to a long.
+   */
+  private Long getLong(final Object object) {
     Long result = null;
-    if ( o instanceof Long ) {
-      result = (Long) o;
+    if ( object instanceof Long ) {
+      result = (Long) object;
     }
-    else if ( o instanceof String ) {
-      result = Long.valueOf((String) o);
+    else if ( object instanceof String ) {
+      result = Long.valueOf((String) object);
     }
     return result;
   }
 
-  public Long getLong(String key) {
+  /**
+   * Get the long field with the specified name.
+   *
+   * @param key  the name of the field.
+   * @return the long field with the specified name.
+   */
+  public Long getLong(final String key) {
     return getLong(get(key));
   }
 
-  public Long getLong(JSONPath path, int... params) {
+  /**
+   * Get the long field with the specified name. If the field is missing
+   * or null, return the specified default value.
+   *
+   * @param key  the name of the field.
+   * @param defaultValue  the value to return if the field is null.
+   * @return the long field with the specified name.
+   */
+  public long getLong(final String key, final long defaultValue) {
+    final Long value = getLong(key);
+    return value == null ? defaultValue : value.longValue();
+  }
+
+  /**
+   * Get the long field at the specified path.
+   *
+   * @param path    the path of the specified field.
+   * @param params  the parameters to use when traversing the path.
+   * @return the long field at the specified path.
+   */
+  public Long getLong(final JSONPath path, final int... params) {
     return getLong(get(path, params));
   }
 
-  public long getLong(String key, long defaultValue) {
-    Long l = getLong(key);
-    return l == null ? defaultValue : l.longValue();
-  }
-
-  private String getString(Object o) {
+  /**
+   * Convert an object to a string if necessary.
+   *
+   * @param object  the object to convert.
+   * @return the object converted to a string.
+   */
+  private String getString(final Object object) {
     String result = null;
-    if ( o instanceof String ) {
-      result = (String) o;
+    if ( object instanceof String ) {
+      result = (String) object;
     }
-    else if ( o != null ) {
-      result = o.toString();
+    else if ( object != null ) {
+      result = object.toString();
     }
     return result;
   }
 
-  public String getString(String key) {
+  /**
+   * Get the string field with the specified name.
+   *
+   * @param key  the name of the field.
+   * @return the string field with the specified name.
+   */
+  public String getString(final String key) {
     return getString(get(key));
   }
 
-  public String getString(JSONPath path, int... params) {
+  /**
+   * Get the string field with the specified name. If the field is missing
+   * or null, return the specified default value.
+   *
+   * @param key  the name of the field.
+   * @param defaultValue  the value to return if the field is null.
+   * @return the string field with the specified name.
+   */
+  public String getString(final String key, final String defaultValue) {
+    final String string = getString(key);
+    return string == null ? defaultValue : string;
+  }
+
+  /**
+   * Get the string field at the specified path.
+   *
+   * @param path    the path of the specified field.
+   * @param params  the parameters to use when traversing the path.
+   * @return the string field at the specified path.
+   */
+  public String getString(final JSONPath path, final int... params) {
     return getString(get(path, params));
   }
 
-  public String getString(String key, String defaultValue) {
-    String s = getString(key);
-    return s == null ? defaultValue : s;
+  /**
+   * Get the embedded JSON object with the specified name.
+   *
+   * @param key  the name of the object.
+   * @return the embedded JSON object with the specified name.
+   */
+  public JSON getJSON(final String key) {
+    final Object object = get(key);
+    return object != null && object instanceof JSON ? (JSON) object : null;
   }
 
-  public JSON getJSON(String key) {
-    Object o = get(key);
-    return o != null && o instanceof JSON ? (JSON) o : null;
+  /**
+   * Get an embedded JSON object at the specified path.
+   *
+   * @param path    the path of the object.
+   * @param params  the parameters to use while traversing the path.
+   * @return the embedded JSON object at the specified path.
+   */
+  public JSON getJSON(final JSONPath path, final int... params) {
+    final Object object = get(path, params);
+    return object != null && object instanceof JSON ? (JSON) object : null;
   }
 
-  public JSON getJSON(JSONPath path, int... params) {
-    Object o = get(path, params);
-    return o != null && o instanceof JSON ? (JSON) o : null;
-  }
-
+  /**
+   * Return a hash map that is a flattened version of this JSON.
+   * Any arrays or objects will be represented as a string in
+   * JSON format.
+   *
+   * @return a hash map representing a flattened JSON.
+   */
   public Map<String, String> flatten() {
-    Map<String, String> result = CollectionFactory.hashMap();
-    for (Map.Entry<String, Object> entry : entrySet()) {
-      Object value = entry.getValue();
+    final Map<String, String> result = CollectionFactory.hashMap();
+    for ( final Map.Entry<String, Object> entry : entrySet()) {
+      final Object value = entry.getValue();
       result.put(entry.getKey(), value == null ? null : value.toString());
     }
     return result;
   }
 
-  public JSON merge(JSON json) {
-    for (Map.Entry<String, Object> entry : json.entrySet()) {
-      String key = entry.getKey();
-      Object o = entry.getValue();
-      if ( o instanceof JSON ) {
-	Object target = get(key);
+  /**
+   * Merge a JSON into this JSON.
+   *
+   * @param json  the JSON to merge into this JSON.
+   * @return this JSON.
+   */
+  public JSON merge(final JSON json) {
+    for ( final Map.Entry<String, Object> entry : json.entrySet()) {
+      final String key = entry.getKey();
+      Object object = entry.getValue();
+      if ( object instanceof JSON ) {
+	final Object target = get(key);
 	if ( target instanceof JSON ) {
-	  ((JSON) target).merge((JSON) o);
+	  ((JSON) target).merge((JSON) object);
 	}
 	else {
-	  o = new JSON((JSON) o);
-	  super.put(key, o);
+	  object = new JSON((JSON) object);
+	  super.put(key, object);
 	}
       }
-      else if ( o instanceof JSONArray ) {
-	Object target = get(key);
+      else if ( object instanceof JSONArray ) {
+	final Object target = get(key);
 	if ( target instanceof JSONArray ) {
-	  ((JSONArray) target).addAll((JSONArray) o);
+	  ((JSONArray) target).addAll((JSONArray) object);
 	}
 	else {
-	  o = new JSONArray((JSONArray) o);
-	  super.put(key, o);
+	  object = new JSONArray((JSONArray) object);
+	  super.put(key, object);
 	}
       }
       else {
-	super.put(key, o);
+	super.put(key, object);
       }
     }
     return this;
   }
 
+  /**
+   * Returns a compact string representation of this JSON.
+   *
+   * @return a compact string representation of this JSON.
+   */
+  @Override
   public String toString() {
     return toString(Format.COMPACT);
   }
 
-  public String toString(Format format) {
-    StringBuilder sb = new StringBuilder();
+  /**
+   * Return a string representation of this JSON formatted according
+   * to the specified format.
+   *
+   * @param format
+   * @return a string representation of this JSON.
+   */
+  public String toString(final Format format) {
+    final StringBuilder builder = new StringBuilder();
     // sb.append("{").append(format.postOpenBrace);
-    toString(sb, format, 0);
+    toString(builder, format, 0);
     // sb.append(format.preCloseBrace).append("}");
-    return sb.toString();
+    return builder.toString();
   }
 
-  public void toString(StringBuilder sb, Format format, int level) {
-    String indentation = format.indentation(level++);
-    String innerIndentation = format.indentation(level);
-    sb.append(format.preOpenBrace).append("{");
+  /**
+   * Create a string representation of this JSON formatted according
+   * to the specified format using an existing string builder.
+   *
+   * @param builder      the string builder.
+   * @param format       the format.
+   * @param indentLevel  the initial indentation level.
+   */
+  public void toString(final StringBuilder builder, final Format format,
+                       final int indentLevel) {
+    int level = indentLevel;
+    final String indentation = format.indentation(level++);
+    final String innerIndentation = format.indentation(level);
+    builder.append(format.preOpenBrace).append(LEFT_BRACE);
     if ( entrySet().size() > 0 ) {
-      sb.append(format.postOpenBrace);
+      builder.append(format.postOpenBrace);
       boolean first = true;
-      for (Map.Entry<String, Object> entry : entrySet()) {
+      for ( final Map.Entry<String, Object> entry : entrySet()) {
 	if ( first ) {
 	  first = false;
 	}
 	else {
-	  sb.append(format.preComma).append(",").append(format.postComma);
+	  builder.append(format.preComma).append(COMMA).append(format.postComma);
 	}
-	sb.append(innerIndentation);
-	sb.append(format.quoteIdentifier).append(entry.getKey())
+	builder.append(innerIndentation);
+	builder.append(format.quoteIdentifier).append(entry.getKey())
 	    .append(format.quoteIdentifier);
-	sb.append(format.preColon).append(":").append(format.postColon);
-	Object value = entry.getValue();
-	appendValue(sb, format, level, value);
+	builder.append(format.preColon).append(COLON).append(format.postColon);
+	final Object value = entry.getValue();
+	appendValue(builder, format, level, value);
       }
-      sb.append(format.preCloseBrace).append(indentation);
+      builder.append(format.preCloseBrace).append(indentation);
     }
-    sb.append("}").append(format.postCloseBrace);
+    builder.append(RIGHT_BRACE).append(format.postCloseBrace);
   }
 
-  public static void appendValue(StringBuilder sb, Format format, int level,
-				 Object value) {
+  /**
+   * Append a JSON field value to the builder.
+   *
+   * @param builder  the string builder used for output.
+   * @param format   the format for formatting the JSON.
+   * @param level    the indentation level.
+   * @param value    the value to append.
+   */
+  public static void appendValue(final StringBuilder builder, final Format format,
+                                 final int level, final Object value) {
     if ( value instanceof JSON ) {
-      ((JSON) value).toString(sb, format, level);
+      ((JSON) value).toString(builder, format, level);
     }
     else if ( value instanceof JSONArray ) {
-      ((JSONArray) value).toString(sb, format, level);
+      ((JSONArray) value).toString(builder, format, level);
     }
     else if ( value instanceof String ) {
-      String s = StringEscapeUtils.escapeEcmaScript((String) value);
-      sb.append(format.quoteString).append(s).append(format.quoteString);
+      final String string = StringEscapeUtils.escapeEcmaScript((String) value);
+      builder.append(format.quoteString).append(string).append(format.quoteString);
     }
     else {
-      sb.append(value);
+      builder.append(value);
     }
   }
 
+  /**
+   * Return this JSON as an array of bytes.
+   *
+   * @return this JSON as an array of bytes.
+   */
   public byte[] getBytes() {
-    String s = toString();
-    return s.getBytes();
+    return toString().getBytes();
   }
 
-  public final static long serialVersionUID = 0;
+  /**
+   * Format describes how a JSON should be formatted when converted to a string.
+   */
+  public static class Format {
+    private final static String TABS = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+
+    // Single line, no whitespace.
+    public final static Format COMPACT =
+	new Format(false, "", "'", "", "", "", "", "", "", "", "");
+    // Single line, some whitespace.
+    public final static Format EXPANDED =
+	new Format(false, "", "'", "", "", "", " ", " ", " ", " ", "");
+    // Multiple lines with whitespace.
+    public final static Format VERBOSE =
+	new Format(true, "", "'", "", "", "", "\n", " ", "\n", "\n", "");
+
+    public final boolean indent;
+    public final String quoteIdentifier;
+    public final String quoteString;
+    public final String preColon;
+    public final String preComma;
+    public final String preOpenBrace;
+    public final String preCloseBrace;
+    public final String postColon;
+    public final String postComma;
+    public final String postOpenBrace;
+    public final String postCloseBrace;
+
+    /**
+     * Construct a Format.
+     *
+     * @param indent		true if output should be indented.
+     * @param quoteIdentifier	string used to quote identifiers.
+     * @param quoteString	string used to quote strings.
+     * @param preColon		string that precedes a colon.
+     * @param preComma		string that precedes a comma.
+     * @param preOpenBrace	string that precedes an opening brace.
+     * @param preCloseBrace	string that precedes a closing brace.
+     * @param postColon		string that follows a colon.
+     * @param postComma		string that follows a comma.
+     * @param postOpenBrace	string that follows an opening brace.
+     * @param postCloseBrace	string that follows a closing brace.
+     */
+    @SuppressWarnings("PMD.ExcessiveParameterList")
+    public Format(final boolean indent, final String quoteIdentifier, final String quoteString,
+                  final String preColon, final String preComma, final String preOpenBrace,
+                  final String preCloseBrace, final String postColon, final String postComma,
+                  final String postOpenBrace, final String postCloseBrace) {
+      this.indent = indent;
+      this.quoteIdentifier = quoteIdentifier;
+      this.quoteString = quoteString;
+      this.preColon = preColon;
+      this.preComma = preComma;
+      this.preOpenBrace = preOpenBrace;
+      this.preCloseBrace = preCloseBrace;
+      this.postColon = postColon;
+      this.postComma = postComma;
+      this.postOpenBrace = postOpenBrace;
+      this.postCloseBrace = postCloseBrace;
+    }
+
+    /**
+     * Returns a string containing the specified number of tabs to use
+     * for indentation.
+     *
+     * @param level  the indentation level.
+     * @return a string of tabs for indentation.
+     */
+    public String indentation(final int level) {
+      return indent ? TABS.substring(0, level) : "";
+    }
+  }
 }

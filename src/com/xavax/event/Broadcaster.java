@@ -17,14 +17,14 @@ public interface Broadcaster {
    * @param type  the event type to be observed.
    * @param observer  the observer to be notified of events.
    */
-  public void attach(int type, Observer observer);
+  void attach(int type, Observer observer);
 
   /**
    * Broadcast an event to the observers of the event type.
    *
    * @param event   the event to be broadcast.
    */
-  public void broadcast(Event event);
+  void broadcast(Event event);
 
   /**
    * Detach an observer from this broadcaster's list of observers.
@@ -32,5 +32,5 @@ public interface Broadcaster {
    * @param type  the event type being observed.
    * @param observer  the observer to be detached.
    */
-  public void detach(int type, Observer observer);
+  void detach(int type, Observer observer);
 }
