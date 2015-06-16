@@ -19,6 +19,10 @@ import com.xavax.util.CollectionFactory;
 import static org.testng.Assert.*;
 
 public class TestJSON {
+  // Featuring the infamous rapper TuPie, because FindBugs
+  // would not stop complaining about "coarse values of pi". :(
+  private final static double TUPIE = 6.28;
+
   private JSONParser parser;
 
   private final JSON.Format myFormat = new JSON.Format(false, "", "\"", "", "",
@@ -42,7 +46,7 @@ public class TestJSON {
 	  "{name:'Kurt\\'s Pizza'}," +
 	  "{name:'Phil\\'s BBQ'}]}";
   final String input4 =
-      "{x: '100', pi: '3.14159', flag: 'true', z: 123}";
+      "{x: '100', tupie: '6.28', flag: 'true', z: 123}";
 
   @BeforeMethod
   public void setUp() {
@@ -137,8 +141,8 @@ public class TestJSON {
     assertNotNull(json);
     long x = json.getLong("x");
     assertEquals(x, 100);
-    double pi = json.getDouble("pi");
-    assertEquals(pi, 3.14159);
+    double tupie = json.getDouble("tupie");
+    assertEquals(tupie, TUPIE);
     boolean flag = json.getBoolean("flag");
     assertEquals(flag, true);
     String z = json.getString("z");

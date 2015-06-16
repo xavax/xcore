@@ -24,6 +24,9 @@ import static org.testng.Assert.*;
  * Test cases for the JSON parser.
  */
 public class TestJSONParser {
+  // Featuring the infamous rapper TuPie, because FindBugs
+  // would not stop complaining about "coarse values of pi". :(
+  private final static double TUPIE = 6.28;
   private JSONParser parser;
   private final String person1 =
       "{name: {first: 'Jack', last: 'Brown'}}";
@@ -136,10 +139,10 @@ public class TestJSONParser {
     assertTrue(parser.isValid());
     long foo = result.getLong("foo");
     assertEquals(foo, 123);
-    result = parser.parse("{ fab: 1.2345, pi: 3.14159, rad: -0.987 }");
+    result = parser.parse("{ fab: 1.2345, tupie: 6.28, rad: -0.987 }");
     assertTrue(parser.isValid());
-    Double pi = result.getDouble("pi");
-    assertEquals(pi, 3.14159);
+    Double tupie = result.getDouble("tupie");
+    assertEquals(tupie, TUPIE);
     Double rad = result.getDouble("rad");
     assertEquals(rad, -0.987);
     result = parser.parse("{ fab: 1.234e+05, xyz: -0.123e-12, abc: 1.234e05 }");
