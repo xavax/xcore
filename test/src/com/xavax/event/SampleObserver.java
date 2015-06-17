@@ -5,23 +5,22 @@
 //
 package com.xavax.event;
 
-import com.xavax.event.Broadcaster;
-import com.xavax.event.Event;
-import com.xavax.event.Observer;
-
 /**
  * SampleObserver is used by the event package test cases.
  *
  * @author alvitar@xavax.com
  */
 public class SampleObserver implements Observer {
+  private int count;
+  final private int type;
+
   /**
    * Construct a SampleObserver.
    *
    * @param type  the type of event to observe.
    * @param source  the broadcaster.
    */
-  public SampleObserver(Broadcaster source, int type)
+  public SampleObserver(final Broadcaster source, final int type)
   {
     this.type = type;
     count = 0;
@@ -33,9 +32,9 @@ public class SampleObserver implements Observer {
    *
    * @param event  the event being broadcast.
    */
-  public void notify(Event event)
+  public void notify(final Event event)
   {
-    int type = event.type();
+    final int type = event.type();
     if ( type == this.type ) {
       ++count;
     }
@@ -58,7 +57,4 @@ public class SampleObserver implements Observer {
   {
     count = 0;
   }
-
-  private int type;
-  private int count;
 }

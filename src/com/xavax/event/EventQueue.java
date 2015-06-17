@@ -12,12 +12,14 @@ import java.util.Map;
 import com.xavax.util.CollectionFactory;
 
 /**
- * EventQueue manages a queue of events. Rather than broadcasting the
- * events to a list of observers, EventQueue saves the event in a FIFO
- * queue until a client requests the next event of a specific type.
- * EventQueue maintains a map of FIFO queues keyed by the event type.
+ * EventQueue manages a queue of events. Rather than broadcasting the events to
+ * a list of observers, EventQueue saves the event in a FIFO queue until a
+ * client requests the next event of a specific type. EventQueue maintains a map
+ * of FIFO queues keyed by the event type.
  */
 public class EventQueue {
+  protected Map<Integer, List<Event>> eventMap;
+
   /**
    * Construct an EventQueue.
    */
@@ -27,50 +29,47 @@ public class EventQueue {
   }
 
   /**
-   * Enqueue an event. The event becomes the tail of a FIFO queue
-   * of events of the same type.
+   * Enqueue an event. The event becomes the tail of a FIFO queue of events of
+   * the same type.
    *
-   * @param event  the event to be enqueued.
+   * @param event the event to be enqueued.
    */
-  public void enqueue(Event event)
+  public void enqueue(final Event event)
   {
     if ( event != null ) {
-      if ( eventMap == null ) {
-	eventMap = CollectionFactory.hashMap();
-      }
-      Integer t = new Integer(event.type());
-      synchronized (this) {
-	List<Event> l = eventMap.get(t);
-	if ( l == null ) {
-	  l = CollectionFactory.linkedList();
-	  eventMap.put(t, l);
+      final Integer key = new Integer(event.type());
+      synchronized ( this ) {
+	if ( eventMap == null ) {
+	  eventMap = CollectionFactory.hashMap();
 	}
-	l.add(event);
+	List<Event> observers = eventMap.get(key);
+	if ( observers == null ) {
+	  observers = CollectionFactory.linkedList();
+	  eventMap.put(key, observers);
+	}
+	observers.add(event);
       }
     }
   }
 
   /**
-   * Dequeue and return an event of the specified type. The head of
-   * the FIFO queue of events of the specified type is removed from
-   * the queue and returned. If there are no events in the queue,
-   * return null.
+   * Dequeue and return an event of the specified type. The head of the FIFO
+   * queue of events of the specified type is removed from the queue and
+   * returned. If there are no events in the queue, return null.
    *
-   * @param  type  the type of event to dequeue.
-   * @return an event of the specified type, or null if there are no
-   *         events waiting in the queue.
+   * @param type the type of event to dequeue.
+   * @return an event of the specified type, or null if there are no events
+   *         waiting in the queue.
    */
-  public Event dequeue(int type)
+  public Event dequeue(final int type)
   {
     Event result = null;
-    if ( eventMap != null ) {
-      Integer t = new Integer(type);
-      synchronized (this) {
-	List<Event> l = eventMap.get(t);
-	if ( l != null ) {
-	  if ( !l.isEmpty() ) {
-	    result = (Event) l.remove(0);
-	  }
+    final Integer key = new Integer(type);
+    synchronized ( this ) {
+      if ( eventMap != null ) {
+	final List<Event> observers = eventMap.get(key);
+	if ( observers != null && !observers.isEmpty() ) {
+	  result = (Event) observers.remove(0);
 	}
       }
     }
@@ -80,14 +79,14 @@ public class EventQueue {
   /**
    * Flush all events of the specified type.
    *
-   * @param  type  the type of event to dequeue.
+   * @param type the type of event to dequeue.
    */
-  public void flush(int type)
+  public void flush(final int type)
   {
     if ( eventMap != null ) {
-      synchronized (this) {
-	Integer t = new Integer(type);
-	eventMap.remove(t);
+      synchronized ( this ) {
+	final Integer key = new Integer(type);
+	eventMap.remove(key);
       }
     }
   }
@@ -97,10 +96,8 @@ public class EventQueue {
    */
   public void flush()
   {
-    synchronized (this) {
+    synchronized ( this ) {
       eventMap = null;
     }
   }
-
-  protected Map<Integer,List<Event>> eventMap;
 }

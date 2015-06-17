@@ -19,6 +19,8 @@ import com.xavax.util.CollectionFactory;
  * <i>List</i> of observers for that event type.
  */
 public class BroadcastHelper implements Broadcaster {
+  protected Map<Integer,List<Observer>> observerMap;
+
   /**
    * Construct a BroadcastHelper.
    */
@@ -33,19 +35,19 @@ public class BroadcastHelper implements Broadcaster {
    * @param type  the event type to be observed.
    * @param observer  the observer to be attached.
    */
-  public void attach(int type, Observer observer)
+  public void attach(final int type, final Observer observer)
   {
-    if ( observerMap == null ) {
-      observerMap = CollectionFactory.treeMap();
-    }
-    Integer t = new Integer(type);
+    final Integer key = new Integer(type);
     synchronized (this) {
-      List<Observer> l = observerMap.get(t);
-      if ( l == null ) {
-	l = CollectionFactory.arrayList();
-	observerMap.put(t, l);
+      if ( observerMap == null ) {
+	observerMap = CollectionFactory.treeMap();
       }
-      l.add(observer);
+      List<Observer> observers = observerMap.get(key);
+      if ( observers == null ) {
+	observers = CollectionFactory.arrayList();
+	observerMap.put(key, observers);
+      }
+      observers.add(observer);
     }
   }
 
@@ -55,14 +57,14 @@ public class BroadcastHelper implements Broadcaster {
    * @param type  the event type being observed.
    * @param observer  the observer to be detached.
    */
-  public void detach(int type, Observer observer)
+  public void detach(final int type, final Observer observer)
   {
     if ( observerMap != null ) {
-      Integer t = new Integer(type);
+      final Integer key = new Integer(type);
       synchronized (this) {
-	List<Observer> l = observerMap.get(t);
-	if ( l != null ) {
-	  l.remove(observer);
+	final List<Observer> observers = observerMap.get(key);
+	if ( observers != null ) {
+	  observers.remove(observer);
 	}
       }
     }
@@ -73,15 +75,15 @@ public class BroadcastHelper implements Broadcaster {
    *
    * @param event   the event to be broadcast.
    */
-  public void broadcast(Event event)
+  public void broadcast(final Event event)
   {
     if ( observerMap != null ) {
-      int type = event.type();
-      Integer t = new Integer(type);
+      final int type = event.type();
+      final Integer key = new Integer(type);
       synchronized (this) {
-	List<Observer> list = observerMap.get(t);
-	if ( list != null ) {
-	  for ( Observer observer : list ) {
+	final List<Observer> observers = observerMap.get(key);
+	if ( observers != null ) {
+	  for ( final Observer observer : observers ) {
 	    observer.notify(event);
 	  }
 	}
@@ -96,7 +98,7 @@ public class BroadcastHelper implements Broadcaster {
    * @param source  the broadcaster source.
    * @param event   the event to be broadcast.
    */
-  public void broadcast(Broadcaster source, Event event)
+  public void broadcast(final Broadcaster source, final Event event)
   {
     event.source(source);
     broadcast(event);
@@ -108,11 +110,8 @@ public class BroadcastHelper implements Broadcaster {
    * @param source  the broadcaster source.
    * @param type    the type of event to be broadcast.
    */
-  public void broadcast(Broadcaster source, int type)
+  public void broadcast(final Broadcaster source, final int type)
   {
-    Event event = new BasicEvent(type);
-    broadcast(source, event);
+    broadcast(source, new BasicEvent(type));
   }
-
-  protected Map<Integer,List<Observer>> observerMap;
 }

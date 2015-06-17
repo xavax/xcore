@@ -17,5 +17,5 @@ public interface Observer {
    *
    * @param event  the event being broadcast.
    */
-  public void notify(Event event);
+  void notify(Event event);
 }

@@ -14,6 +14,10 @@ import com.xavax.util.Dates;
  */
 public class TimeEvent extends BasicEvent {
 
+  private final static char COMMA = ',';
+  private final static char RIGHT_PAREN = ')';
+  private final static String NULLSTR = "null";
+
   protected long timestamp;
   protected Object info;
 
@@ -23,7 +27,7 @@ public class TimeEvent extends BasicEvent {
    * @param type  the type of this event.
    * @param info  arbitrary object to associate with this event.
    */
-  public TimeEvent(int type, Object info)
+  public TimeEvent(final int type, final Object info)
   {
     this(type, info, System.currentTimeMillis());
   }
@@ -35,7 +39,7 @@ public class TimeEvent extends BasicEvent {
    * @param info  arbitrary object to associate with this event.
    * @param timestamp  the timestamp for this event.
    */
-  public TimeEvent(int type, Object info, long timestamp)
+  public TimeEvent(final int type, final Object info, final long timestamp)
   {
     super(type);
     this.info = info;
@@ -57,7 +61,7 @@ public class TimeEvent extends BasicEvent {
    *
    * @param info  arbitrary object to associate with this event.
    */
-  public void info(Object info)
+  public void info(final Object info)
   {
     this.info = info;
   }
@@ -77,7 +81,7 @@ public class TimeEvent extends BasicEvent {
    *
    * @param timestamp  the timestamp of this event.
    */
-  public void timestamp(long timestamp)
+  public void timestamp(final long timestamp)
   {
     this.timestamp = timestamp;
   }
@@ -89,8 +93,7 @@ public class TimeEvent extends BasicEvent {
    */
   public String toString()
   {
-    String s = info != null ? info.toString() : "null";
-    String result = "TE(" + type + "," + Dates.timestamp(timestamp) + "," + s + ")";
-    return result;
+    return "TE(" + type + COMMA + Dates.timestamp(timestamp) +
+	COMMA + (info == null ? NULLSTR : info.toString()) + RIGHT_PAREN;
   }
 }

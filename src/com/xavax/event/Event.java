@@ -16,19 +16,19 @@ public interface Event {
    *
    * @return the type of this event.
    */
-  public int type();
+  int type();
 
   /**
    * Returns the source of this event.
    *
    * @return the source of this event.
    */
-  public Broadcaster source();
+  Broadcaster source();
 
   /**
    * Sets the source of this event.
    *
    * @param source  the source of this event.
    */
-  public void source(Broadcaster source);
+  void source(Broadcaster source);
 }

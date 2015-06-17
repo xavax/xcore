@@ -6,78 +6,65 @@
 package com.xavax.event;
 
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
-
-import com.xavax.event.BasicEvent;
-import com.xavax.event.BroadcastHelper;
-import com.xavax.event.Broadcaster;
-import com.xavax.event.EventQueue;
-import com.xavax.event.TimeEvent;
 
 import static org.testng.Assert.*;
 
 /**
  * Test cases for classes in the event package.
- *
- * @author alvitar@xavax.com
  */
 public class TestEventHandling  {
 
-  @BeforeMethod
-  public void setUp()
-  {}
-
+  /**
+   * Test Event methods.
+   */
   @Test
   public void testEvents()
   {
-    broadcaster = new BroadcastHelper();
-
-    event = new BasicEvent[5];
-    observer = new SampleObserver[5];
+    final Broadcaster broadcaster = new BroadcastHelper();
+    final BasicEvent[] event = new BasicEvent[5];
+    final SampleObserver[] observer = new SampleObserver[5];
     for ( int i= 0; i < 5; ++i ) {
       observer[i] = new SampleObserver(broadcaster, i+1);
       event[i] = new BasicEvent(i+1);
     }
-    int maxCount = 10;
+    final int maxCount = 10;
     for ( int i = 0; i < maxCount; ++i ) {
       for ( int j = 0; j < 5; ++j ) {
 	broadcaster.broadcast(event[j]);
       }
     }
     for ( int i = 0; i < 5; ++i ) {
-      int count = observer[i].count();
+      final int count = observer[i].count();
       assertEquals(maxCount, count);
     }
   }
 
+  /**
+   * Test event queues.
+   */
   @Test
   public void testEventQueue()
   {
-    int maxCount = 10;
-    TimeEvent e = null;
-    EventQueue eq = new EventQueue();
+    final int maxCount = 10;
+    TimeEvent event = null;
+    final EventQueue queue = new EventQueue();
     for ( int i = 0; i < maxCount; ++i ) {
-      Integer info = new Integer(i);
+      final Integer info = new Integer(i);
       for ( int j = 0; j < 5; ++j ) {
-	e = new TimeEvent(j, info);
-	eq.enqueue(e);
+	event = new TimeEvent(j, info);
+	queue.enqueue(event);
       }
     }
-    for ( int j = 0; j < 5; ++j ) {
-      int i = 0;
+    for ( int i = 0; i < 5; ++i ) {
+      int count = 0;
       do {
-	e = (TimeEvent) eq.dequeue(j);
-	if ( e != null ) {
-	  int type = e.type();
-	  assertEquals(type, j);
-	  ++i;
+	event = (TimeEvent) queue.dequeue(i);
+	if ( event != null ) {
+	  assertEquals(event.type(), i);
+	  ++count;
 	}
-      } while ( e != null );
-      assertEquals(maxCount, i);
+      } while ( event != null );
+      assertEquals(maxCount, count);
     }
   }
-
-  private BasicEvent[] event;
-  private Broadcaster broadcaster;
-  private SampleObserver[] observer;
 }

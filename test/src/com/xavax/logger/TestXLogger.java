@@ -10,63 +10,76 @@ import java.util.Date;
 
 import org.apache.log4j.Logger;
 import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
 
 import static org.testng.Assert.*;
 
+/**
+ * Test cases for the XLogger class.
+ */
 public class TestXLogger {
+  private final static Logger LOGGER = Logger.getLogger(TestXLogger.class);
+  private final static String EXPECT =
+      "TestXLogger.testFormatVarargs: p1=[param1], p2=[123] p3=[5.678000]";
 
-  @BeforeMethod
-  public void setUp()
-  {
-  }
-
+  /**
+   * Test the logger.
+   */
   @Test
   public void testLogging()
   {
     foo();
   }
 
+  /**
+   * Test the logger.
+   */
   public void foo()
   {
     baz();
   }
 
+  /**
+   * Test the logger.
+   */
   public void baz()
   {
-    Date begin = new Date();
+    final Date begin = new Date();
     for ( int n = 0; n < 1000; ++n ) {
-      Exception e = new NullPointerException();
-      StackTraceElement[] stack = e.getStackTrace();
-      StackTraceElement ste = stack[1];
-      String s = ste.getClassName();
-      int i = s.lastIndexOf('.');
-      String className = i > 0 ? s.substring(i + 1) : s;
-      s = format("%s.%d:%s.%s", ste.getFileName(), ste.getLineNumber(),
+      final Exception npe = new NullPointerException();
+      final StackTraceElement[] stack = npe.getStackTrace();
+      final StackTraceElement ste = stack[1];
+      String fullname = ste.getClassName();
+      final int position = fullname.lastIndexOf('.');
+      final String className = position > 0 ? fullname.substring(position + 1) : fullname;
+      fullname = format("%s.%d:%s.%s", ste.getFileName(), ste.getLineNumber(),
 	  className, ste.getMethodName());
     }
-    Date end = new Date();
-    long elapsed = end.getTime() - begin.getTime();
+    final Date end = new Date();
+    final long elapsed = end.getTime() - begin.getTime();
     System.out.println("elapsed time: " + elapsed + " msec.");
   }
 
-  public String format(String format, Object... params)
+  /**
+   * Format a string.
+   *
+   * @param format  the format template.
+   * @param params  substitution parameters.
+   * @return a formatted string.
+   */
+  private String format(final String format, final Object... params)
   {
-    String s = String.format(format, params);
-    return s;
+    return String.format(format, params);
   }
 
+  /**
+   * Test format varargs.
+   */
   @Test
   public void testFormatVarargs()
   {
     final String method = "testFormatVarargs";
-    String s = XLogger.format(logger, method, "p1=[%s], p2=[%d] p3=[%f]",
+    final String result = XLogger.format(LOGGER, method, "p1=[%s], p2=[%d] p3=[%f]",
 	"param1", 123, 5.678);
-    assertEquals(s, expect);
+    assertEquals(result, EXPECT);
   }
-
-  private final static Logger logger = Logger.getLogger(TestXLogger.class);
-
-  private final static String expect =
-      "TestXLogger.testFormatVarargs: p1=[param1], p2=[123] p3=[5.678000]";
 }

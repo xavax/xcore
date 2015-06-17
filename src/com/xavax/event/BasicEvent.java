@@ -13,12 +13,15 @@ package com.xavax.event;
  * and source of the event.
  */
 public class BasicEvent implements Event {
+  protected int type;
+  protected Broadcaster source;
+
   /**
    * Construct a BasicEvent with the specified type.
    *
    * @param type  the type of this event.
    */
-  public BasicEvent(int type)
+  public BasicEvent(final int type)
   {
     this.type = type;
     this.source = null;
@@ -30,7 +33,7 @@ public class BasicEvent implements Event {
    * @param source  the source of this event. 
    * @param type  the type of this event.
    */
-  public BasicEvent(Broadcaster source, int type)
+  public BasicEvent(final Broadcaster source, final int type)
   {
     this.type = type;
     this.source = source;
@@ -61,7 +64,7 @@ public class BasicEvent implements Event {
    *
    * @param source  the source of this event.
    */
-  public void source(Broadcaster source)
+  public void source(final Broadcaster source)
   {
     this.source = source;
   }
@@ -73,10 +76,6 @@ public class BasicEvent implements Event {
    */
   public String toString()
   {
-    String result = "E(" + type + ")";
-    return result;
+    return "E(" + type + ")";
   }
-
-  protected int type;
-  protected Broadcaster source;
 }

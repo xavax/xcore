@@ -97,6 +97,8 @@ public class IterableStringTokenizer implements Iterable<String> {
        *
        * @return true if this iterator has more tokens.
        */
+      @Override
+      @SuppressWarnings("PMD.CommentRequired")
       public boolean hasNext() {
 	return tokenizer.hasMoreElements();
       }
