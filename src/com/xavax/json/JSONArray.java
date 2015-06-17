@@ -13,102 +13,180 @@ import java.util.Map;
 import com.xavax.json.JSON.Format;
 import com.xavax.util.CollectionFactory;
 
+/**
+ * JSONArray represents an array field in a JSON.
+ */
 public class JSONArray extends ArrayList<Object> {
-  public JSONArray() {
+  public final static long serialVersionUID = 0;
+
+  private final static char COMMA = ',';
+  private final static char LEFT_BRACKET = '[';
+  private final static char RIGHT_BRACKET = ']';
+
+  /**
+   * Construct a JSONArray from a collection.
+   *
+   * @param collection  contains the initial array elements.
+   */
+  public JSONArray(final Collection<Object> collection) {
+    super(collection);
   }
 
-  public JSONArray(Collection<Object> c) {
-    super(c);
-  }
-
-  public JSONArray(Object[] items) {
-    for (Object o : items) {
-      add(o);
+  /**
+   * Construct a JSONArray from an array of items.
+   *
+   * @param items  the initial array elements.
+   */
+  public JSONArray(final Object... items) {
+    for ( final Object item : items ) {
+      add(item);
     }
   }
 
-  public JSONArray(JSONArray ja) {
-    this.addAll(ja);
+  /**
+   * Construct a JSONArray as a copy of another JSONArray.
+   *
+   * @param array  the array to copy.
+   */
+  public JSONArray(final JSONArray array) {
+    this.addAll(array);
   }
 
-  public boolean add(Collection<Object> c) {
-    JSONArray ja = new JSONArray(c);
-    return super.add((Object) ja);
+  /**
+   * Create a new JSONArray from a collection and add the new
+   * array to this array.
+   *
+   * @param collection  the collection of items to add.
+   * @return true if this array was modified.
+   */
+  public boolean add(final Collection<Object> collection) {
+    final JSONArray array = new JSONArray(collection);
+    return super.add((Object) array);
   }
 
-  public boolean add(Map<String, Object> map) {
-    JSON json = new JSON(map);
+  /**
+   * Create a new JSON from a map and add it to this array.
+   *
+   * @param map  the map of items to add.
+   * @return true if this array was modified.
+   */
+  public boolean add(final Map<String, Object> map) {
+    final JSON json = new JSON(map);
     return super.add((Object) json);
   }
 
-  public boolean add(JSON json) {
+  /**
+   * Add a JSON to this array.
+   *
+   * @param json  the JSON to add.
+   * @return true if this array was modified.
+   */
+  public boolean add(final JSON json) {
     return super.add((Object) json);
   }
 
-  public boolean addAll(JSONArray ja) {
+  /**
+   * Add all elements of a JSONArray to this array.
+   *
+   * @param array  the array of elements to add.
+   * @return true if this array was modified.
+   */
+  public boolean addAll(final JSONArray array) {
     boolean result = false;
-    for (Object o : ja) {
-      if ( o instanceof JSON ) {
-	o = new JSON((JSON) o);
+    for ( Object object : array ) {
+      if ( object instanceof JSON ) {
+	object = new JSON((JSON) object);
       }
-      else if ( o instanceof JSONArray ) {
-	o = new JSONArray((JSONArray) o);
+      else if ( object instanceof JSONArray ) {
+	object = new JSONArray((JSONArray) object);
       }
-      add(o);
+      add(object);
       result = true;
     }
     return result;
   }
 
+  /**
+   * Return a list that is a flattened version of this array.
+   * Any arrays or objects will be represented as a string in
+   * JSON format.
+   *
+   * @return a list representing a flattened array.
+   */
   public List<String> flatten() {
-    List<String> result = CollectionFactory.arrayList();
-    for (Object o : this) {
-      String s = o == null ? "" : o.toString();
-      result.add(s);
+    final List<String> result = CollectionFactory.arrayList();
+    for ( final Object object : this ) {
+      result.add(object == null ? "" : object.toString());
     }
     return result;
   }
 
+  /**
+   * Convert this JSONArray to a map with the array index as the key.
+   *
+   * @return this JSONArray as a map.
+   */
   public Map<String, String> asMap() {
-    List<String> l = flatten();
-    Map<String, String> map = CollectionFactory.hashMap();
-    int i = 0;
-    for (String s : l) {
-      map.put(String.valueOf(i++), s);
+    final List<String> list = flatten();
+    final Map<String, String> map = CollectionFactory.hashMap();
+    int count = 0;
+    for ( final String string : list ) {
+      map.put(String.valueOf(count++), string);
     }
     return map;
   }
 
+  /**
+   * Returns a compact string representation of this array.
+   *
+   * @return a compact string representation of this array.
+   */
+  @Override
   public String toString() {
     return toString(Format.COMPACT);
   }
 
-  public String toString(Format format) {
-    StringBuilder sb = new StringBuilder();
-    toString(sb, format, 0);
-    return sb.toString();
+  /**
+   * Return a string representation of this array formatted according
+   * to the specified format.
+   *
+   * @param format  controls the formatting.
+   * @return a string representation of this JSONArray.
+   */
+  public String toString(final Format format) {
+    final StringBuilder builder = new StringBuilder();
+    toString(builder, format, 0);
+    return builder.toString();
   }
 
-  public void toString(StringBuilder sb, Format format, int level) {
-    String indentation = format.indentation(level++);
-    String innerIndentation = format.indentation(level);
-    sb.append(format.preOpenBrace).append("[");
-    if (size() > 0) {
-      sb.append(format.postOpenBrace);
+  /**
+   * Create a string representation of this array formatted according
+   * to the specified format using an existing string builder.
+   *
+   * @param builder      the string builder.
+   * @param format       the format.
+   * @param indentLevel  the initial indentation level.
+   */
+  public void toString(final StringBuilder builder, final Format format, final int indentLevel) {
+    int level = indentLevel;
+    final String indentation = format.indentation(level++);
+    final String innerIndentation = format.indentation(level);
+    builder.append(format.preOpenBrace).append(LEFT_BRACKET);
+    if ( size() > 0 ) {
+      builder.append(format.postOpenBrace);
       boolean first = true;
-      for (Object o : this) {
-	if (first) {
+      for ( final Object object : this ) {
+	if ( first ) {
 	  first = false;
-	} else {
-	  sb.append(format.preComma).append(",").append(format.postComma);
 	}
-	sb.append(innerIndentation);
-	JSON.appendValue(sb, format, level, o);
+	else {
+	  builder.append(format.preComma).append(COMMA).append(format.postComma);
+	}
+	builder.append(innerIndentation);
+	JSON.appendValue(builder, format, level, object);
       }
-      sb.append(format.preCloseBrace).append(indentation);
+      builder.append(format.preCloseBrace).append(indentation);
     }
-    sb.append("]").append(format.postCloseBrace);
+    builder.append(RIGHT_BRACKET).append(format.postCloseBrace);
   }
-
-  public final static long serialVersionUID = 0;
 }

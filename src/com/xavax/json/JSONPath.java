@@ -14,16 +14,29 @@ import java.util.ArrayList;
  * @author Phil Harbison
  */
 public class JSONPath extends ArrayList<String> {
-  public JSONPath() {
-  }
+  public final static long serialVersionUID = 0;
 
-  public JSONPath(String... paths) {
+  private final static char PERIOD = '.';
+  private final static String EMPTY = "";
+  private final static String SEPARATOR_REGEX = "[.]";
+
+  /**
+   * Construct a JSONPath from an array of path elements.
+   *
+   * @param paths  an array of path elements.
+   */
+  public JSONPath(final String... paths) {
     append(paths);
   }
 
-  public static JSONPath create(String... paths) {
-    JSONPath jp = new JSONPath(paths);
-    return jp;
+  /**
+   * Create a JSONPath from an array of path elements.
+   *
+   * @param paths  an array of path elements.
+   * @return a JSONPath.
+   */
+  public static JSONPath create(final String... paths) {
+    return new JSONPath(paths);
   }
 
   /**
@@ -33,13 +46,13 @@ public class JSONPath extends ArrayList<String> {
    * @param paths one or more strings containing path components.
    * @return this path.
    */
-  public JSONPath append(String... paths) {
-    for (String path : paths) {
-      if ( path != null && !path.equals("") ) {
-	String[] parts = path.trim().split("[.]");
-	for (String s : parts) {
-	  if ( s != null && !s.equals("") ) {
-	    add(s);
+  public JSONPath append(final String... paths) {
+    for ( final String path : paths ) {
+      if ( path != null && !path.equals(EMPTY) ) {
+	final String[] parts = path.trim().split(SEPARATOR_REGEX);
+	for ( final String part : parts ) {
+	  if ( part != null && !part.equals(EMPTY) ) {
+	    add(part);
 	  }
 	}
       }
@@ -53,25 +66,29 @@ public class JSONPath extends ArrayList<String> {
    * @param path a path to be appended to this path.
    * @return this path.
    */
-  public JSONPath append(JSONPath path) {
+  public JSONPath append(final JSONPath path) {
     this.addAll(path);
     return this;
   }
 
+  /**
+   * Returns a string representation of this path.
+   *
+   * @return a string representation of this path.
+   */
+  @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
     boolean first = true;
-    for (String s : this) {
+    for ( final String string : this ) {
       if ( first ) {
 	first = false;
       }
       else {
-	sb.append('.');
+	builder.append(PERIOD);
       }
-      sb.append(s);
+      builder.append(string);
     }
-    return sb.toString();
+    return builder.toString();
   }
-
-  public final static long serialVersionUID = 0;
 }

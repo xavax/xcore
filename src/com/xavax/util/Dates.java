@@ -2,7 +2,11 @@ package com.xavax.util;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
+/**
+ * Dates is a utility class for manipulating dates and timestamps.
+ */
 public final class Dates {
   private final static String EMPTY = "";
   private final static String ISO_TIMESTAMP = "yyyy-MM-ddTHH:mm:ss.SSS";
@@ -21,9 +25,9 @@ public final class Dates {
    * @param delimited  true if the delimiters should be included.
    * @return a date in ISO-8601 format.
    */
-  public static String timestamp(Date date, boolean delimited) {
-    SimpleDateFormat formatter =
-	new SimpleDateFormat(delimited ? ISO_TIMESTAMP : ISO_TIMESTAMP_ND);
+  public static String timestamp(final Date date, final boolean delimited) {
+    final SimpleDateFormat formatter =
+	new SimpleDateFormat(delimited ? ISO_TIMESTAMP : ISO_TIMESTAMP_ND, Locale.getDefault());
     return date == null ? EMPTY : formatter.format(date);
   }
 
@@ -33,7 +37,7 @@ public final class Dates {
    * @param date       the date to be formatted.
    * @return a date in ISO-8601 format.
    */
-  public static String timestamp(Date date) {
+  public static String timestamp(final Date date) {
     return timestamp(date, true);
   }
 
@@ -44,7 +48,7 @@ public final class Dates {
    * @param delimited  true if the delimiters should be included.
    * @return a date in ISO-8601 format.
    */
-  public static String timestamp(boolean delimited) {
+  public static String timestamp(final boolean delimited) {
     return timestamp(new Date(System.currentTimeMillis()), true);
   }
 
@@ -64,7 +68,7 @@ public final class Dates {
    * @param delimited  true if the delimiters should be included.
    * @return a time in ISO-8601 format.
    */
-  public static String timestamp(long time, boolean delimited) {
+  public static String timestamp(final long time, final boolean delimited) {
     return timestamp(new Date(time), delimited);
   }
 
@@ -74,7 +78,7 @@ public final class Dates {
    * @param  time      the time to be formatted.
    * @return a time in ISO-8601 format.
    */
-  public static String timestamp(long time) {
+  public static String timestamp(final long time) {
     return timestamp(time, true);
   }
 }

@@ -14,17 +14,25 @@ import java.util.List;
 import com.xavax.util.CollectionFactory;
 
 /**
- * 
- * @author Phil Harbison
+ * JSONParser is a parser for strings in JSON format.
  */
 public class JSONParser {
+  /**
+   * Construct a JSONParser.
+   */
   public JSONParser() {
     this.source = null;
     this.reader = null;
     init();
   }
 
-  public JSONParser(Reader reader, String source) {
+  /**
+   * Construct a JSONParser with the specified reader and source.
+   *
+   * @param reader
+   * @param source
+   */
+  public JSONParser(final Reader reader, final String source) {
     this.source = source;
     this.reader = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
     init();
@@ -40,22 +48,22 @@ public class JSONParser {
     errors = null;
   }
 
-  static public JSON parse(Reader reader, String source) {
+  static public JSON parse(final Reader reader, final String source) {
     JSON result = null;
     if ( reader != null ) {
-      JSONParser parser = new JSONParser(reader, source);
+      final JSONParser parser = new JSONParser(reader, source);
       result = parser.parse();
     }
     return result;
   }
 
-  private void init(String input) {
+  private void init(final String input) {
     source = null;
     reader = new BufferedReader(new StringReader(input));
     init();
   }
 
-  public JSON parse(String input) {
+  public JSON parse(final String input) {
     init(input);
     return parse();
   }
@@ -72,7 +80,7 @@ public class JSONParser {
       }
     }
     catch (EndOfInputException e) {
-      String msg = "unexpected end of input";
+      final String msg = "unexpected end of input";
       addError(msg);
     }
     if ( hasNext() ) {
@@ -81,10 +89,10 @@ public class JSONParser {
     return json;
   }
 
-  public JSONArray parseArray(String input) {
+  public JSONArray parseArray(final String input) {
     init(input);
     level = 0;
-    JSONArray list = new JSONArray();
+    final JSONArray list = new JSONArray();
     try {
       if ( expect('[', true) ) {
 	parseArrayItems(list);
@@ -94,7 +102,7 @@ public class JSONParser {
       }
     }
     catch (EndOfInputException e) {
-      String msg = "unexpected end of input";
+      final String msg = "unexpected end of input";
       addError(msg);
     }
     if ( hasNext() ) {
@@ -113,26 +121,26 @@ public class JSONParser {
 	}
       }
       parseItem(map);
-      char c = next(true);
-      if ( c == '}' ) {
+      final char input = next(true);
+      if ( input == '}' ) {
 	break;
       }
-      else if ( c != ',' ) {
-	expected(',', c);
+      else if ( input != ',' ) {
+	expected(',', input);
 	break;
       }
     }
   }
 
-  private boolean parseItem(JSON map) {
+  private boolean parseItem(final JSON map) {
     boolean result = false;
-    String key = parseKey();
+    final String key = parseKey();
     if ( key == null || key.equals("") ) {
       expected("identifier", peek());
     }
     else {
       if ( expect(':', true) ) {
-	Object value = parseValue();
+	final Object value = parseValue();
 	map.put(key, value);
 	result = true;
       }
@@ -145,10 +153,10 @@ public class JSONParser {
 
   private String parseKey() {
     String key = null;
-    char c = next(true);
-    if ( c == '"' || c == '\'' ) {
+    final char input = next(true);
+    if ( input == '"' || input == '\'' ) {
       key = parseIdentifier();
-      expect(c, false);
+      expect(input, false);
     }
     else {
       pushback();
@@ -158,14 +166,14 @@ public class JSONParser {
   }
 
   private String parseIdentifier() {
-    StringBuilder sb = new StringBuilder();
-    char c = next(false);
-    if ( Character.isLetter(c) || c == '_' ) {
-      sb.append(c);
+    final StringBuilder builder = new StringBuilder();
+    char input = next(false);
+    if ( Character.isLetter(input) || input == '_' ) {
+      builder.append(input);
       while ( hasNext() ) {
-	c = next(false);
-	if ( Character.isLetterOrDigit(c) || c == '_' ) {
-	  sb.append(c);
+	input = next(false);
+	if ( Character.isLetterOrDigit(input) || input == '_' ) {
+	  builder.append(input);
 	}
 	else {
 	  pushback();
@@ -176,20 +184,20 @@ public class JSONParser {
     else {
       pushback();
     }
-    return sb.toString();
+    return builder.toString();
   }
 
   private Object parseValue() {
     Object result = null;
     if ( hasNext() ) {
-      char c = next(true);
-      switch ( c ) {
+      char input = next(true);
+      switch ( input ) {
       case '"':
       case '\'':
-	result = parseString(c);
+	result = parseString(input);
 	break;
       case '{':
-	JSON map = new JSON();
+	final JSON map = new JSON();
 	++level;
 	parseItems(map);
 	--level;
@@ -198,10 +206,10 @@ public class JSONParser {
       case '}':
       case ',':
 	pushback();
-	expected("value", c);
+	expected("value", input);
 	break;
       case '[':
-	JSONArray list = new JSONArray();
+	final JSONArray list = new JSONArray();
 	++level;
 	parseArrayItems(list);
 	--level;
@@ -213,15 +221,15 @@ public class JSONParser {
 	result = parseNumber();
 	break;
       default:
-	if ( Character.isDigit(c) ) {
+	if ( Character.isDigit(input) ) {
 	  pushback();
 	  result = parseNumber();
 	}
-	else if ( Character.isLetter(c) ) {
-	  int mark = cursor - 1;
+	else if ( Character.isLetter(input) ) {
+	  final int mark = cursor - 1;
 	  while ( hasNext() ) {
-	    c = next(false);
-	    if ( !Character.isLetter(c) ) {
+	    input = next(false);
+	    if ( !Character.isLetter(input) ) {
 	      pushback();
 	      break;
 	    }
@@ -244,7 +252,7 @@ public class JSONParser {
 	  }
 	}
 	else {
-	  expected("value", c);
+	  expected("value", input);
 	}
 	break;
       }
@@ -252,19 +260,19 @@ public class JSONParser {
     return result;
   }
 
-  private void parseArrayItems(JSONArray list) {
+  private void parseArrayItems(final JSONArray list) {
     while ( hasNext() ) {
       if ( scanFor(']') ) {
 	break;
       }
-      Object value = parseValue();
+      final Object value = parseValue();
       list.add(value);
-      char c = next(true);
-      if ( c == ']' ) {
+      final char input = next(true);
+      if ( input == ']' ) {
 	break;
       }
-      else if ( c != ',' ) {
-	expected(',', c);
+      else if ( input != ',' ) {
+	expected(',', input);
 	break;
       }
     }
@@ -275,102 +283,101 @@ public class JSONParser {
     boolean isDouble = false;
     boolean leadingZero = false;
     int state = AcceptDigitSignRadix;
-    int mark = cursor;
-    StringBuilder sb = new StringBuilder();
+    final int mark = cursor;
+    final StringBuilder builder = new StringBuilder();
     while ( !done && hasNext() ) {
       // Skip whitespace only for first character of number.
-      char c = next(state == AcceptDigitSignRadix);
+      final char input = next(state == AcceptDigitSignRadix);
       switch ( state ) {
       case AcceptDigitSignRadix:
-	if ( Character.isDigit(c) ) {
+	if ( Character.isDigit(input) ) {
 	  state = AccumulateInitialDigits;
-	  if ( c == '0' ) {
+	  if ( input == '0' ) {
 	    leadingZero = true;
 	  }
 	}
-	else if ( c == '-' ) {
+	else if ( input == '-' ) {
 	  state = AcceptDigitRadix;
 	}
-	else if ( c == '.' ) {
+	else if ( input == '.' ) {
 	  state = AccumulateFractionalDigits;
 	}
 	else {
-	  unexpectedNumericInput(mark, c);
+	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
       case AcceptDigitRadix:
-	if ( Character.isDigit(c) ) {
+	if ( Character.isDigit(input) ) {
 	  state = AccumulateInitialDigits;
-	  if ( c == '0' ) {
+	  if ( input == '0' ) {
 	    leadingZero = true;
 	  }
 	}
-	else if ( c == '.' ) {
+	else if ( input == '.' ) {
 	  state = AccumulateFractionalDigits;
 	}
 	else {
-	  unexpectedNumericInput(mark, c);
+	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
       case AccumulateInitialDigits:
 	// Accumulating initial digits.
-	if ( c == '.' ) {
+	if ( input == '.' ) {
 	  state = AccumulateFractionalDigits;
 	}
-	else if ( c == 'e' || c == 'E' ) {
+	else if ( input == 'e' || input == 'E' ) {
 	  state = AcceptExponentDigitSign;
 	}
-	else if ( Character.isDigit(c) ) {
+	else if ( Character.isDigit(input) ) {
 	  if ( leadingZero ) {
 	    invalid(mark, "leading zero");
 	  }
 	}
 	else {
-	  unexpectedNumericInput(mark, c);
+	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
       case AccumulateFractionalDigits:
 	isDouble = true;
-	if ( c == 'e' || c == 'E' ) {
+	if ( input == 'e' || input == 'E' ) {
 	  state = AcceptExponentDigitSign;
 	}
-	else if ( !Character.isDigit(c) ) {
-	  unexpectedNumericInput(mark, c);
+	else if ( !Character.isDigit(input) ) {
+	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
       case AcceptExponentDigitSign:
 	isDouble = true;
-	if ( c == '-' || c == '+' ) {
+	if ( input == '-' || input == '+' ) {
 	  state = AccumulateExponentDigits;
 	}
-	else if ( !Character.isDigit(c) ) {
-	  unexpectedNumericInput(mark, c);
+	else if ( !Character.isDigit(input) ) {
+	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
       case AccumulateExponentDigits:
-	if ( !Character.isDigit(c) ) {
-	  unexpectedNumericInput(mark, c);
+	if ( !Character.isDigit(input) ) {
+	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
       }
       if ( !done ) {
-	sb.append(c);
+	builder.append(input);
       }
     }
-    String s = sb.toString();
-    // The casting is necessary to keep Java from converting the Long to a
-    // Double.
-    return isDouble ? (Object) Double.valueOf(s) : (Object) Long.valueOf(s);
+    final String value = builder.toString();
+    // The casting is necessary to keep Java from converting the Long to a Double.
+    return isDouble ? (Object) Double.valueOf(value) : (Object) Long.valueOf(value);
   }
 
-  private void unexpectedNumericInput(int mark, char c) {
-    if ( Character.isWhitespace(c) || c == ',' || c == '}' ) {
+  private void unexpectedNumericInput(final int mark, final char input) {
+    if ( Character.isWhitespace(input) || input == ',' || input == '}' ) {
       pushback();
     }
     else {
@@ -379,15 +386,15 @@ public class JSONParser {
     }
   }
 
-  private String parseString(char sentinel) {
+  private String parseString(final char sentinel) {
     boolean escape = false;
     String result = null;
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder builder = new StringBuilder();
     while ( hasNext() ) {
-      char c = next(false);
+      final char input = next(false);
       char[] chars = empty;
       if ( escape ) {
-	switch ( c ) {
+	switch ( input ) {
 	case 'b':
 	  chars = backspace;
 	  break;
@@ -407,21 +414,21 @@ public class JSONParser {
 	  chars = getUnicodeChar();
 	  break;
 	default:
-	  sb.append(c);
+	  builder.append(input);
 	  break;
 	}
-	sb.append(chars);
+	builder.append(chars);
 	escape = false;
       }
-      else if ( c == '\\' ) {
+      else if ( input == '\\' ) {
 	escape = true;
       }
-      else if ( c == sentinel ) {
-	result = sb.toString();
+      else if ( input == sentinel ) {
+	result = builder.toString();
 	break;
       }
       else {
-	sb.append(c);
+	builder.append(input);
       }
     }
     return result;
@@ -429,22 +436,22 @@ public class JSONParser {
 
   private char[] getUnicodeChar() {
     char[] result = empty;
-    int mark = cursor - 2;
+    final int mark = cursor - 2;
     int codePoint = 0;
-    int i = 4;
-    while ( i > 0 && hasNext() ) {
-      char c = next(false);
-      int value = Character.digit(c, 16);
+    int count = 4;
+    while ( count > 0 && hasNext() ) {
+      final char input = next(false);
+      final int value = Character.digit(input, 16);
       if ( value >= 0 ) {
 	codePoint = (codePoint << 4) + value;
-	--i;
+	--count;
       }
       else {
-	expected("hex-digit", c);
+	expected("hex-digit", input);
 	break;
       }
     }
-    if ( i == 0 ) {
+    if ( count == 0 ) {
       result = Character.toChars(codePoint);
     }
     else {
@@ -453,22 +460,22 @@ public class JSONParser {
     return result;
   }
 
-  private boolean expect(char expected, boolean skipWhitespace) {
+  private boolean expect(final char expected, final boolean skipWhitespace) {
     boolean result = false;
-    char c = next(skipWhitespace);
-    if ( c == expected ) {
+    final char input = next(skipWhitespace);
+    if ( input == expected ) {
       result = true;
     }
     else {
-      expected(expected, c);
+      expected(expected, input);
       pushback();
     }
     return result;
   }
 
-  private boolean scanFor(char expected) {
-    char c = next(true);
-    boolean result = c == expected;
+  private boolean scanFor(final char expected) {
+    final char input = next(true);
+    final boolean result = input == expected;
     if ( !result ) {
       pushback();
     }
@@ -500,7 +507,7 @@ public class JSONParser {
     return result;
   }
 
-  private char next(boolean skipWhitespace) {
+  private char next(final boolean skipWhitespace) {
     char result = '\0';
     do {
       if ( hasNext() ) {
@@ -521,7 +528,7 @@ public class JSONParser {
     --cursor;
   }
 
-  private void skipToNextItem(boolean skipWhitespace) {
+  private void skipToNextItem(final boolean skipWhitespace) {
     while ( hasNext() ) {
       char c = next(false);
       if ( (!skipWhitespace && Character.isWhitespace(c)) || c == ','

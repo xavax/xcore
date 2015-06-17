@@ -517,7 +517,7 @@ public class JSON extends HashMap<String, Object> {
    * Return a string representation of this JSON formatted according
    * to the specified format.
    *
-   * @param format
+   * @param format  controls the formatting.
    * @return a string representation of this JSON.
    */
   public String toString(final Format format) {
