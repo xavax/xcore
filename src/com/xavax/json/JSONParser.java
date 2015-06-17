@@ -16,7 +16,39 @@ import com.xavax.util.CollectionFactory;
 /**
  * JSONParser is a parser for strings in JSON format.
  */
+@SuppressWarnings({ "PMD.CyclomaticComplexity",
+    	            "PMD.ModifiedCyclomaticComplexity",
+    	            "PMD.StdCyclomaticComplexity" })
 public class JSONParser {
+  private final static int ACCEPT_DIGIT_SIGN_RADIX = 0;
+  private final static int ACCEPT_DIGIT_RADIX = 1;
+  private final static int ACCUMULATE_DIGITS = 2;
+  private final static int ACCUMULATE_FRACTION = 3;
+  private final static int ACCEPT_EXPONENT_SIGN = 4;
+  private final static int ACCUMULATE_EXPONENT = 5;
+  private final static int DEFAULT_BUFFER_SIZE = 64;
+  private final static char CARET = '^';
+  private final static char NEWLINE = '\n';
+  private final static char SPACE = ' ';
+
+  private final static char[] empty = new char[] {};
+  private final static char[] backspace = new char[] { '\b' };
+  private final static char[] formfeed = new char[] { '\f' };
+  private final static char[] newline = new char[] { '\n' };
+  private final static char[] creturn = new char[] { '\r' };
+  private final static char[] tab = new char[] { '\t' };
+
+  private boolean ignoreCase;
+  private int cursor;
+  private int length;
+  private int level;
+  private int line;
+  private char[] array;
+  private String lineBuffer;
+  private String source;
+  private List<String> errors;
+  private BufferedReader reader;
+
   /**
    * Construct a JSONParser.
    */
@@ -38,6 +70,9 @@ public class JSONParser {
     init();
   }
 
+  /**
+   * Initialize this parser.
+   */
   private void init() {
     line = 0;
     level = 0;
@@ -48,6 +83,13 @@ public class JSONParser {
     errors = null;
   }
 
+  /**
+   * Parse an input string in JSON format and return a JSON.
+   *
+   * @param reader
+   * @param source
+   * @return
+   */
   static public JSON parse(final Reader reader, final String source) {
     JSON result = null;
     if ( reader != null ) {
@@ -57,20 +99,36 @@ public class JSONParser {
     return result;
   }
 
+  /**
+   * Initialize this parser to parse an input string.
+   *
+   * @param input  a string in JSON format to be parsed.
+   */
   private void init(final String input) {
     source = null;
     reader = new BufferedReader(new StringReader(input));
     init();
   }
 
+  /**
+   * Construct a JSONParser configured to parse the specified input.
+   *
+   * @param input  a string in JSON format to be parsed.
+   * @return the JSON resulting from parsing the input.
+   */
   public JSON parse(final String input) {
     init(input);
     return parse();
   }
 
+  /**
+   * Parse the input and return a JSON.
+   *
+   * @return the JSON resulting from parsing the input.
+   */
   public JSON parse() {
     level = 0;
-    json = new JSON();
+    final JSON json = new JSON();
     try {
       if ( expect('{', true) ) {
 	parseItems(json);
@@ -111,7 +169,7 @@ public class JSONParser {
     return list;
   }
 
-  private void parseItems(JSON map) {
+  private void parseItems(final JSON map) {
     boolean first = true;
     while ( hasNext() ) {
       if ( first ) {
@@ -282,53 +340,53 @@ public class JSONParser {
     boolean done = false;
     boolean isDouble = false;
     boolean leadingZero = false;
-    int state = AcceptDigitSignRadix;
+    int state = ACCEPT_DIGIT_SIGN_RADIX;
     final int mark = cursor;
     final StringBuilder builder = new StringBuilder();
     while ( !done && hasNext() ) {
       // Skip whitespace only for first character of number.
-      final char input = next(state == AcceptDigitSignRadix);
+      final char input = next(state == ACCEPT_DIGIT_SIGN_RADIX);
       switch ( state ) {
-      case AcceptDigitSignRadix:
+      case ACCEPT_DIGIT_SIGN_RADIX:
 	if ( Character.isDigit(input) ) {
-	  state = AccumulateInitialDigits;
+	  state = ACCUMULATE_DIGITS;
 	  if ( input == '0' ) {
 	    leadingZero = true;
 	  }
 	}
 	else if ( input == '-' ) {
-	  state = AcceptDigitRadix;
+	  state = ACCEPT_DIGIT_RADIX;
 	}
 	else if ( input == '.' ) {
-	  state = AccumulateFractionalDigits;
+	  state = ACCUMULATE_FRACTION;
 	}
 	else {
 	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
-      case AcceptDigitRadix:
+      case ACCEPT_DIGIT_RADIX:
 	if ( Character.isDigit(input) ) {
-	  state = AccumulateInitialDigits;
+	  state = ACCUMULATE_DIGITS;
 	  if ( input == '0' ) {
 	    leadingZero = true;
 	  }
 	}
 	else if ( input == '.' ) {
-	  state = AccumulateFractionalDigits;
+	  state = ACCUMULATE_FRACTION;
 	}
 	else {
 	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
-      case AccumulateInitialDigits:
+      case ACCUMULATE_DIGITS:
 	// Accumulating initial digits.
 	if ( input == '.' ) {
-	  state = AccumulateFractionalDigits;
+	  state = ACCUMULATE_FRACTION;
 	}
 	else if ( input == 'e' || input == 'E' ) {
-	  state = AcceptExponentDigitSign;
+	  state = ACCEPT_EXPONENT_SIGN;
 	}
 	else if ( Character.isDigit(input) ) {
 	  if ( leadingZero ) {
@@ -340,27 +398,27 @@ public class JSONParser {
 	  done = true;
 	}
 	break;
-      case AccumulateFractionalDigits:
+      case ACCUMULATE_FRACTION:
 	isDouble = true;
 	if ( input == 'e' || input == 'E' ) {
-	  state = AcceptExponentDigitSign;
+	  state = ACCEPT_EXPONENT_SIGN;
 	}
 	else if ( !Character.isDigit(input) ) {
 	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
-      case AcceptExponentDigitSign:
+      case ACCEPT_EXPONENT_SIGN:
 	isDouble = true;
 	if ( input == '-' || input == '+' ) {
-	  state = AccumulateExponentDigits;
+	  state = ACCUMULATE_EXPONENT;
 	}
 	else if ( !Character.isDigit(input) ) {
 	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
 	break;
-      case AccumulateExponentDigits:
+      case ACCUMULATE_EXPONENT:
 	if ( !Character.isDigit(input) ) {
 	  unexpectedNumericInput(mark, input);
 	  done = true;
@@ -483,10 +541,10 @@ public class JSONParser {
   }
 
   private boolean hasNext() {
-    return cursor < length || getNextLine();
+    return cursor < length || readNextLine();
   }
 
-  private boolean getNextLine() {
+  private boolean readNextLine() {
     boolean result = false;
     try {
       if ( reader.ready() ) {
@@ -530,120 +588,122 @@ public class JSONParser {
 
   private void skipToNextItem(final boolean skipWhitespace) {
     while ( hasNext() ) {
-      char c = next(false);
-      if ( (!skipWhitespace && Character.isWhitespace(c)) || c == ','
-	  || c == '}' ) {
+      final char input = next(false);
+      if ( !skipWhitespace && Character.isWhitespace(input) || input == ','
+	  || input == '}' ) {
 	pushback();
 	break;
       }
     }
   }
 
-  private void expected(char expected, char received) {
-    String msg = "expected [" + expected + "] but received [" + received + "]";
-    addError(msg);
+  private void expected(final char expected, final char received) {
+    addError("expected [" + expected + "] but received [" + received + "]");
   }
 
-  private void expected(String expected, char received) {
-    String s = "" + received;
-    expected(expected, s);
+  private void expected(final String expected, final char received) {
+    expected(expected, Character.toString(received));
   }
 
-  private void expected(String expected, String received) {
-    String msg = "expected [" + expected + "] but received [" + received + "]";
-    addError(msg);
+  private void expected(final String expected, final String received) {
+    addError("expected [" + expected + "] but received [" + received + "]");
   }
 
-  private void invalidNumber(int mark) {
+  private void invalidNumber(final int mark) {
     invalid(mark, "number");
   }
 
-  private void invalidUnicode(int mark) {
+  private void invalidUnicode(final int mark) {
     invalid(mark, "Unicode escape sequence");
   }
 
-  private void invalid(int mark, String detail) {
-    String msg = "invalid " + detail + " [" + lineBuffer.substring(mark, cursor)
-	+ "]";
-    addError(mark, msg);
+  private void invalid(final int mark, final String detail) {
+    addError(mark, "invalid " + detail + " [" +
+	lineBuffer.substring(mark, cursor) + "]");
   }
 
-  private void addError(String msg) {
+  private void addError(final String msg) {
     addError(cursor - 1, msg);
   }
 
-  private void addError(int mark, String msg) {
-    StringBuilder sb = new StringBuilder();
-    sb.append(source == null ? "JSON" : source)
-      .append(": error at line ").append(line)
-      .append(" position ").append(mark)
-      .append(" - ").append(msg);
+  private void addError(final int mark, final String message) {
+    final StringBuilder builder = new StringBuilder(DEFAULT_BUFFER_SIZE);
+    builder.append(source == null ? "JSON" : source)
+      	   .append(": error at line ").append(line)
+      	   .append(" position ").append(mark)
+      	   .append(" - ").append(message);
     if ( lineBuffer != null ) {
-      sb.append("\n").append(lineBuffer).append("\n");
+      builder.append(NEWLINE).append(lineBuffer).append(NEWLINE);
       for ( int i = 0; i < mark ; ++i ) {
-	sb.append(" ");
+	builder.append(SPACE);
       }
-      sb.append("^");
+      builder.append(CARET);
     }
-    String s = sb.toString();
+    final String msg = builder.toString();
     if ( errors == null ) {
       errors = CollectionFactory.arrayList();
     }
-    errors.add(s);
-    System.out.println(s);
+    errors.add(msg);
+    System.out.println(msg);
   }
 
+  /**
+   * Return the list of errors.
+   *
+   * @return the list of errors.
+   */
   public List<String> getErrors() {
     return errors;
   }
 
+  /**
+   * Return the error count.
+   *
+   * @return the error count.
+   */
   public int errorCount() {
     return errors == null ? 0 : errors.size();
   }
 
+  /**
+   * Return true if no errors occurred during parsing.
+   *
+   * @return true if no errors occurred during parsing.
+   */
   public boolean isValid() {
     return errors == null;
   }
 
+  /**
+   * Return true if the parser is ignoring case.
+   *
+   * @return true if the parser is ignoring case.
+   */
   public boolean ignoreCase() {
     return this.ignoreCase;
   }
 
-  public void ignoreCase(boolean ignoreCase) {
+  /**
+   * Set the ignoreCase flag.
+   *
+   * @param ignoreCase  if true, ignore case while parsing.
+   */
+  public void ignoreCase(final boolean ignoreCase) {
     this.ignoreCase = ignoreCase;
   }
 
-  static final int AcceptDigitSignRadix = 0;
-  static final int AcceptDigitRadix = 1;
-  static final int AccumulateInitialDigits = 2;
-  static final int AccumulateFractionalDigits = 3;
-  static final int AcceptExponentDigitSign = 4;
-  static final int AccumulateExponentDigits = 5;
-
-  private final static char[] empty = new char[] {};
-  private final static char[] backspace = new char[] { '\b' };
-  private final static char[] formfeed = new char[] { '\f' };
-  private final static char[] newline = new char[] { '\n' };
-  private final static char[] creturn = new char[] { '\r' };
-  private final static char[] tab = new char[] { '\t' };
-
-  private boolean ignoreCase = false;
-  private int cursor;
-  private int length;
-  private int level;
-  private int line;
-  private char[] array;
-  private String lineBuffer;
-  private String source;
-  private JSON json;
-  private List<String> errors;
-  private BufferedReader reader;
-
+  /**
+   * EndOfInputException is thrown when we encounter an unexpected
+   * end of input (end of file).
+   */
   public final class EndOfInputException extends RuntimeException {
+    public final static long serialVersionUID = 0;
+
+    /**
+     * Construct an EndOfInputException.
+     */
     public EndOfInputException() {
       super("UnexpectedEndOfInput");
     }
-
-    public final static long serialVersionUID = 0;
   }
 }
