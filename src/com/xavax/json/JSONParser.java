@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
+import java.util.Locale;
 
 import com.xavax.util.CollectionFactory;
 
@@ -20,23 +21,38 @@ import com.xavax.util.CollectionFactory;
     	            "PMD.ModifiedCyclomaticComplexity",
     	            "PMD.StdCyclomaticComplexity" })
 public class JSONParser {
-  private final static int ACCEPT_DIGIT_SIGN_RADIX = 0;
-  private final static int ACCEPT_DIGIT_RADIX = 1;
-  private final static int ACCUMULATE_DIGITS = 2;
-  private final static int ACCUMULATE_FRACTION = 3;
-  private final static int ACCEPT_EXPONENT_SIGN = 4;
-  private final static int ACCUMULATE_EXPONENT = 5;
+  /**
+   * ScannerState enumerates the possible states of the input scanner.
+   */
+  public enum ScannerState {
+    ACCEPT_DIGIT_SIGN_RADIX,
+    ACCEPT_DIGIT_RADIX,
+    ACCUMULATE_DIGITS,
+    ACCUMULATE_FRACTION,
+    ACCEPT_EXPONENT_SIGN,
+    ACCUMULATE_EXPONENT
+  };
+
   private final static int DEFAULT_BUFFER_SIZE = 64;
+
+  private final static char BACKSPACE = '\b';
   private final static char CARET = '^';
+  private final static char CRETURN = '\r';
+  private final static char FORMFEED = '\f';
   private final static char NEWLINE = '\n';
   private final static char SPACE = ' ';
+  private final static char TAB = '\t';
 
-  private final static char[] empty = new char[] {};
-  private final static char[] backspace = new char[] { '\b' };
-  private final static char[] formfeed = new char[] { '\f' };
-  private final static char[] newline = new char[] { '\n' };
-  private final static char[] creturn = new char[] { '\r' };
-  private final static char[] tab = new char[] { '\t' };
+  private final static char[] EMPTY_ARRAY = new char[] {};
+  private final static char[] BACKSPACE_ARRAY = new char[] { BACKSPACE };
+  private final static char[] FORMFEED_ARRAY = new char[] { FORMFEED };
+  private final static char[] NEWLINE_ARRAY = new char[] { NEWLINE };
+  private final static char[] RETURN_ARRAY = new char[] { CRETURN };
+  private final static char[] TAB_ARRAY = new char[] { TAB };
+
+  private static final String FALSE_STR = "false";
+  private static final String TRUE_STR = "true";
+  private static final String NULL_STR = "null";
 
   private boolean ignoreCase;
   private int cursor;
@@ -47,6 +63,7 @@ public class JSONParser {
   private String lineBuffer;
   private String source;
   private List<String> errors;
+  private Locale locale;
   private BufferedReader reader;
 
   /**
@@ -81,6 +98,7 @@ public class JSONParser {
     array = null;
     lineBuffer = null;
     errors = null;
+    locale = Locale.getDefault();
   }
 
   /**
@@ -113,7 +131,7 @@ public class JSONParser {
   /**
    * Construct a JSONParser configured to parse the specified input.
    *
-   * @param input  a string in JSON format to be parsed.
+   * @param input  a string in JSON format.
    * @return the JSON resulting from parsing the input.
    */
   public JSON parse(final String input) {
@@ -147,6 +165,12 @@ public class JSONParser {
     return json;
   }
 
+  /**
+   * Parse a string in JSON format containing an array.
+   *
+   * @param inputa string in JSON format.
+   * @return the JSONArray resulting from parsing the input.
+   */
   public JSONArray parseArray(final String input) {
     init(input);
     level = 0;
@@ -294,15 +318,15 @@ public class JSONParser {
 	  }
 	  String word = lineBuffer.substring(mark, cursor);
 	  if ( ignoreCase ) {
-	    word = word.toLowerCase();
+	    word = word.toLowerCase(locale);
 	  }
-	  if ( word.equals("null") ) {
+	  if ( NULL_STR.equals(word) ) {
 	    result = null;
 	  }
-	  else if ( word.equals("true") ) {
+	  else if ( TRUE_STR.equals(word) ) {
 	    result = Boolean.TRUE;
 	  }
-	  else if ( word.equals("false") ) {
+	  else if ( FALSE_STR.equals(word) ) {
 	    result = Boolean.FALSE;
 	  }
 	  else {
@@ -336,29 +360,30 @@ public class JSONParser {
     }
   }
 
+  @SuppressWarnings("PMD.NPathComplexity")
   private Object parseNumber() {
     boolean done = false;
     boolean isDouble = false;
     boolean leadingZero = false;
-    int state = ACCEPT_DIGIT_SIGN_RADIX;
+    ScannerState state = ScannerState.ACCEPT_DIGIT_SIGN_RADIX;
     final int mark = cursor;
     final StringBuilder builder = new StringBuilder();
     while ( !done && hasNext() ) {
       // Skip whitespace only for first character of number.
-      final char input = next(state == ACCEPT_DIGIT_SIGN_RADIX);
+      final char input = next(state == ScannerState.ACCEPT_DIGIT_SIGN_RADIX);
       switch ( state ) {
       case ACCEPT_DIGIT_SIGN_RADIX:
 	if ( Character.isDigit(input) ) {
-	  state = ACCUMULATE_DIGITS;
+	  state = ScannerState.ACCUMULATE_DIGITS;
 	  if ( input == '0' ) {
 	    leadingZero = true;
 	  }
 	}
 	else if ( input == '-' ) {
-	  state = ACCEPT_DIGIT_RADIX;
+	  state = ScannerState.ACCEPT_DIGIT_RADIX;
 	}
 	else if ( input == '.' ) {
-	  state = ACCUMULATE_FRACTION;
+	  state = ScannerState.ACCUMULATE_FRACTION;
 	}
 	else {
 	  unexpectedNumericInput(mark, input);
@@ -367,13 +392,13 @@ public class JSONParser {
 	break;
       case ACCEPT_DIGIT_RADIX:
 	if ( Character.isDigit(input) ) {
-	  state = ACCUMULATE_DIGITS;
+	  state = ScannerState.ACCUMULATE_DIGITS;
 	  if ( input == '0' ) {
 	    leadingZero = true;
 	  }
 	}
 	else if ( input == '.' ) {
-	  state = ACCUMULATE_FRACTION;
+	  state = ScannerState.ACCUMULATE_FRACTION;
 	}
 	else {
 	  unexpectedNumericInput(mark, input);
@@ -383,10 +408,10 @@ public class JSONParser {
       case ACCUMULATE_DIGITS:
 	// Accumulating initial digits.
 	if ( input == '.' ) {
-	  state = ACCUMULATE_FRACTION;
+	  state = ScannerState.ACCUMULATE_FRACTION;
 	}
 	else if ( input == 'e' || input == 'E' ) {
-	  state = ACCEPT_EXPONENT_SIGN;
+	  state = ScannerState.ACCEPT_EXPONENT_SIGN;
 	}
 	else if ( Character.isDigit(input) ) {
 	  if ( leadingZero ) {
@@ -401,7 +426,7 @@ public class JSONParser {
       case ACCUMULATE_FRACTION:
 	isDouble = true;
 	if ( input == 'e' || input == 'E' ) {
-	  state = ACCEPT_EXPONENT_SIGN;
+	  state = ScannerState.ACCEPT_EXPONENT_SIGN;
 	}
 	else if ( !Character.isDigit(input) ) {
 	  unexpectedNumericInput(mark, input);
@@ -411,7 +436,7 @@ public class JSONParser {
       case ACCEPT_EXPONENT_SIGN:
 	isDouble = true;
 	if ( input == '-' || input == '+' ) {
-	  state = ACCUMULATE_EXPONENT;
+	  state = ScannerState.ACCUMULATE_EXPONENT;
 	}
 	else if ( !Character.isDigit(input) ) {
 	  unexpectedNumericInput(mark, input);
@@ -423,6 +448,8 @@ public class JSONParser {
 	  unexpectedNumericInput(mark, input);
 	  done = true;
 	}
+	break;
+      default:
 	break;
       }
       if ( !done ) {
@@ -450,23 +477,23 @@ public class JSONParser {
     final StringBuilder builder = new StringBuilder();
     while ( hasNext() ) {
       final char input = next(false);
-      char[] chars = empty;
+      char[] chars = EMPTY_ARRAY;
       if ( escape ) {
 	switch ( input ) {
 	case 'b':
-	  chars = backspace;
+	  chars = BACKSPACE_ARRAY;
 	  break;
 	case 'f':
-	  chars = formfeed;
+	  chars = FORMFEED_ARRAY;
 	  break;
 	case 'n':
-	  chars = newline;
+	  chars = NEWLINE_ARRAY;
 	  break;
 	case 'r':
-	  chars = creturn;
+	  chars = RETURN_ARRAY;
 	  break;
 	case 't':
-	  chars = tab;
+	  chars = TAB_ARRAY;
 	  break;
 	case 'u':
 	  chars = getUnicodeChar();
@@ -493,7 +520,7 @@ public class JSONParser {
   }
 
   private char[] getUnicodeChar() {
-    char[] result = empty;
+    char[] result = EMPTY_ARRAY;
     final int mark = cursor - 2;
     int codePoint = 0;
     int count = 4;
