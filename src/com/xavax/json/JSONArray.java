@@ -13,15 +13,13 @@ import java.util.Map;
 import com.xavax.json.JSON.Format;
 import com.xavax.util.CollectionFactory;
 
+import static com.xavax.util.Constants.*;
+
 /**
  * JSONArray represents an array field in a JSON.
  */
 public class JSONArray extends ArrayList<Object> {
   public final static long serialVersionUID = 0;
-
-  private final static char COMMA = ',';
-  private final static char LEFT_BRACKET = '[';
-  private final static char RIGHT_BRACKET = ']';
 
   /**
    * Construct a JSONArray from a collection.

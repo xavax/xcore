@@ -11,6 +11,8 @@ import java.util.Formatter;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import static com.xavax.util.Constants.*;
+
 /**
  * XLogger is a logging utility class used in Xavax products.
  *
@@ -19,11 +21,8 @@ import org.apache.log4j.Logger;
 public final class XLogger {
   public final static int DEFAULT_LENGTH = 128;
   public final static int EXTRA_LENGTH = 64;
-  public final static String EMPTY = "";
   public final static String ENTER = "enter";
   public final static String LEAVE = "leave";
-  public final static String NULLBRK = "<null>";
-  public final static String NULLSTR = "null";
   public final static String UNKNOWN = "<unknown>";
   public final static String LEAVE_MESSAGE = "leave, return value = [";
 
@@ -373,7 +372,7 @@ public final class XLogger {
   {
     if ( logger != null && logger.isTraceEnabled() ) {
       logger.trace(formatLeave(logger, method,
-	  result == null ? NULLSTR : result.toString()));
+	  result == null ? NULL_STRING : result.toString()));
     }
   }
 
@@ -421,7 +420,7 @@ public final class XLogger {
   private static String format(final Logger logger, final String method,
                                final String message)
   {
-    String result = EMPTY;
+    String result = EMPTY_STRING;
     if ( logger != null ) {
       final int length = message.length() + EXTRA_LENGTH;
       final StringBuilder builder = new StringBuilder(length);
@@ -444,12 +443,12 @@ public final class XLogger {
   private static String formatLeave(final Logger logger, final String method,
                                     final String result)
   {
-    String output = EMPTY;
+    String output = EMPTY_STRING;
     if ( logger != null ) {
       final StringBuilder builder = new StringBuilder(DEFAULT_LENGTH); 
       addPrefix(builder, logger, method);
       builder.append(LEAVE_MESSAGE)
-             .append(result == null ? NULLBRK : result)
+             .append(result == null ? NULL_BRK_STRING : result)
              .append(']');
       output = builder.toString();
     }
@@ -469,7 +468,7 @@ public final class XLogger {
   public static String format(final Logger logger, final String method,
                               final String format, final Object... params)
   {
-    String output = EMPTY;
+    String output = EMPTY_STRING;
     if ( logger != null ) {
       final StringBuilder builder = new StringBuilder();
       addPrefix(builder, logger, method);

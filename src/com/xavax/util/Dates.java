@@ -4,11 +4,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import static com.xavax.util.Constants.EMPTY_STRING;
+
 /**
  * Dates is a utility class for manipulating dates and timestamps.
  */
 public final class Dates {
-  private final static String EMPTY = "";
   private final static String ISO_TIMESTAMP = "yyyy-MM-ddTHH:mm:ss.SSS";
   private final static String ISO_TIMESTAMP_ND = "yyyyMMddTHHmmss";
 
@@ -28,7 +29,7 @@ public final class Dates {
   public static String timestamp(final Date date, final boolean delimited) {
     final SimpleDateFormat formatter =
 	new SimpleDateFormat(delimited ? ISO_TIMESTAMP : ISO_TIMESTAMP_ND, Locale.getDefault());
-    return date == null ? EMPTY : formatter.format(date);
+    return date == null ? EMPTY_STRING : formatter.format(date);
   }
 
   /**

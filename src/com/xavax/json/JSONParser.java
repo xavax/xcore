@@ -14,6 +14,8 @@ import java.util.Locale;
 
 import com.xavax.util.CollectionFactory;
 
+import static com.xavax.util.Constants.*;
+
 /**
  * JSONParser is a parser for strings in JSON format.
  */
@@ -35,24 +37,12 @@ public class JSONParser {
 
   private final static int DEFAULT_BUFFER_SIZE = 64;
 
-  private final static char BACKSPACE = '\b';
-  private final static char CARET = '^';
-  private final static char CRETURN = '\r';
-  private final static char FORMFEED = '\f';
-  private final static char NEWLINE = '\n';
-  private final static char SPACE = ' ';
-  private final static char TAB = '\t';
-
   private final static char[] EMPTY_ARRAY = new char[] {};
   private final static char[] BACKSPACE_ARRAY = new char[] { BACKSPACE };
   private final static char[] FORMFEED_ARRAY = new char[] { FORMFEED };
   private final static char[] NEWLINE_ARRAY = new char[] { NEWLINE };
   private final static char[] RETURN_ARRAY = new char[] { CRETURN };
   private final static char[] TAB_ARRAY = new char[] { TAB };
-
-  private static final String FALSE_STRING = "false";
-  private static final String TRUE_STRING = "true";
-  private static final String NULL_STRING = "null";
 
   private boolean ignoreCase;
   private int cursor;

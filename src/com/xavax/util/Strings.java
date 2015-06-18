@@ -8,12 +8,13 @@ package com.xavax.util;
 
 import java.util.Comparator;
 
+import static com.xavax.util.Constants.EMPTY_STRING;
+
 /**
  * Useful String utilities.
  */
 public final class Strings {
   private final static int DEFAULT_BUFFER_SIZE = 256;
-  private final static String EMPTY = "";
   private final static StringComparator COMPARATOR = new StringComparator();
 
   /**
@@ -40,7 +41,7 @@ public final class Strings {
    * @return the hash code for a string
    */
   public static int hashCode(final String input) {
-    return input == null || EMPTY.equals(input) ? 1 : input.hashCode();
+    return input == null || EMPTY_STRING.equals(input) ? 1 : input.hashCode();
   }
 
   /**

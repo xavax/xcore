@@ -12,6 +12,7 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import com.xavax.logger.XLogger;
+import static com.xavax.util.Constants.*;
 
 /**
  * XObject (eXtended Object) is a base class for objects that
@@ -375,7 +376,7 @@ public class XObject {
   {
     if ( logger != null && logger.isTraceEnabled() ) {
       logger.trace(formatLeave(method,
-	  result == null ? XLogger.NULLSTR : result.toString()));
+	  result == null ? NULL_STRING : result.toString()));
     }
   }
 
@@ -435,7 +436,7 @@ public class XObject {
   {
     final StringBuilder builder = new StringBuilder(prefix);
     format(builder, method, XLogger.LEAVE_MESSAGE);
-    builder.append(result == null ? XLogger.NULLBRK : result)
+    builder.append(result == null ? NULL_BRK_STRING : result)
     	   .append(']');
     return builder.toString();
   }

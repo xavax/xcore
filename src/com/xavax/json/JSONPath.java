@@ -7,6 +7,8 @@ package com.xavax.json;
 
 import java.util.ArrayList;
 
+import static com.xavax.util.Constants.*;
+
 /**
  * JSONPath encapsulates a path used to navigate through a JSON to a specific
  * element.
@@ -16,8 +18,6 @@ import java.util.ArrayList;
 public class JSONPath extends ArrayList<String> {
   public final static long serialVersionUID = 0;
 
-  private final static char PERIOD = '.';
-  private final static String EMPTY = "";
   private final static String SEPARATOR_REGEX = "[.]";
 
   /**
@@ -48,10 +48,10 @@ public class JSONPath extends ArrayList<String> {
    */
   public JSONPath append(final String... paths) {
     for ( final String path : paths ) {
-      if ( path != null && !path.equals(EMPTY) ) {
+      if ( path != null && !path.equals(EMPTY_STRING) ) {
 	final String[] parts = path.trim().split(SEPARATOR_REGEX);
 	for ( final String part : parts ) {
-	  if ( part != null && !part.equals(EMPTY) ) {
+	  if ( part != null && !part.equals(EMPTY_STRING) ) {
 	    add(part);
 	  }
 	}

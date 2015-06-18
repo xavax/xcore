@@ -8,15 +8,13 @@ package com.xavax.event;
 
 import com.xavax.util.Dates;
 
+import static com.xavax.util.Constants.*;
+
 /**
  * TimeEvent extends BasicEvent by adding a timestamp as well as a
  * general purpose "info" field that can store any object.
  */
 public class TimeEvent extends BasicEvent {
-
-  private final static char COMMA = ',';
-  private final static char RIGHT_PAREN = ')';
-  private final static String NULLSTR = "null";
 
   protected long timestamp;
   protected Object info;
@@ -94,6 +92,6 @@ public class TimeEvent extends BasicEvent {
   public String toString()
   {
     return "TE(" + type + COMMA + Dates.timestamp(timestamp) +
-	COMMA + (info == null ? NULLSTR : info.toString()) + RIGHT_PAREN;
+	COMMA + (info == null ? NULL_STRING : info.toString()) + RIGHT_PAREN;
   }
 }

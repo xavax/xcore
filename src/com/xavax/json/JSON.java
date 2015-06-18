@@ -13,14 +13,13 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.xavax.util.CollectionFactory;
 
+import static com.xavax.util.Constants.*;
+
 /**
  * JSON represents a JSON object as nested hashmaps.
  */
 public class JSON extends HashMap<String, Object> {
-  private static final char RIGHT_BRACE = '}';
-  private static final char LEFT_BRACE = '{';
-  private static final char COLON = ':';
-  private static final char COMMA = ',';
+
   public final static long serialVersionUID = 0;
 
   /**
