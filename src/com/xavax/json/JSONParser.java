@@ -50,9 +50,9 @@ public class JSONParser {
   private final static char[] RETURN_ARRAY = new char[] { CRETURN };
   private final static char[] TAB_ARRAY = new char[] { TAB };
 
-  private static final String FALSE_STR = "false";
-  private static final String TRUE_STR = "true";
-  private static final String NULL_STR = "null";
+  private static final String FALSE_STRING = "false";
+  private static final String TRUE_STRING = "true";
+  private static final String NULL_STRING = "null";
 
   private boolean ignoreCase;
   private int cursor;
@@ -320,13 +320,13 @@ public class JSONParser {
 	  if ( ignoreCase ) {
 	    word = word.toLowerCase(locale);
 	  }
-	  if ( NULL_STR.equals(word) ) {
+	  if ( NULL_STRING.equals(word) ) {
 	    result = null;
 	  }
-	  else if ( TRUE_STR.equals(word) ) {
+	  else if ( TRUE_STRING.equals(word) ) {
 	    result = Boolean.TRUE;
 	  }
-	  else if ( FALSE_STR.equals(word) ) {
+	  else if ( FALSE_STRING.equals(word) ) {
 	    result = Boolean.FALSE;
 	  }
 	  else {
