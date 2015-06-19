@@ -68,8 +68,8 @@ public class JSONParser {
   /**
    * Construct a JSONParser with the specified reader and source.
    *
-   * @param reader
-   * @param source
+   * @param reader  the reader to use for input.
+   * @param source  the source name to associate with the input.
    */
   public JSONParser(final Reader reader, final String source) {
     this.source = source;
@@ -94,9 +94,9 @@ public class JSONParser {
   /**
    * Parse an input string in JSON format and return a JSON.
    *
-   * @param reader
-   * @param source
-   * @return
+   * @param reader  the reader to use for input.
+   * @param source  the source name to associate with the input.
+   * @return a JSON object.
    */
   static public JSON parse(final Reader reader, final String source) {
     JSON result = null;

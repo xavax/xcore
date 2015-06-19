@@ -7,32 +7,38 @@ package com.xavax.json;
 
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
+
 import java.util.List;
 import java.util.Map;
 
-import com.xavax.json.JSON;
-import com.xavax.json.JSONArray;
-import com.xavax.json.JSONParser;
-import com.xavax.json.JSONPath;
 import com.xavax.util.CollectionFactory;
 
 import static org.testng.Assert.*;
 
+/**
+ * Test the JSON class.
+ */
 public class TestJSON {
+  private static final String COSMO = "Cosmo";
+
+  private static final String CHARLOTTE = "Charlotte";
+
+  private static final String BIRMINGHAM = "Birmingham";
+
+  private static final String ATLANTA = "Atlanta";
+
   // Featuring the infamous rapper TuPie, because FindBugs
   // would not stop complaining about "coarse values of pi". :(
   private final static double TUPIE = 6.28;
 
-  private JSONParser parser;
-
-  private final JSON.Format myFormat = new JSON.Format(false, "", "\"", "", "",
+  private final static JSON.Format CUSTOM_FORMAT = new JSON.Format(false, "", "\"", "", "",
       "", "", "", "", "", "");
 
-  private final String input1 =
+  private final static String INPUT1 =
       "{foo:{x:\"1\",y:\"2\"},bar:{x:\"3\",y:\"4\"}," +
 	  "baz:{x:\"5\",y:\"6\",name:{first:\"John\",last:\"Doe\"}}," +
 	  "cities:[\"Atlanta\",\"Birmingham\",\"Charlotte\"]}";
-  private final String input2 =
+  private final static String INPUT2 =
       "{cities:[" +
 	  "{name: 'Atlanta', x: 3.0000, y: 4.0000, pop: 4500000}," +
 	  "{name: 'Birmingham', x: 1.0000, y: 2.0000, pop: 1250000, people: [" +
@@ -40,149 +46,175 @@ public class TestJSON {
 	  "{name: {first: 'Judy', last: 'Jetson'}}," +
 	  "{name: {first: 'Cosmo', last: 'Spacely'}}]}," +
 	  "{name: 'Charlotte', x: 5.0000, y: 6.0000, pop: 2000000}]}";
-  final String input3 =
+  private final static String INPUT3 =
       "{restaurants:[" +
 	  "{name:'Clint\\'s Burgers'}," +
 	  "{name:'Kurt\\'s Pizza'}," +
 	  "{name:'Phil\\'s BBQ'}]}";
-  final String input4 =
+  private final static String INPUT4 =
       "{x: '100', tupie: '6.28', flag: 'true', z: 123}";
+  private final static String JOHN = "John";
 
+  private JSONParser parser;
+
+  /**
+   * Test setup.
+   */
   @BeforeMethod
   public void setUp() {
     parser = new JSONParser();
   }
 
+  /**
+   * Test the toString method.
+   */
   @Test
   public void testToString() {
-    JSON result = parser.parse(input1);
+    final JSON result = parser.parse(INPUT1);
     assertNotNull(result);
-    String s = result.toString(JSON.Format.COMPACT);
-    assertNotNull(s);
-    s = result.toString(JSON.Format.EXPANDED);
-    assertNotNull(s);
-    s = result.toString(JSON.Format.VERBOSE);
-    assertNotNull(s);
+    String string = result.toString(JSON.Format.COMPACT);
+    assertNotNull(string);
+    string = result.toString(JSON.Format.EXPANDED);
+    assertNotNull(string);
+    string = result.toString(JSON.Format.VERBOSE);
+    assertNotNull(string);
   }
 
+  /**
+   * Test escaping in string literals.
+   */
   @Test
   public void testEscaping() {
-    JSON result = parser.parse(input3);
+    final JSON result = parser.parse(INPUT3);
     assertNotNull(result);
-    String s = result.toString(JSON.Format.COMPACT);
-    assertEquals(s, input3);
-    s = result.toString(myFormat);
-    assertNotNull(s);
-    s = result.toString(JSON.Format.EXPANDED);
-    assertNotNull(s);
-    s = result.toString(JSON.Format.VERBOSE);
-    assertNotNull(s);
+    String string = result.toString(JSON.Format.COMPACT);
+    assertEquals(string, INPUT3);
+    string = result.toString(CUSTOM_FORMAT);
+    assertNotNull(string);
+    string = result.toString(JSON.Format.EXPANDED);
+    assertNotNull(string);
+    string = result.toString(JSON.Format.VERBOSE);
+    assertNotNull(string);
   }
 
+  /**
+   * Test traversal using a path.
+   */
   @Test
   public void testPath() {
-    JSON result = parser.parse(input1);
+    final JSON result = parser.parse(INPUT1);
     assertNotNull(result);
     JSONPath path = new JSONPath("baz.name.first");
-    String s = result.getString(path);
-    assert (s.equals("John"));
+    final String string = result.getString(path);
+    assertTrue(JOHN.equals(string));
     path = new JSONPath("baz.name");
-    JSON name = result.getJSON(path);
-    assert (name instanceof JSON);
+    final JSON name = result.getJSON(path);
+    assertTrue(name instanceof JSON);
   }
 
+  /**
+   * Test traversal of arrays using a path.
+   */
   @Test
   public void testPathArrays() {
-    JSON result = parser.parse(input2);
+    final JSON result = parser.parse(INPUT2);
     assertNotNull(result);
     JSONPath path = new JSONPath("cities.name");
-    String s = result.getString(path);
-    assert (s.equals("Atlanta"));
-    s = result.getString(path, 1);
-    assert (s.equals("Birmingham"));
-    s = result.getString(path, 2);
-    assert (s.equals("Charlotte"));
+    assertEquals(result.getString(path, 0), ATLANTA);
+    assertEquals(result.getString(path, 1), BIRMINGHAM);
+    assertEquals(result.getString(path, 2), CHARLOTTE);
     path = new JSONPath("cities.people.name.first");
-    s = result.getString(path, 1, 2);
-    assert (s.equals("Cosmo"));
+    assertEquals(result.getString(path, 1, 2), COSMO);
   }
 
+  /**
+   * Test the flatten method.
+   */
   @Test
   public void testFlatten() {
-    JSON json = parser.parse(input1);
+    JSON json = parser.parse(INPUT1);
     assertNotNull(json);
     Map<String, String> result = json.flatten();
     assertEquals(result.size(), json.size());
-    json = parser.parse(input2);
+    json = parser.parse(INPUT2);
     assertNotNull(json);
     result = json.flatten();
     assertEquals(result.size(), json.size());
   }
 
+  /**
+   * Test the merge method.
+   */
   @Test
   public void testMerge() {
-    JSON json2 = parser.parse(input2);
+    final JSON json2 = parser.parse(INPUT2);
     assertNotNull(json2);
-    int size2 = json2.size();
-    JSON json3 = parser.parse(input3);
+    final int size2 = json2.size();
+    final JSON json3 = parser.parse(INPUT3);
     assertNotNull(json3);
-    int size3 = json3.size();
+    final int size3 = json3.size();
     json2.merge(json3);
-    JSON json4 = parser.parse(input4);
+    final JSON json4 = parser.parse(INPUT4);
     assertNotNull(json4);
-    int size4 = json4.size();
+    final int size4 = json4.size();
     json2.merge(json4);
     assertEquals(json2.size(), size2 + size3 + size4);
   }
 
+  /**
+   * Test the type conversions.
+   */
   @Test
   public void testConversions() {
-    JSON json = parser.parse(input4);
+    final JSON json = parser.parse(INPUT4);
     assertNotNull(json);
-    long x = json.getLong("x");
-    assertEquals(x, 100);
-    double tupie = json.getDouble("tupie");
+    final long xvalue = json.getLong("x");
+    assertEquals(xvalue, 100);
+    final double tupie = json.getDouble("tupie");
     assertEquals(tupie, TUPIE);
-    boolean flag = json.getBoolean("flag");
+    final boolean flag = json.getBoolean("flag");
     assertEquals(flag, true);
-    String z = json.getString("z");
-    assertEquals(z, "123");
+    final String zvalue = json.getString("z");
+    assertEquals(zvalue, "123");
   }
 
+  /**
+   * Test parsing example 1.
+   */
   @Test
   public void testExample1() {
     final String input = "{\"calendars\":[{\"calendarID\":\"900000002\",\"calendarName\":\"My Business Calendar\",\"calendarUri\":{\"href\":\"/v1_0/O/A/calendarDetail/900000002\"}},{\"calendarID\":\"900000000\",\"calendarName\":\"My Business Calendar\",\"calendarUri\":{\"href\":\"/v1_0/O/A/calendarDetail/900000000\"}}]}";
-    JSON result = parser.parse(input);
+    final JSON result = parser.parse(input);
     assertTrue(parser.isValid());
-    String s = result.toString(JSON.Format.VERBOSE);
-    System.out.println(s);
-    JSONPath calendarsPath = new JSONPath("calendars");
-    JSONArray calendars = result.getArray(calendarsPath);
+    System.out.println(result.toString(JSON.Format.VERBOSE));
+    final JSONPath calendarsPath = new JSONPath("calendars");
+    final JSONArray calendars = result.getArray(calendarsPath);
     // JSONArray calendars = result.getArray("calendars");
     assertNotNull(calendars);
-    List<String> calendarIDs = CollectionFactory.arrayList();
-    for (Object o : calendars) {
-      if ( o instanceof JSON ) {
-	JSON calendar = (JSON) o;
-	String id = calendar.getString("calendarID");
-	calendarIDs.add(id);
+    final List<String> calendarIDs = CollectionFactory.arrayList();
+    for ( final Object object : calendars ) {
+      if ( object instanceof JSON ) {
+	final JSON calendar = (JSON) object;
+	final String calendarId = calendar.getString("calendarID");
+	calendarIDs.add(calendarId);
       }
     }
     System.out.println(calendarIDs.toString());
   }
 
+  /**
+   * Test parsing example 2.
+   */
   @Test
   public void testExample2() {
     final String input = "{\"calendarDetail\":{\"calendarConfiguration\":{\"timeNotationCode\":\"12h\",\"categories\":[{\"code\":\"B\",\"name\":\"Benefit\",\"colorCode\":\"FF0000\",\"eventTypes\":[{\"code\":\"BOE\",\"name\":\"Benefits Open Enrollment\",\"colorCode\":\"FF0000\"}]},{\"code\":\"H\",\"name\":\"Human Resource\",\"colorCode\":\"00FF00\",\"eventTypes\":[{\"code\":\"CH\",\"name\":\"Company Holiday\",\"colorCode\":\"00FF00\"},{\"code\":\"CE\",\"name\":\"Company Event\",\"colorCode\":\"00FF00\"}]},{\"code\":\"P\",\"name\":\"Payroll\",\"colorCode\":\"0000F1\",\"eventTypes\":[{\"code\":\"PS\",\"name\":\"Pay Schedule\",\"colorCode\":\"0000F1\"}]},{\"code\":\"R\",\"name\":\"Retirement\",\"colorCode\":\"FFAB00\",\"eventTypes\":[{\"code\":\"RPE\",\"name\":\"Retirement Plan Enrollment\",\"colorCode\":\"FFAB00\"}]},{\"code\":\"T\",\"name\":\"Time Management\",\"colorCode\":\"FFAAA2\",\"eventTypes\":[{\"code\":\"WS\",\"name\":\"Work Schedule\",\"colorCode\":\"FFAAA2\"},{\"code\":\"WK\",\"name\":\"Worked\",\"colorCode\":\"FFAAA3\"},{\"code\":\"PTO\",\"name\":\"Paid Time Off\",\"colorCode\":\"FFAAA4\"},{\"code\":\"BLK\",\"name\":\"Black Out\",\"colorCode\":\"FFAAA5\"}]}]},\"calendar\":{\"calendarID\":\"900000002\",\"calendarName\":\"My Business Calendar\",\"timePeriod\":{\"startDateTime\":\"2011-11-17\",\"endDateTime\":\"2011-12-17\"}}}}";
-    JSON result = parser.parse(input);
+    final JSON result = parser.parse(input);
     assertTrue(parser.isValid());
-    String s = result.toString(JSON.Format.VERBOSE);
-    System.out.println(s);
-    JSONPath eventIDs = new JSONPath(
+    System.out.println(result.toString(JSON.Format.VERBOSE));
+    final JSONPath eventIDs = new JSONPath(
 	"calendarDetail.calendarConfiguration.categories.eventTypes.code");
-    String code = result.getString(eventIDs, 4, 3);
+    final String code = result.getString(eventIDs, 4, 3);
     assertEquals(code, "BLK");
-    Object o = result.get(eventIDs);
-    assertEquals(o, "BOE");
+    assertEquals(result.get(eventIDs), "BOE");
   }
 }

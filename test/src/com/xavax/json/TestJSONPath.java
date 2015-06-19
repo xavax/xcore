@@ -7,12 +7,16 @@ package com.xavax.json;
 
 import org.testng.annotations.Test;
 
-import com.xavax.json.JSONPath;
-
 import static org.testng.Assert.*;
 
+/**
+ * Test cases for the JSONPath class.
+ */
 public class TestJSONPath {
 
+  /**
+   * Test the JSONPath constructors.
+   */
   @Test
   public void testPath() {
     JSONPath path = new JSONPath("abc.def.ghi");
