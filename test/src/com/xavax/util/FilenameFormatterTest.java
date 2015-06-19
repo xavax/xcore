@@ -19,7 +19,7 @@ import static org.testng.Assert.*;
  *
  * @author alvitar@xavax.com
  */
-public class TestFilenameFormatter {
+public class FilenameFormatterTest {
   private final static String EXPECTED = "test19590719123456.log";
   private final static String PREFIX = "test";
   private final static String SUFFIX = ".log";

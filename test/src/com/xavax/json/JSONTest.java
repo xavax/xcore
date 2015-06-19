@@ -18,7 +18,7 @@ import static org.testng.Assert.*;
 /**
  * Test the JSON class.
  */
-public class TestJSON {
+public class JSONTest {
   private static final String COSMO = "Cosmo";
 
   private static final String CHARLOTTE = "Charlotte";

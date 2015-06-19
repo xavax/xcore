@@ -12,7 +12,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for classes in the event package.
  */
-public class TestEventHandling  {
+public class EventTest  {
 
   /**
    * Test Event methods.

@@ -3,7 +3,7 @@ package com.xavax.util;
 /**
  * Constants used through Xavax products.
  */
-public class Constants {
+public final class Constants {
   public final static char BACKSPACE = '\b';
   public final static char CARET = '^';
   public final static char COLON = ':';

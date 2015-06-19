@@ -19,7 +19,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for the JSON parser.
  */
-public class TestJSONParser {
+public class JSONParserTest {
 
   private final static int    BAZ_VALUE = 123;
   private final static double ABC_VALUE = 1.234e+05;

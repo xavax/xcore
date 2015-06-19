@@ -27,7 +27,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for CollectionFactory.
  */
-public class TestCollectionFactory {
+public class CollectionFactoryTest {
   public final static int INITIAL_CAPACITY = 32;
 
   /**

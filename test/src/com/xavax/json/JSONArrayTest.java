@@ -16,7 +16,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for the JSONArray class.
  */
-public class TestJSONArray {
+public class JSONArrayTest {
   private JSONParser parser;
 
   private final static String INPUT_ATL =

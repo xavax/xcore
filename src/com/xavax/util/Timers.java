@@ -3,20 +3,20 @@
 // Use of this software is allowed under the Xavax Open Software License.
 // http://www.xavax.com/xosl.html
 //
-package com.xavax.test;
+package com.xavax.util;
 
 /**
- * XCacheTestCase is a base class for XCache test cases.
+ * Timers is a utility class for timers and sleeping.
  * 
  * @author alvitar@xavax.com
  */
-public final class XTestUtils {
+public final class Timers {
 
   /**
    * Private constructor provided to keep the compiler from generating
    * a public default constructor.
    */
-  private XTestUtils() {}
+  private Timers() {}
 
   /**
    * Sleep the specified number of milliseconds.

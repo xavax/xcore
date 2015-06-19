@@ -9,11 +9,11 @@ package com.xavax.base;
 import org.testng.annotations.Test;
 
 /**
- * Test cast for XObject.
+ * Test cases for XObject.
  *
  * @author alvitar@xavax.com
  */
-public class TestXObject extends XObject {
+public class XObjectTest extends XObject {
 
   /**
    * Test the debug logging method.

@@ -41,7 +41,7 @@ public class TimeMetricTest {
     metric.addTransaction(START_TIME, STOP_TIME + 1);
     metric.addTransaction(START_TIME, STOP_TIME + 2);
     metric.addTransaction(START_TIME, STOP_TIME + 3);
-    metric.addTransaction(START_TIME, STOP_TIME + 4);
+    metric.addTransaction(START_TIME);
     final TimeMetric.Result result = metric.result();
     assertEquals(result.count(), 5);
   }
@@ -57,10 +57,11 @@ public class TimeMetricTest {
     assertEquals(result.toString(), "(1, 100, 100, 100.00, 0.00)");
     metric.addTransaction(START_TIME, STOP_TIME + 1);
     metric.addTransaction(START_TIME, STOP_TIME + 2);
-    metric.addTransaction(START_TIME, STOP_TIME + 3);
     metric.addTransaction(START_TIME, STOP_TIME + 4);
+    metric.addTransaction(START_TIME, STOP_TIME + 3);
     result = metric.result();
     assertEquals(result.toString(), "(5, 100, 104, 102.00, 1.41)");
+    assertEquals(result.toString(), metric.toString());
   }
 
   /**
@@ -72,5 +73,38 @@ public class TimeMetricTest {
     metric.addTransaction(START_TIME, STOP_TIME);
     final TimeMetric.Result result = metric.result();
     assertEquals(result.min(), 1);
+  }
+
+  /**
+   * Test the reset method.
+   */
+  @Test
+  public void testReset() {
+    metric.addTransaction(START_TIME);
+    metric.addTransaction(START_TIME);
+    metric.reset();
+    metric.addTransaction(START_TIME);
+    metric.addTransaction(START_TIME);
+    final TimeMetric.Result result = metric.result();
+    assertEquals(result.count(), 2);
+  }
+
+  /**
+   * Test statistics.
+   */
+  @Test
+  public void testStatistics() {
+    metric.addTransaction(START_TIME, STOP_TIME);
+    metric.addTransaction(START_TIME, STOP_TIME + 1);
+    metric.addTransaction(START_TIME, STOP_TIME + 2);
+    metric.addTransaction(START_TIME, STOP_TIME + 4);
+    metric.addTransaction(START_TIME, STOP_TIME + 3);
+    final TimeMetric.Result result = metric.result();
+    assertEquals(result.min(), 100);
+    assertEquals(result.max(), 104);
+    assertEquals(result.mean(), 102.0);
+    assertEquals(result.totalTime(), 510);
+    assertEquals(result.totalTimeSquared(), 52030);
+    assertEquals(result.deviation(), 1.4142135623730951);
   }
 }

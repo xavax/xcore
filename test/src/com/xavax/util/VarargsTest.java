@@ -13,7 +13,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for the Varargs class.
  */
-public class TestVarargs {
+public class VarargsTest {
   private final static int CAPACITY = 32;
   private final static String FLATTENED = "[A1, A2, A3, B1, B2, B3]";
   private final static String NESTED1 = "[[A1, A2, A3], [B1, B2, B3]]";

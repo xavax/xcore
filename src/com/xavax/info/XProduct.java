@@ -72,7 +72,7 @@ public class XProduct {
    */
   public String copyright()
   {
-    if (copyright == null) {
+    if ( copyright == null ) {
       final String year = String.format(copyrightEnd == 0 ? YEAR : YEAR_SPAN,
 	  copyrightBegin, copyrightEnd);
       copyright = String.format(template, year);
@@ -87,7 +87,7 @@ public class XProduct {
    */
   public String name()
   {
-	  return this.name;
+    return this.name;
   }
 
   /**
@@ -127,7 +127,7 @@ public class XProduct {
    */
   public String version()
   {
-    if (version == null) {
+    if ( version == null ) {
       version = name + " " + major + "." + minor + "." + patch;
     }
     return version;

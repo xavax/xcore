@@ -15,7 +15,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for the Strings utility class.
  */
-public class TestStrings {
+public class StringsTest {
   private final static int ALPHARETTA_HASH = 797734992;
   private final static String EMPTY = "";
   private final static String ALPHARETTA = "Alpharetta";

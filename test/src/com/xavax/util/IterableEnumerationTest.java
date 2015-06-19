@@ -18,7 +18,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for the IterableEnumeration class.
  */
-public class TestIterableEnumeration {
+public class IterableEnumerationTest {
   private final static String[] CITIES = new String[] {
       "Atlanta", "Birmingham", "Jackson"
   };

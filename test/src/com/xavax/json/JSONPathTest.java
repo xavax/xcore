@@ -12,7 +12,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for the JSONPath class.
  */
-public class TestJSONPath {
+public class JSONPathTest {
 
   /**
    * Test the JSONPath constructors.

@@ -14,7 +14,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for the IterableStringTokenizer class.
  */
-public class TestIterableStringTokenizer {
+public class IterableStringTokenizerTest {
   private final static int COUNT = 4;
   private final static String DELIMITERS = ",;:";
   private final static String INPUT2 = "abc,def;ghi:jkl";

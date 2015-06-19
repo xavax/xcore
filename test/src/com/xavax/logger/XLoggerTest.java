@@ -16,10 +16,10 @@ import static org.testng.Assert.*;
 /**
  * Test cases for the XLogger class.
  */
-public class TestXLogger {
-  private final static Logger LOGGER = Logger.getLogger(TestXLogger.class);
+public class XLoggerTest {
+  private final static Logger LOGGER = Logger.getLogger(XLoggerTest.class);
   private final static String EXPECT =
-      "TestXLogger.testFormatVarargs: p1=[param1], p2=[123] p3=[5.678000]";
+      "XLoggerTest.testFormatVarargs: p1=[param1], p2=[123] p3=[5.678000]";
 
   /**
    * Test the logger.
