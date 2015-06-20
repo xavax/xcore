@@ -54,4 +54,13 @@ http://www.xavax.com/xosl.html
 		<delete dir="test/build" />
 	</target>
 
+	<target name="cpd">
+	    <taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask" />
+	    <cpd minimumTokenCount="100" outputFile="/Users/alvitar/Workspaces/xavax/xcore/metrics/cpd.txt">
+	        <fileset dir="/Users/alvitar/Workspaces/xavax/xcore">
+	            <include name="**/*.java"/>
+	        </fileset>
+	    </cpd>
+	</target>
+
 </project>
