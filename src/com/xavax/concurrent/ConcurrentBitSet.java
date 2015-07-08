@@ -50,7 +50,7 @@ public class ConcurrentBitSet {
   private int logSegmentSize;
   private int currentMapSize;
   private long segmentMask;
-  private long segmentSize;
+  // private long segmentSize;
   // private long maxBitIndex;
   final private InternalMetrics metrics = new InternalMetrics();
   private ReentrantLock segmentMapLock;
@@ -89,8 +89,8 @@ public class ConcurrentBitSet {
       throw new RangeException(0, LOG2_MAX_SEGMENT_SIZE, logSegmentSize);
     }
     this.logSegmentSize = logSegmentSize;
-    this.segmentSize = 1 << this.logSegmentSize;
-    this.segmentMask = this.segmentSize - 1;
+    final long segmentSize = 1 << this.logSegmentSize;
+    this.segmentMask = segmentSize - 1;
     final int size = (int) (initialSize + segmentSize - 1) >>> logSegmentSize;
     this.currentMapSize = size;
     this.segmentMap = new SegmentMapEntry[size];
