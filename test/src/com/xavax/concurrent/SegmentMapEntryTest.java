@@ -12,13 +12,14 @@ import org.testng.annotations.BeforeMethod;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertNotNull;
+
 import static com.xavax.concurrent.ConcurrentBitSet.*;
+import static com.xavax.util.Constants.*;
 
 /**
  * Test the ConcurrentBitSet.SegmentMapEntry class.
  */
 public class SegmentMapEntryTest {
-  private final static String EXPECTED = "null";
   private final static int DEFAULT_SIZE = ConcurrentBitSet.LOG2_DEFAULT_SEGMENT_SIZE;
 
   private ConcurrentBitSet bitSet;
@@ -55,7 +56,7 @@ public class SegmentMapEntryTest {
    */
   @Test
   public void testToString() {
-    assertEquals(entry.toString(), EXPECTED);
+    assertEquals(entry.toString(), NULL_INDICATOR);
     final Segment segment = new Segment(bitSet, LOG2_DEFAULT_SEGMENT_SIZE);
     entry.set(segment);
     assertNotNull(entry.toString());

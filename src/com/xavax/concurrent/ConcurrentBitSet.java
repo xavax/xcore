@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.xavax.exception.RangeException;
+import static com.xavax.util.Constants.*;
 
 /**
  * ConcurrentBitSet encapsulates and manages an extendable bit set. The size
@@ -41,6 +42,7 @@ public class ConcurrentBitSet {
   final static int BITS_PER_INT = 1 << LOG2_BITS_PER_INT;
   final static int BITS_PER_LONG = 1 << LOG2_BITS_PER_LONG;
   final static int BITS_PER_PAGE = 1 << LOG2_BITS_PER_PAGE;
+  final static int DEFAULT_BUFFER_SIZE = 32768;
 
   final static int LOG2_DEFAULT_SEGMENT_SIZE = 16;
   final static int LOG2_MAX_SEGMENT_SIZE = BITS_PER_INT + LOG2_BITS_PER_PAGE;
@@ -283,7 +285,29 @@ public class ConcurrentBitSet {
    * @return a string representation of this bit set.
    */
   public String toString() {
-    return Arrays.toString(segmentMap);
+    return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+  }
+
+  /**
+   * Format a string representation of this bit set using the supplied builder.
+   *
+   * @param builder  the builder.
+   * @return the builder.
+   */
+  public StringBuilder toString(final StringBuilder builder) {
+    boolean first = true;
+    builder.append(LEFT_BRACKET);
+    for ( final SegmentMapEntry entry : segmentMap ) {
+      if ( first ) {
+	first = false;
+      }
+      else {
+	builder.append(COMMA_SEPARATOR);
+      }
+      entry.toString(builder);
+    }
+    builder.append(RIGHT_BRACKET);
+    return builder;
   }
 
   /**
@@ -292,6 +316,8 @@ public class ConcurrentBitSet {
    * entry rather than the entire segment map.
    */
   static class SegmentMapEntry {
+    final static int DEFAULT_BUFFER_SIZE = 8192;
+
     private Segment segment;
 
     /**
@@ -324,7 +350,24 @@ public class ConcurrentBitSet {
      * @return a string representation of this map entry.
      */
     public String toString() {
-      return segment == null ? "null" : segment.toString();
+      return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+    }
+
+    /**
+     * Format a string representation of this object using the
+     * supplied builder.
+     *
+     * @param builder  the builder.
+     * @return the builder.
+     */
+    public StringBuilder toString(final StringBuilder builder) {
+      if ( segment == null ) {
+	builder.append(NULL_INDICATOR);
+      }
+      else {
+	segment.toString(builder);
+      }
+      return builder;
     }
   }
 
@@ -334,6 +377,7 @@ public class ConcurrentBitSet {
    */
   static class Segment {
     final static int BIT_INDEX_MASK = (1 << LOG2_BITS_PER_PAGE) - 1;
+    final static int DEFAULT_BUFFER_SIZE = 8192;
 
     private int pageCount;
     private final Page[] map;
@@ -506,7 +550,37 @@ public class ConcurrentBitSet {
      * @return a string representation of this segment.
      */
     public String toString() {
-      return Arrays.toString(map);
+      return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+    }
+
+    /**
+     * Format a string representation of this segment using the
+     * supplied builder.
+     *
+     * @param builder  the builder.
+     * @return the builder.
+     */
+    public StringBuilder toString(final StringBuilder builder) {
+      if ( builder != null ) {
+	boolean first = true;
+	builder.append(LEFT_BRACKET);
+	for ( final Page page : map ) {
+	  if ( first ) {
+	    first = false;
+	  }
+	  else {
+	    builder.append(COMMA_SEPARATOR);
+	  }
+	  if ( page == null ) {
+	    builder.append(NULL_INDICATOR);
+	  }
+	  else {
+	    page.toString(builder);
+	  }
+	}
+	builder.append(RIGHT_BRACKET);
+      }
+      return builder;
     }
 
     /**
@@ -567,6 +641,7 @@ public class ConcurrentBitSet {
   static class Page {
     final static int BIT_MAP_ARRAY_SIZE = 1 << (LOG2_BITS_PER_PAGE - LOG2_BITS_PER_BYTE);
     final static int BIT_MAP_INDEX_MASK = (1 << LOG2_BITS_PER_BYTE) - 1;
+    final static int DEFAULT_BUFFER_SIZE = 8192;
 
     private final static String[] NIBBLES = new String[] {
         "0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111",
@@ -738,21 +813,32 @@ public class ConcurrentBitSet {
      * @return a string representation of this page.
      */
     public String toString() {
-      final StringBuilder buffer = new StringBuilder(100);
-      boolean first = true;
-      buffer.append('[');
-      for ( final byte b : bits ) {
-	if ( first ) {
-	  first = false;
+      return toString( new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+    }
+
+    /**
+     * Format a string representation of this page using the supplied builder.
+     *
+     * @param builder  the builder.
+     * @return the builder.
+     */
+    public StringBuilder toString(final StringBuilder builder) {
+      if ( builder != null ) {
+	boolean first = true;
+	builder.append(LEFT_BRACKET);
+	for ( final byte b : bits ) {
+	  if ( first ) {
+	    first = false;
+	  }
+	  else {
+	    builder.append(PERIOD);
+	  }
+	  builder.append(NIBBLES[(b & 0xF0) >>> 4])
+	         .append(NIBBLES[b & 0x0F]);
 	}
-	else {
-	  buffer.append('.');
-	}
-	buffer.append(NIBBLES[(b & 0xF0) >>> 4])
-	  .append(NIBBLES[b & 0x0F]);
+	builder.append(RIGHT_BRACKET);
       }
-      buffer.append(']');
-      return buffer.toString();
+      return builder;
     }
   }
 
@@ -822,13 +908,24 @@ public class ConcurrentBitSet {
      * @return the metrics as a string.
      */
     public String toString() {
-      final StringBuilder buffer = new StringBuilder(DEFAULT_BUFFER_SIZE);
-      buffer.append("{ pc: ").append(pagesCreated)
-	    .append(", sc: ").append(segmentsCreated)
-	    .append(", sml: ").append(segmentMapLocks)
-	    .append(", ops: ").append(totalOperations)
-	    .append(" }");
-      return buffer.toString();
+      return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+    }
+
+    /**
+     * Format the metrics as a string using the specified builder.
+     *
+     * @param builder  the string builder.
+     * @return the builder.
+     */
+    public StringBuilder toString(final StringBuilder builder) {
+      if ( builder != null ) {
+        builder.append("{ pc: ").append(pagesCreated)
+  	       .append(", sc: ").append(segmentsCreated)
+  	       .append(", sml: ").append(segmentMapLocks)
+  	       .append(", ops: ").append(totalOperations)
+  	       .append(" }");
+      }
+      return builder;
     }
   }
 

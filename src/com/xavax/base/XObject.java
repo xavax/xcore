@@ -436,7 +436,7 @@ public class XObject {
   {
     final StringBuilder builder = new StringBuilder(prefix);
     format(builder, method, XLogger.LEAVE_MESSAGE);
-    builder.append(result == null ? NULL_BRK_STRING : result)
+    builder.append(result == null ? NULL_INDICATOR : result)
     	   .append(']');
     return builder.toString();
   }

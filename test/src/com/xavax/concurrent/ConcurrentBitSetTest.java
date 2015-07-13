@@ -13,6 +13,8 @@ import org.testng.annotations.BeforeMethod;
 
 import com.xavax.exception.RangeException;
 
+import static com.xavax.util.Constants.COMMA_SEPARATOR;
+import static com.xavax.util.Constants.NULL_INDICATOR;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -28,7 +30,7 @@ public class ConcurrentBitSetTest {
   private final static int INVALID_SEGMENT_SIZE = 99;
   private final static int RANDOM_BOUNDS = 4000000;
   private final static int RANDOM_COUNT = 1000000;
-  private final static String EXPECTED = "[null, null";
+  private final static String EXPECTED = "[" + NULL_INDICATOR + COMMA_SEPARATOR + NULL_INDICATOR;
 
   private ConcurrentBitSet bitSet;
 

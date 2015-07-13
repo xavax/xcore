@@ -448,7 +448,7 @@ public final class XLogger {
       final StringBuilder builder = new StringBuilder(DEFAULT_LENGTH); 
       addPrefix(builder, logger, method);
       builder.append(LEAVE_MESSAGE)
-             .append(result == null ? NULL_BRK_STRING : result)
+             .append(result == null ? NULL_INDICATOR : result)
              .append(']');
       output = builder.toString();
     }

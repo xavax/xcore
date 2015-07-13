@@ -11,6 +11,7 @@ import org.testng.annotations.BeforeMethod;
 
 import static org.testng.Assert.*;
 import static com.xavax.concurrent.ConcurrentBitSet.*;
+import static com.xavax.util.Constants.*;
 
 /**
  * Test the ConcurrentBitSet.Segment class.
@@ -18,7 +19,7 @@ import static com.xavax.concurrent.ConcurrentBitSet.*;
 public class SegmentTest {
   private final static int MAX_BIT_INDEX = 1 << LOG2_DEFAULT_SEGMENT_SIZE;
   private final static int MAX_ENTRY_INDEX = 1 << (LOG2_DEFAULT_SEGMENT_SIZE - LOG2_BITS_PER_PAGE);
-  private final static String EXPECTED = "[null, null";
+  private final static String EXPECTED = "[" + NULL_INDICATOR + COMMA_SEPARATOR + NULL_INDICATOR;
 
   private Segment segment;
 
