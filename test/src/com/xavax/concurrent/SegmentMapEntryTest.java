@@ -14,13 +14,14 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertNotNull;
 
 import static com.xavax.concurrent.ConcurrentBitSet.*;
-import static com.xavax.util.Constants.*;
+import static com.xavax.util.Constants.NULL_INDICATOR;
 
 /**
  * Test the ConcurrentBitSet.SegmentMapEntry class.
  */
+@SuppressWarnings("PMD.TooManyStaticImports")
 public class SegmentMapEntryTest {
-  private final static int DEFAULT_SIZE = ConcurrentBitSet.LOG2_DEFAULT_SEGMENT_SIZE;
+  private final static int DEFAULT_SIZE = LOG2_DEFAULT_SEGMENT_SIZE;
 
   private ConcurrentBitSet bitSet;
   private SegmentMapEntry entry;

@@ -123,7 +123,18 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner append(final boolean value) {
-    beginField();
+    return append(null, value);
+  }
+
+  /**
+   * Append a boolean value to the output.
+   *
+   * @param name   the field name.
+   * @param value  the value to append to the output.
+   * @return this joiner.
+   */
+  public Joiner append(final String name, final boolean value) {
+    beginField(name);
     builder.append(value);
     return this;
   }
@@ -135,8 +146,18 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner append(final Boolean value) {
-    appendField(value);
-    return this;
+    return append(null, value);
+  }
+
+  /**
+   * Append a boolean value to the output.
+   *
+   * @param name   the field name.
+   * @param value  the value to append to the output.
+   * @return this joiner.
+   */
+  public Joiner append(final String name, final Boolean value) {
+    return appendField(name, value);
   }
 
   /**
@@ -146,7 +167,18 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner append(final char value) {
-    beginField();
+    return append(null, value);
+  }
+
+  /**
+   * Append a character value to the output.
+   *
+   * @param name   the field name.
+   * @param value  the value to append to the output.
+   * @return this joiner.
+   */
+  public Joiner append(final String name, final char value) {
+    beginField(name);
     builder.append(value);
     return this;
   }
@@ -158,8 +190,18 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner append(final Character value) {
-    appendField(value);
-    return this;
+    return append(null, value);
+  }
+
+  /**
+   * Append a character value to the output.
+   *
+   * @param name   the field name.
+   * @param value  the value to append to the output.
+   * @return this joiner.
+   */
+  public Joiner append(final String name, final Character value) {
+    return appendField(name, value);
   }
 
   /**
@@ -169,19 +211,19 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner append(final byte value) {
-    beginField();
-    builder.append(value);
-    return this;
+    return append(null, value);
   }
 
   /**
    * Append a byte value to the output.
    *
+   * @param name   the field name.
    * @param value  the value to append to the output.
    * @return this joiner.
    */
-  public Joiner append(final Byte value) {
-    appendField(value);
+  public Joiner append(final String name, final byte value) {
+    beginField(name);
+    builder.append(value);
     return this;
   }
 
@@ -192,19 +234,19 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner append(final short value) {
-    beginField();
-    builder.append(value);
-    return this;
+    return append(null, value);
   }
 
   /**
    * Append a short integer value to the output.
    *
+   * @param name   the field name.
    * @param value  the value to append to the output.
    * @return this joiner.
    */
-  public Joiner append(final Short value) {
-    appendField(value);
+  public Joiner append(final String name, final short value) {
+    beginField(name);
+    builder.append(value);
     return this;
   }
 
@@ -215,19 +257,19 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner append(final int value) {
-    beginField();
-    builder.append(value);
-    return this;
+    return append(null, value);
   }
 
   /**
    * Append an integer value to the output.
    *
+   * @param name   the field name.
    * @param value  the value to append to the output.
    * @return this joiner.
    */
-  public Joiner append(final Integer value) {
-    appendField(value);
+  public Joiner append(final String name, final int value) {
+    beginField(name);
+    builder.append(value);
     return this;
   }
 
@@ -238,19 +280,61 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner append(final long value) {
-    beginField();
-    builder.append(value);
-    return this;
+    return append(null, value);
   }
 
   /**
    * Append a long value to the output.
    *
+   * @param name   the field name.
    * @param value  the value to append to the output.
    * @return this joiner.
    */
-  public Joiner append(final Long value) {
-    appendField(value);
+  public Joiner append(final String name, final long value) {
+    beginField(name);
+    builder.append(value);
+    return this;
+  }
+
+  /**
+   * Append a Number to the output.
+   *
+   * @param value  the value to append to the output.
+   * @return this joiner.
+   */
+  public Joiner append(final Number value) {
+    return appendField(null, value);
+  }
+
+  /**
+   * Append a Number to the output.
+   *
+   * @param name   the field name.
+   * @param value  the value to append to the output.
+   * @return this joiner.
+   */
+  public Joiner append(final String name, final Number value) {
+    return appendField(name, value);
+  }
+
+  /**
+   * Append a field. Append the separator if this is
+   * the first field.
+   *
+   * @param field  the field being appended.
+   * @return this Joiner.
+   */
+  public Joiner appendField(final String name, final Object field) {
+    if ( field == null ) {
+      if ( !skipNulls ) {
+	beginField(name);
+	builder.append(nullIndicator);
+      }
+    }
+    else {
+      beginField(name);
+      builder.append(field);
+    }
     return this;
   }
 
@@ -261,14 +345,25 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner append(final String string) {
+    return append(null, string);
+  }
+
+  /**
+   * Append a string.
+   *
+   * @param name    the field name.
+   * @param string  the string to append.
+   * @return this Joiner.
+   */
+  public Joiner append(final String name, final String string) {
     if ( string == null ) {
       if ( !skipNulls ) {
-	beginField();
+	beginField(name);
 	builder.append(nullIndicator);
       }
     }
     else {
-      beginField();
+      beginField(name);
       if ( quoteStrings ) {
 	builder.append('"')
 	       .append(string)
@@ -288,21 +383,32 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner append(final Object object) {
+    return append(null, object);
+  }
+
+  /**
+   * Append an object.
+   *
+   * @param name    the field name.
+   * @param object  the object to be joined.
+   * @return this Joiner.
+   */
+  public Joiner append(final String name, final Object object) {
     if ( object == null ) {
       if ( !skipNulls ) {
-	beginField();
+	beginField(name);
 	builder.append(nullIndicator);
       }
     }
     else {
-      beginObject();
       if ( object instanceof Joinable ) {
 	((Joinable) object).join(this);
       }
       else {
-	builder.append(object.toString());      
+	beginObject();
+	builder.append(object.toString());   
+	endObject();
       }
-      endObject();
     }
     return this;
   }
@@ -406,6 +512,19 @@ public class Joiner {
   }
 
   /**
+   * Append a string to the output.
+   *
+   * @param string  the string to append.
+   * @return this Joiner.
+   */
+  public Joiner appendRaw(final String string) {
+    if ( string != null ) {
+      builder.append(string);
+    }
+    return this;
+  }
+
+  /**
    * Returns the contents of this Joiner as a string.
    *
    * @return the contents of this Joiner as a string.
@@ -432,35 +551,19 @@ public class Joiner {
    * Begin joining a field. Append the separator if this is
    * the first field.
    *
+   * @param name  the field name (omit if null).
    * @return this Joiner.
    */
-  private Joiner beginField() {
+  private Joiner beginField(final String name) {
     if ( first ) {
       first = false;
     }
     else {
       builder.append(separator);
     }
-    return this;
-  }
-
-  /**
-   * Append a field. Append the separator if this is
-   * the first field.
-   *
-   * @param field  the field being appended.
-   * @return this Joiner.
-   */
-  private Joiner appendField(final Object field) {
-    if ( field == null ) {
-      if ( !skipNulls ) {
-	beginField();
-	builder.append(nullIndicator);
-      }
-    }
-    else {
-      beginField();
-      builder.append(field);
+    if ( name != null ) {
+      builder.append(name)
+             .append(COLON_SEPARATOR);
     }
     return this;
   }

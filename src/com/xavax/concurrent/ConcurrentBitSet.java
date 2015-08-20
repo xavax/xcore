@@ -11,6 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.xavax.exception.RangeException;
+import com.xavax.util.Joinable;
+import com.xavax.util.Joiner;
+
 import static com.xavax.util.Constants.*;
 
 /**
@@ -34,7 +37,7 @@ import static com.xavax.util.Constants.*;
  * 
  * @author alvitar@xavax.com Phillip L Harbison
  */
-public class ConcurrentBitSet {
+public class ConcurrentBitSet implements Joinable {
   final static int LOG2_BITS_PER_BYTE = 3;
   final static int LOG2_BITS_PER_INT  = 5;
   final static int LOG2_BITS_PER_LONG = 6;
@@ -285,29 +288,21 @@ public class ConcurrentBitSet {
    * @return a string representation of this bit set.
    */
   public String toString() {
-    return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+    return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
   }
 
   /**
-   * Format a string representation of this bit set using the supplied builder.
+   * Join this object to the specified joiner.
    *
-   * @param builder  the builder.
-   * @return the builder.
+   * @param joiner  the joiner to use.
+   * @return the joiner.
    */
-  public StringBuilder toString(final StringBuilder builder) {
-    boolean first = true;
-    builder.append(LEFT_BRACKET);
-    for ( final SegmentMapEntry entry : segmentMap ) {
-      if ( first ) {
-	first = false;
-      }
-      else {
-	builder.append(COMMA_SEPARATOR);
-      }
-      entry.toString(builder);
-    }
-    builder.append(RIGHT_BRACKET);
-    return builder;
+  @Override
+  public Joiner join(final Joiner joiner) {
+    return joiner == null ? null :
+      joiner.beginObject()
+            .append((Object[]) segmentMap)
+            .endObject();
   }
 
   /**
@@ -315,7 +310,7 @@ public class ConcurrentBitSet {
    * segment). It reduces thread contention by allowing us to synchronize on one
    * entry rather than the entire segment map.
    */
-  static class SegmentMapEntry {
+  static class SegmentMapEntry implements Joinable {
     final static int DEFAULT_BUFFER_SIZE = 8192;
 
     private Segment segment;
@@ -350,24 +345,18 @@ public class ConcurrentBitSet {
      * @return a string representation of this map entry.
      */
     public String toString() {
-      return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+      return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
     }
 
     /**
-     * Format a string representation of this object using the
-     * supplied builder.
+     * Join this object to the specified joiner.
      *
-     * @param builder  the builder.
-     * @return the builder.
+     * @param joiner  the joiner to use.
+     * @return the joiner.
      */
-    public StringBuilder toString(final StringBuilder builder) {
-      if ( segment == null ) {
-	builder.append(NULL_INDICATOR);
-      }
-      else {
-	segment.toString(builder);
-      }
-      return builder;
+    @Override
+    public Joiner join(final Joiner joiner) {
+      return joiner == null ? null : joiner.append(segment);
     }
   }
 
@@ -375,7 +364,7 @@ public class ConcurrentBitSet {
    * Segment encapsulates a fixed-size segment of the bit set. Segment sizes are
    * always a power of 2 to simplify calculations.
    */
-  static class Segment {
+  static class Segment implements Joinable {
     final static int BIT_INDEX_MASK = (1 << LOG2_BITS_PER_PAGE) - 1;
     final static int DEFAULT_BUFFER_SIZE = 8192;
 
@@ -550,37 +539,19 @@ public class ConcurrentBitSet {
      * @return a string representation of this segment.
      */
     public String toString() {
-      return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+      return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
     }
 
     /**
-     * Format a string representation of this segment using the
-     * supplied builder.
+     * Join this object to the specified joiner.
      *
-     * @param builder  the builder.
-     * @return the builder.
+     * @param joiner  the joiner to use.
+     * @return the joiner.
      */
-    public StringBuilder toString(final StringBuilder builder) {
-      if ( builder != null ) {
-	boolean first = true;
-	builder.append(LEFT_BRACKET);
-	for ( final Page page : map ) {
-	  if ( first ) {
-	    first = false;
-	  }
-	  else {
-	    builder.append(COMMA_SEPARATOR);
-	  }
-	  if ( page == null ) {
-	    builder.append(NULL_INDICATOR);
-	  }
-	  else {
-	    page.toString(builder);
-	  }
-	}
-	builder.append(RIGHT_BRACKET);
-      }
-      return builder;
+    @Override
+    public Joiner join(final Joiner joiner) {
+      return joiner == null ? null :
+	joiner.append((Object[]) map);
     }
 
     /**
@@ -638,7 +609,7 @@ public class ConcurrentBitSet {
    * Page encapsulates a small array of longs used to represent a portion
    * of a bit set.
    */
-  static class Page {
+  static class Page implements Joinable {
     final static int BIT_MAP_ARRAY_SIZE = 1 << (LOG2_BITS_PER_PAGE - LOG2_BITS_PER_BYTE);
     final static int BIT_MAP_INDEX_MASK = (1 << LOG2_BITS_PER_BYTE) - 1;
     final static int DEFAULT_BUFFER_SIZE = 8192;
@@ -813,7 +784,21 @@ public class ConcurrentBitSet {
      * @return a string representation of this page.
      */
     public String toString() {
-      return toString( new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+      return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
+    }
+
+    /**
+     * Join this object to the specified joiner.
+     *
+     * @param joiner  the joiner to use.
+     * @return the joiner.
+     */
+    @Override
+    public Joiner join(final Joiner joiner) {
+      if ( joiner != null ) {
+	toString(joiner.getBuilder());
+      }
+      return joiner;
     }
 
     /**
@@ -845,7 +830,7 @@ public class ConcurrentBitSet {
   /**
    * Metrics is a public snapshot of the internal metrics.
    */
-  public static class Metrics {
+  public static class Metrics implements Joinable {
     private final static int DEFAULT_BUFFER_SIZE = 128;
 
     private final long pagesCreated;
@@ -908,24 +893,25 @@ public class ConcurrentBitSet {
      * @return the metrics as a string.
      */
     public String toString() {
-      return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+      // return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
+      return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
     }
 
     /**
-     * Format the metrics as a string using the specified builder.
+     * Join this object to the specified joiner.
      *
-     * @param builder  the string builder.
-     * @return the builder.
+     * @param joiner  the joiner to use.
+     * @return the joiner.
      */
-    public StringBuilder toString(final StringBuilder builder) {
-      if ( builder != null ) {
-        builder.append("{ pc: ").append(pagesCreated)
-  	       .append(", sc: ").append(segmentsCreated)
-  	       .append(", sml: ").append(segmentMapLocks)
-  	       .append(", ops: ").append(totalOperations)
-  	       .append(" }");
-      }
-      return builder;
+    @Override
+    public Joiner join(final Joiner joiner) {
+      return joiner == null ? null :
+	joiner.appendRaw("{ ")
+	      .append("pc", pagesCreated)
+	      .append("sc", segmentsCreated)
+	      .append("sel", segmentMapLocks)
+	      .append("ops", totalOperations)
+	      .appendRaw(" }");
     }
   }
 

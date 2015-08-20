@@ -26,5 +26,6 @@ public final class Constants {
   public static final String TRUE_STRING = "true";
   public static final String NULL_STRING = "null";
   public final static String NULL_INDICATOR = "<null>";
+  public final static String COLON_SEPARATOR = ": ";
   public final static String COMMA_SEPARATOR = ", ";
 }
