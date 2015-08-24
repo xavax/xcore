@@ -6,14 +6,17 @@
 
 package com.xavax.event;
 
+import com.xavax.util.Joinable;
+import com.xavax.util.Joiner;
+
 /**
  * BasicEvent serves as a base class for events used by broadcasters
  * and observers and can also be used as a concrete class for simple
  * events that require no additional information other than the type
  * and source of the event.
  */
-public class BasicEvent implements Event {
-  protected int type;
+public class BasicEvent implements Event, Joinable {
+  protected final int type;
   protected Broadcaster source;
 
   /**
@@ -23,8 +26,7 @@ public class BasicEvent implements Event {
    */
   public BasicEvent(final int type)
   {
-    this.type = type;
-    this.source = null;
+    this(null, type);
   }
 
   /**
@@ -76,6 +78,18 @@ public class BasicEvent implements Event {
    */
   public String toString()
   {
-    return "E(" + type + ")";
+    return join(Joiner.create()).toString();
+  }
+
+  /**
+   * Join this object to the specified joiner.
+   *
+   * @param joiner  the joiner to use.
+   * @return the joiner.
+   */
+  public Joiner join(final Joiner joiner) {
+    joiner.appendField("type", type)
+          .appendField("source", source);
+    return joiner;
   }
 }

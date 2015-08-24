@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.xavax.util.CollectionFactory;
+import com.xavax.util.Joinable;
+import com.xavax.util.Joiner;
 
 /**
  * BroadcastHelper is a basic broadcaster of events. The development
@@ -18,7 +20,7 @@ import com.xavax.util.CollectionFactory;
  * a <i>Map</i> of observers indexed by event type. Each map entry is a
  * <i>List</i> of observers for that event type.
  */
-public class BroadcastHelper implements Broadcaster {
+public class BroadcastHelper implements Broadcaster, Joinable {
   protected Map<Integer,List<Observer>> observerMap;
 
   /**
@@ -26,7 +28,7 @@ public class BroadcastHelper implements Broadcaster {
    */
   public BroadcastHelper()
   {
-    observerMap = null;
+    observerMap = CollectionFactory.treeMap();
   }
 
   /**
@@ -39,9 +41,6 @@ public class BroadcastHelper implements Broadcaster {
   {
     final Integer key = new Integer(type);
     synchronized (this) {
-      if ( observerMap == null ) {
-	observerMap = CollectionFactory.treeMap();
-      }
       List<Observer> observers = observerMap.get(key);
       if ( observers == null ) {
 	observers = CollectionFactory.arrayList();
@@ -59,13 +58,11 @@ public class BroadcastHelper implements Broadcaster {
    */
   public void detach(final int type, final Observer observer)
   {
-    if ( observerMap != null ) {
-      final Integer key = new Integer(type);
-      synchronized (this) {
-	final List<Observer> observers = observerMap.get(key);
-	if ( observers != null ) {
-	  observers.remove(observer);
-	}
+    final Integer key = new Integer(type);
+    synchronized ( this ) {
+      final List<Observer> observers = observerMap.get(key);
+      if ( observers != null ) {
+	observers.remove(observer);
       }
     }
   }
@@ -77,15 +74,13 @@ public class BroadcastHelper implements Broadcaster {
    */
   public void broadcast(final Event event)
   {
-    if ( observerMap != null ) {
-      final int type = event.type();
-      final Integer key = new Integer(type);
-      synchronized (this) {
-	final List<Observer> observers = observerMap.get(key);
-	if ( observers != null ) {
-	  for ( final Observer observer : observers ) {
-	    observer.notify(event);
-	  }
+    final int type = event.type();
+    final Integer key = new Integer(type);
+    synchronized ( this ) {
+      final List<Observer> observers = observerMap.get(key);
+      if ( observers != null ) {
+	for ( final Observer observer : observers ) {
+	  observer.notify(event);
 	}
       }
     }
@@ -113,5 +108,26 @@ public class BroadcastHelper implements Broadcaster {
   public void broadcast(final Broadcaster source, final int type)
   {
     broadcast(source, new BasicEvent(type));
+  }
+
+  /**
+   * Returns a string representation of this BroadcastHelper.
+   *
+   * @return a string representation of this BroadcastHelper.
+   */
+  public String toString()
+  {
+    return join(Joiner.create()).toString();
+  }
+
+  /**
+   * Join this object to the specified joiner.
+   *
+   * @param joiner  the joiner to use.
+   * @return the joiner.
+   */
+  public Joiner join(final Joiner joiner) {
+    joiner.appendRaw("BroadcastHelper");
+    return joiner;
   }
 }

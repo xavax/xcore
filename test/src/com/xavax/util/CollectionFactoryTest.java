@@ -19,6 +19,7 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.testng.annotations.Test;
 
@@ -37,6 +38,14 @@ public class CollectionFactoryTest {
   public void testArrayListFactory() {
     assertTrue(CollectionFactory.arrayList() instanceof ArrayList);
     assertTrue(CollectionFactory.arrayList(INITIAL_CAPACITY) instanceof ArrayList);
+  }
+
+  /**
+   * Test the concurrentLinkedQueue method.
+   */
+  @Test
+  public void testConcurrentLinkedQueueFactory() {
+    assertTrue(CollectionFactory.concurrentLinkedQueue() instanceof ConcurrentLinkedQueue);
   }
 
   /**

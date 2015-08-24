@@ -6,8 +6,9 @@
 
 package com.xavax.event;
 
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.xavax.util.CollectionFactory;
 
@@ -18,14 +19,16 @@ import com.xavax.util.CollectionFactory;
  * of FIFO queues keyed by the event type.
  */
 public class EventQueue {
-  protected Map<Integer, List<Event>> eventMap;
+  final ReentrantLock mapLock;
+  final protected Map<Integer, ConcurrentLinkedQueue<Event>> queueMap;
 
   /**
    * Construct an EventQueue.
    */
   public EventQueue()
   {
-    eventMap = null;
+    mapLock = new ReentrantLock();
+    queueMap = CollectionFactory.hashMap();
   }
 
   /**
@@ -37,18 +40,8 @@ public class EventQueue {
   public void enqueue(final Event event)
   {
     if ( event != null ) {
-      final Integer key = new Integer(event.type());
-      synchronized ( this ) {
-	if ( eventMap == null ) {
-	  eventMap = CollectionFactory.hashMap();
-	}
-	List<Event> observers = eventMap.get(key);
-	if ( observers == null ) {
-	  observers = CollectionFactory.linkedList();
-	  eventMap.put(key, observers);
-	}
-	observers.add(event);
-      }
+      final ConcurrentLinkedQueue<Event> queue = getQueue(event.type(), true);
+      queue.add(event);
     }
   }
 
@@ -64,14 +57,9 @@ public class EventQueue {
   public Event dequeue(final int type)
   {
     Event result = null;
-    final Integer key = new Integer(type);
-    synchronized ( this ) {
-      if ( eventMap != null ) {
-	final List<Event> observers = eventMap.get(key);
-	if ( observers != null && !observers.isEmpty() ) {
-	  result = (Event) observers.remove(0);
-	}
-      }
+    final ConcurrentLinkedQueue<Event> queue = getQueue(type, false);
+    if ( queue != null ) {
+      result = queue.poll();
     }
     return result;
   }
@@ -83,11 +71,9 @@ public class EventQueue {
    */
   public void flush(final int type)
   {
-    if ( eventMap != null ) {
-      synchronized ( this ) {
-	final Integer key = new Integer(type);
-	eventMap.remove(key);
-      }
+    final ConcurrentLinkedQueue<Event> queue = getQueue(type, false);
+    if ( queue != null ) {
+      queue.clear();
     }
   }
 
@@ -96,8 +82,31 @@ public class EventQueue {
    */
   public void flush()
   {
-    synchronized ( this ) {
-      eventMap = null;
+    for ( final ConcurrentLinkedQueue<Event> queue : queueMap.values() ) {
+      queue.clear();
     }
+  }
+
+  /**
+   * Get the specified queue from the queue map. If the queue does
+   * not exist and the create flag is true, create it.
+   *
+   * @param type    the event type.
+   * @param create  true if a non-existent queue should be created.
+   * @return the specified queue from the queue map.
+   */
+  private ConcurrentLinkedQueue<Event> getQueue(final int type, final boolean create) {
+    final Integer key = new Integer(type);
+    ConcurrentLinkedQueue<Event> queue = queueMap.get(key);
+    if ( queue == null && create ) {
+      mapLock.lock();
+      queue = queueMap.get(key);
+      if ( queue == null ) {
+	queue = CollectionFactory.concurrentLinkedQueue();
+	queueMap.put(key, queue);
+      }
+      mapLock.unlock();
+    }
+    return queue;
   }
 }

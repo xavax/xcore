@@ -7,8 +7,7 @@
 package com.xavax.event;
 
 import com.xavax.util.Dates;
-
-import static com.xavax.util.Constants.*;
+import com.xavax.util.Joiner;
 
 /**
  * TimeEvent extends BasicEvent by adding a timestamp as well as a
@@ -91,7 +90,19 @@ public class TimeEvent extends BasicEvent {
    */
   public String toString()
   {
-    return "TE(" + type + COMMA + Dates.timestamp(timestamp) +
-	COMMA + (info == null ? NULL_STRING : info.toString()) + RIGHT_PAREN;
+    return join(Joiner.create()).toString();
+  }
+
+  /**
+   * Join this object to the specified joiner.
+   *
+   * @param joiner  the joiner to use.
+   * @return the joiner.
+   */
+  public Joiner join(final Joiner joiner) {
+    super.join(joiner);
+    joiner.appendField("info", info)
+          .appendField("timestamp", Dates.timestamp(timestamp));
+    return joiner;
   }
 }

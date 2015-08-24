@@ -23,6 +23,7 @@ import java.util.Stack;
 import java.util.TreeSet;
 import java.util.TreeMap;
 import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * CollectionFactory creates new collections from the Collections library.
@@ -58,6 +59,15 @@ public final class CollectionFactory {
   public static <T> List<T> arrayList(final int capacity)
   {
     return new ArrayList<T>(capacity);
+  }
+
+  /**
+   * Returns a new concurrent linked queue.
+   *
+   * @return a new concurrent linked queue.
+   */
+  public static <T> ConcurrentLinkedQueue<T> concurrentLinkedQueue() {
+    return new ConcurrentLinkedQueue<T>();
   }
 
   /**
