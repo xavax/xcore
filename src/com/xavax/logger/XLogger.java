@@ -355,7 +355,7 @@ public final class XLogger {
    */
   public static void leave(final Logger logger, final String method)
   {
-    if ( logger.isTraceEnabled() ) {
+    if ( logger != null && logger.isTraceEnabled() ) {
       logger.trace(format(logger, method, LEAVE));
     }
   }
@@ -398,10 +398,13 @@ public final class XLogger {
    * @param logger   the logger used to write this log entry.
    * @param method   the name of the method being traced.
    */
-  private static void addPrefix(final StringBuilder builder, final Logger logger,
-                                final String method)
+  static void addPrefix(final StringBuilder builder, final Logger logger,
+                        final String method)
   {
-    final String name = logger.getName();
+    String name = logger.getName();
+    if ( name == null ) {
+      name = UNKNOWN;
+    }
     final int index = name.lastIndexOf('.');
     builder.append(index >= 0 ? name.substring(index + 1) : name)
            .append('.')
@@ -417,8 +420,8 @@ public final class XLogger {
    * @param message  the message to be included in the log entry.
    * @return a formatted message.
    */
-  private static String format(final Logger logger, final String method,
-                               final String message)
+  static String format(final Logger logger, final String method,
+                       final String message)
   {
     String result = EMPTY_STRING;
     if ( logger != null ) {
@@ -440,8 +443,8 @@ public final class XLogger {
    * @param result  the return value as a string.
    * @return a formatted message.
    */
-  private static String formatLeave(final Logger logger, final String method,
-                                    final String result)
+  static String formatLeave(final Logger logger, final String method,
+                            final String result)
   {
     String output = EMPTY_STRING;
     if ( logger != null ) {
