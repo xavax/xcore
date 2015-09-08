@@ -6,8 +6,10 @@
 
 package com.xavax.logger;
 
+import java.io.FileNotFoundException;
 import java.util.Date;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Mock;
@@ -219,5 +221,128 @@ public class XLoggerTest {
     verify(logger, times(1)).trace(EXPECT11);
     XLogger.leave(logger, METHOD, null);
     verify(logger, times(1)).trace(EXPECT12);
+  }
+
+  /**
+   * Test the info methods.
+   */
+  @Test
+  public void testInfo() {
+    final Exception cause = new FileNotFoundException(MESSAGE);
+    XLogger.info(null, METHOD, MESSAGE);
+    verify(logger, times(0)).info(any());
+    XLogger.info(logger, METHOD, MESSAGE);
+    verify(logger, times(0)).info(any());
+    XLogger.info(null, METHOD, cause, MESSAGE);
+    verify(logger, times(0)).info(any());
+    XLogger.info(logger, METHOD, cause, MESSAGE);
+    verify(logger, times(0)).info(any());
+    XLogger.info(null, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).info(any());
+    XLogger.info(logger, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).info(any());
+    XLogger.info(null, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).info(any());
+    XLogger.info(logger, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).info(any());
+    when(logger.isEnabledFor(Level.INFO)).thenReturn(true);
+    XLogger.info(logger, METHOD, MESSAGE);
+    verify(logger, times(1)).info(EXPECT6);
+    XLogger.info(logger, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(1)).info(EXPECT7);
+    XLogger.info(logger, METHOD, cause, MESSAGE);
+    verify(logger, times(1)).info(EXPECT6);
+    XLogger.info(logger, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(1)).info(EXPECT7);
+  }
+
+  /**
+   * Test the error methods.
+   */
+  @Test
+  public void testError() {
+    final Exception cause = new FileNotFoundException(MESSAGE);
+    XLogger.error(null, METHOD, MESSAGE);
+    verify(logger, times(0)).error(any());
+    XLogger.error(logger, METHOD, MESSAGE);
+    verify(logger, times(0)).error(any());
+    XLogger.error(null, METHOD, cause, MESSAGE);
+    verify(logger, times(0)).error(any());
+    XLogger.error(logger, METHOD, cause, MESSAGE);
+    verify(logger, times(0)).error(any());
+    XLogger.error(null, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).error(any());
+    XLogger.error(logger, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).error(any());
+    XLogger.error(null, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).error(any());
+    XLogger.error(logger, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).error(any());
+    when(logger.isEnabledFor(Level.ERROR)).thenReturn(true);
+    XLogger.error(logger, METHOD, MESSAGE);
+    verify(logger, times(1)).error(EXPECT6);
+    XLogger.error(logger, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(1)).error(EXPECT7);
+    XLogger.error(logger, METHOD, cause, MESSAGE);
+    verify(logger, times(1)).error(EXPECT6);
+    XLogger.error(logger, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(1)).error(EXPECT7);
+  }
+
+  /**
+   * Test the fatal methods.
+   */
+  @Test
+  public void testFatal() {
+    final Exception cause = new FileNotFoundException(MESSAGE);
+    XLogger.fatal(null, METHOD, MESSAGE);
+    verify(logger, times(0)).fatal(any());
+    XLogger.fatal(null, METHOD, cause, MESSAGE);
+    verify(logger, times(0)).fatal(any());
+    XLogger.fatal(null, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).fatal(any());
+    XLogger.fatal(null, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).fatal(any());
+    XLogger.fatal(logger, METHOD, MESSAGE);
+    verify(logger, times(1)).fatal(EXPECT6);
+    XLogger.fatal(logger, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(1)).fatal(EXPECT7);
+    XLogger.fatal(logger, METHOD, cause, MESSAGE);
+    verify(logger, times(1)).fatal(EXPECT6);
+    XLogger.fatal(logger, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(1)).fatal(EXPECT7);
+  }
+
+  /**
+   * Test the warn methods.
+   */
+  @Test
+  public void testWarn() {
+    final Exception cause = new FileNotFoundException(MESSAGE);
+    XLogger.warn(null, METHOD, MESSAGE);
+    verify(logger, times(0)).warn(any());
+    XLogger.warn(logger, METHOD, MESSAGE);
+    verify(logger, times(0)).warn(any());
+    XLogger.warn(null, METHOD, cause, MESSAGE);
+    verify(logger, times(0)).warn(any());
+    XLogger.warn(logger, METHOD, cause, MESSAGE);
+    verify(logger, times(0)).warn(any());
+    XLogger.warn(null, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).warn(any());
+    XLogger.warn(logger, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).warn(any());
+    XLogger.warn(null, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).warn(any());
+    XLogger.warn(logger, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(0)).warn(any());
+    when(logger.isEnabledFor(Level.WARN)).thenReturn(true);
+    XLogger.warn(logger, METHOD, MESSAGE);
+    verify(logger, times(1)).warn(EXPECT6);
+    XLogger.warn(logger, METHOD, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(1)).warn(EXPECT7);
+    XLogger.warn(logger, METHOD, cause, MESSAGE);
+    verify(logger, times(1)).warn(EXPECT6);
+    XLogger.warn(logger, METHOD, cause, FORMAT, PARAM1, 123, 5.678);
+    verify(logger, times(1)).warn(EXPECT7);
   }
 }

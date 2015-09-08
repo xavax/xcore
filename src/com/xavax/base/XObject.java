@@ -361,7 +361,7 @@ public class XObject {
    */
   public void leave(final String method)
   {
-    if ( logger.isTraceEnabled() ) {
+    if ( logger != null && logger.isTraceEnabled() ) {
       logger.trace(format(method, XLogger.LEAVE));
     }
   }
