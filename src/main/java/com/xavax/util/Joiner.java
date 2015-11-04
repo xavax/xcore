@@ -321,6 +321,7 @@ public class Joiner {
    * Append a field. Append the separator if this is
    * the first field.
    *
+   * @param name   the field name.
    * @param field  the field being appended.
    * @return this Joiner.
    */

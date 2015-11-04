@@ -106,9 +106,9 @@ public class Varargs {
    * @param parameters  the collection of parameters to append.
    * @return this Varargs object.
    */
-  public Varargs flatten(final Collection<?> collection) {
-    if ( collection != null ) {
-      for ( final Object object : collection ) {
+  public Varargs flatten(final Collection<?> parameters) {
+    if ( parameters != null ) {
+      for ( final Object object : parameters ) {
 	list.add(object);
       }
     }

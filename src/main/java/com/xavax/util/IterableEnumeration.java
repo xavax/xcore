@@ -14,12 +14,16 @@ import java.util.Iterator;
  * The design was originally described by Dr. Heinz M. Kabutz in
  * the following article.
  *   http://www.javaspecialists.eu/archive/Issue107.html
+ *
+ * @param <T>  the enumeration element type.
  */
 public class IterableEnumeration<T> implements Iterable<T> {
   private final Enumeration<T> enumeration;
 
   /**
    * Construct an InterableEnumeration from an existing enumeration.
+   *
+   * @param enumeration  the enumeration to be iterated.
    */
   public IterableEnumeration(final Enumeration<T> enumeration) {
     this.enumeration = enumeration;
@@ -27,7 +31,7 @@ public class IterableEnumeration<T> implements Iterable<T> {
 
   /**
    * Returns an Iterator for the underlying Enumeration, thereby
-   * making it Iterable.
+   * making it iterable.
    *
    * @return an Iterator for this enumeration.
    */
@@ -64,6 +68,10 @@ public class IterableEnumeration<T> implements Iterable<T> {
 
   /**
    * Returns an IterableEnumeration created from the enumeration.
+   *
+   * @param <T>  the enumeration element type.
+   * @param enumeration  the enumeration to be iterated.
+   * @return an IterableEnumeration created from the enumeration.
    */
   public static <T> IterableEnumeration<T> create(final Enumeration<T> enumeration) {
     return new IterableEnumeration<T>(enumeration);

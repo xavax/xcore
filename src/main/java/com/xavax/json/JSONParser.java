@@ -158,7 +158,7 @@ public class JSONParser {
   /**
    * Parse a string in JSON format containing an array.
    *
-   * @param inputa string in JSON format.
+   * @param input  a string in JSON format.
    * @return the JSONArray resulting from parsing the input.
    */
   public JSONArray parseArray(final String input) {

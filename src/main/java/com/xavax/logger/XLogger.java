@@ -66,6 +66,7 @@ public final class XLogger {
   /**
    * Write a message to the log at error level.
    *
+   * @param logger   the logger used to write this log entry
    * @param method   the method name.
    * @param message  the message to be written to the log.
    */
@@ -96,6 +97,7 @@ public final class XLogger {
   /**
    * Write a message to the log at error level.
    *
+   * @param logger   the logger used to write this log entry
    * @param method   the method name.
    * @param cause    the cause of the error.
    * @param message  the message to be written to the log.
@@ -225,6 +227,7 @@ public final class XLogger {
   /**
    * Write a message to the log at info level.
    *
+   * @param logger   the logger used to write this log entry
    * @param method   the method name.
    * @param cause    the cause of the error.
    * @param message  the message to be written to the log.
@@ -323,6 +326,7 @@ public final class XLogger {
   /**
    * Write a message to the log at trace level.
    *
+   * @param logger   the logger used to write this log entry
    * @param method   the method name.
    * @param message  the message to be written to the log.
    */
@@ -337,8 +341,8 @@ public final class XLogger {
   /**
    * Write a message to the log at trace level when entering a static method.
    *
-   * @param method  the method name.
    * @param logger  the logger used to write this log entry.
+   * @param method  the method name.
    */
   public static void enter(final Logger logger, final String method)
   {

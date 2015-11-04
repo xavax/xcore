@@ -43,6 +43,7 @@ public final class CollectionFactory {
   /**
    * Returns a new array list.
    *
+   * @param <T>  the list element type.
    * @return a new array list.
    */
   public static <T> List<T> arrayList()
@@ -53,6 +54,7 @@ public final class CollectionFactory {
   /**
    * Returns a new array list with the specified initial capacity.
    *
+   * @param <T>  the list element type.
    * @param capacity  the initial capacity of the list.
    * @return a new array list.
    */
@@ -64,6 +66,7 @@ public final class CollectionFactory {
   /**
    * Returns a new concurrent linked queue.
    *
+   * @param <T>  the queue element type.
    * @return a new concurrent linked queue.
    */
   public static <T> ConcurrentLinkedQueue<T> concurrentLinkedQueue() {
@@ -73,6 +76,8 @@ public final class CollectionFactory {
   /**
    * Returns a new hash map.
    *
+   * @param <K>  the map key type.
+   * @param <V>  the map value type.
    * @return a new hash map.
    */
   public static <K, V> Map<K, V> hashMap()
@@ -83,6 +88,7 @@ public final class CollectionFactory {
   /**
    * Returns a new hash set.
    *
+   * @param <T>  the hash set element type.
    * @return a new hash set.
    */
   public static <T> Set<T> hashSet()
@@ -93,6 +99,8 @@ public final class CollectionFactory {
   /**
    * Returns a new linked hash map.
    *
+   * @param <K>  the map key type.
+   * @param <V>  the map value type.
    * @return a new linked hash map.
    */
   public static <K, V> Map<K, V> linkedHashMap() {
@@ -102,6 +110,7 @@ public final class CollectionFactory {
   /**
    * Returns a new linked hash set.
    *
+   * @param <E>  the set element type.
    * @return a new linked hash set.
    */
   public static <E> Set<E> linkedHashSet() {
@@ -111,6 +120,7 @@ public final class CollectionFactory {
   /**
    * Returns a new linked list.
    *
+   * @param <T>  the list element type.
    * @return a new linked list.
    */
   public static <T> List<T> linkedList()
@@ -121,6 +131,7 @@ public final class CollectionFactory {
   /**
    * Returns a new priority queue.
    *
+   * @param <T>  the queue element type.
    * @return a new priority queue.
    */
   public static <T> Queue<T> priorityQueue() {
@@ -130,6 +141,7 @@ public final class CollectionFactory {
   /**
    * Returns a new stack.
    *
+   * @param <T>  the stack value type.
    * @return a new stack.
    */
   public static <T> Stack<T> stack() {
@@ -139,6 +151,8 @@ public final class CollectionFactory {
   /**
    * Returns a new tree map.
    *
+   * @param <K>  the map key type.
+   * @param <V>  the map value type.
    * @return a new tree map.
    */
   public static <K, V> Map<K,V> treeMap()
@@ -149,6 +163,8 @@ public final class CollectionFactory {
   /**
    * Returns a new tree map.
    *
+   * @param <K>  the map key type.
+   * @param <V>  the map value type.
    * @param comparator  the comparator used to compare keys.
    * @return a new tree map.
    */
@@ -160,6 +176,7 @@ public final class CollectionFactory {
   /**
    * Returns a new tree set.
    *
+   * @param <E>  the set element type.
    * @return a new tree set.
    */
   public static <E> Set<E> treeSet() {
@@ -169,6 +186,8 @@ public final class CollectionFactory {
   /**
    * Returns a new weak hash map.
    *
+   * @param <K>  the map key type.
+   * @param <V>  the map value type.
    * @return a new weak hash map.
    */
   public static <K, V> Map<K, V> weakHashMap() {
@@ -178,6 +197,8 @@ public final class CollectionFactory {
   /**
    * Returns a new iterable enumeration.
    *
+   * @param <T>  the element type.
+   * @param enumeration  the enumeration to be iterated.
    * @return a new iterable enumeration.
    */
   public static <T> IterableEnumeration<T>

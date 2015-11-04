@@ -34,7 +34,7 @@ public final class FilenameFormatter {
    *
    * @param template     the template to use as the format string.
    * @param extraParams  extra parameters that can be used in formatting.
-   * @return
+   * @return a filename string.
    */
   public static String filename(final String template, final String... extraParams) {
     return filename(template, new Date(), extraParams);
@@ -47,8 +47,9 @@ public final class FilenameFormatter {
    * are passed to the formatter and can be referenced by the template.
    *
    * @param template     the template to use as the format string.
+   * @param date         the date to use for the timestamp.
    * @param extraParams  extra parameters that can be used in formatting.
-   * @return
+   * @return a filename string.
    */
   public static String filename(final String template, final Date date, final String... extraParams) {
     final Calendar calendar = Calendar.getInstance();

@@ -4,10 +4,44 @@
   <artifactId>xcore</artifactId>
   <version>1.0.0</version>
   <name>Xavax Core Library</name>
+  <url>http://www.xavax.com</url>
   <description>Core classes used by other Xavax projects.</description>
+  <licenses>
+    <license>
+      <name>Xavax Open Source License</name>
+      <url>http://www.xavax.com/xosl.html</url>
+      <distribution>repo</distribution>
+      <comments>Go to the URL to view the details.</comments>
+    </license>
+  </licenses>
+  <organization>
+    <name>Xavax, Inc.</name>
+    <url>http://www.xavax.com</url>
+  </organization>
+  <scm>
+    <url>https://github.com/xavax/xcore</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>alvitar</id>
+      <name>Phillip L Harbison</name>
+      <email>alvitar@xavax.com</email>
+      <url>http://www.xavax.com/alvitar/</url>
+      <organization>Xavax, Inc.</organization>
+      <organizationUrl>http://www.xavax.com/</organizationUrl>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>America/New_York</timezone>
+      <properties>
+        <picUrl>http://www.xavax.com/alvitar/phil.jpg</picUrl>
+      </properties>
+    </developer>
+  </developers>
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test/src</testSourceDirectory>
+    <sourceDirectory>src/main/java</sourceDirectory>
+    <testSourceDirectory>src/test/java</testSourceDirectory>
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -20,6 +54,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.6</version>
         <executions>
           <execution>
             <id>sign-artifacts</id>
@@ -33,6 +68,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.10.3</version>
         <configuration>
           <show>protected</show>
         </configuration>
@@ -47,6 +83,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
+        <version>2.4</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -58,40 +95,32 @@
       </plugin>
     </plugins>
   </build>
-  <url>http://www.xavax.com/</url>
-  <organization>
-  	<name>Xavax, Inc.</name>
-  	<url>http://www.xavax.com/</url>
-  </organization>
-  <scm>
-  	<url>https://github.com/xavax/xcore</url>
-  </scm>
   <dependencies>
-  	<dependency>
-  		<groupId>org.testng</groupId>
-  		<artifactId>testng</artifactId>
-  		<version>6.9.9</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>org.apache.commons</groupId>
-  		<artifactId>commons-lang3</artifactId>
-  		<version>3.1</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>log4j</groupId>
-  		<artifactId>log4j</artifactId>
-  		<version>1.2.14</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>org.mockito</groupId>
-  		<artifactId>mockito-all</artifactId>
-  		<version>1.10.19</version>
-  	</dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>6.9.9</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.1</version>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.14</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-all</artifactId>
+      <version>1.10.19</version>
+    </dependency>
   </dependencies>
   <distributionManagement>
     <repository>
-      <id>NexusReleases</id>
-      <url>https://oss.sonatype.org/content/repositories/releases/</url>
+      <id>sonatype</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
   </distributionManagement>
 </project>

@@ -57,6 +57,8 @@ public class XObject {
 
   /**
    * Returns true if debug is enabled.
+   *
+   * @return true if debug is enabled.
    */
   public boolean debugEnabled()
   {
@@ -135,7 +137,7 @@ public class XObject {
    * Format and write a message to the log at error level.
    *
    * @param method   the method name.
-   * @param message  the message to be written to the log.
+   * @param cause    the cause of the error.
    * @param format   the message format string.
    * @param params   the message parameters.
    */
@@ -192,7 +194,7 @@ public class XObject {
    * Format and write a message to the log at fatal level.
    *
    * @param method   the method name.
-   * @param message  the message to be written to the log.
+   * @param cause    the cause of the error.
    * @param format   the message format string.
    * @param params   the message parameters.
    */
@@ -307,7 +309,7 @@ public class XObject {
    * Format and write a message to the log at warn level.
    *
    * @param method   the method name.
-   * @param message  the message to be written to the log.
+   * @param cause    the cause of the warning.
    * @param format   the message format string.
    * @param params   the message parameters.
    */

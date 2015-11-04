@@ -84,6 +84,8 @@ public class TimeMetric {
   /**
    * Returns the time in nanoseconds as produced by System.nanoTime.
    * Override this method to use a different time base.
+   *
+   * @return the current time in nanoseconds
    */
   public long currentTime() {
     return System.nanoTime();

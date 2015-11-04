@@ -6,3 +6,6 @@
 /build
 /tmp/
 /pmd.out
+/target/
+/xcore/
+/settings.xml
