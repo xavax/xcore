@@ -3,7 +3,7 @@
 // Use of this software is allowed under the Xavax Open Software License.
 // http://www.xavax.com/xosl.html
 //
-package com.xavax.tools.test;
+package com.xavax.test;
 
 import java.util.Collection;
 

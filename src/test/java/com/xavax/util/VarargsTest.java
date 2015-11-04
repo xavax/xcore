@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.testng.annotations.Test;
 
-import com.xavax.tools.test.Joiner;
+import com.xavax.test.Joiner;
 
 import static org.testng.Assert.*;
 

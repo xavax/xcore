@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.xavax</groupId>
   <artifactId>xcore</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>Xavax Core Library</name>
   <description>Core classes used by other Xavax projects.</description>
   <build>
@@ -16,6 +16,45 @@
           <source>1.8</source>
           <target>1.8</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <show>protected</show>
+        </configuration>
+        <executions>  
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -31,7 +70,6 @@
   	<dependency>
   		<groupId>org.testng</groupId>
   		<artifactId>testng</artifactId>
-  		<scope>test</scope>
   		<version>6.9.9</version>
   	</dependency>
   	<dependency>
@@ -48,7 +86,12 @@
   		<groupId>org.mockito</groupId>
   		<artifactId>mockito-all</artifactId>
   		<version>1.10.19</version>
-  		<scope>test</scope>
   	</dependency>
   </dependencies>
+  <distributionManagement>
+    <repository>
+      <id>NexusReleases</id>
+      <url>https://oss.sonatype.org/content/repositories/releases/</url>
+    </repository>
+  </distributionManagement>
 </project>
