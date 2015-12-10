@@ -189,6 +189,7 @@ public class JoinerTest {
   @Test
   public void testWithNullIndicator() {
     final Joiner joiner = Joiner.create().withNullIndicator(INDICATOR2);
+    assertEquals(joiner.getNullIndicator(), INDICATOR2);
     final Person nobody = new Person(null, null, 0);
     final String result = joiner.append(nobody).toString();
     assertTrue(result.startsWith(EXPECT7));

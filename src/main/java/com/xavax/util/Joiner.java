@@ -549,6 +549,15 @@ public class Joiner {
   }
 
   /**
+   * Returns the null indicator string.
+   *
+   * @return the null indicator string.
+   */
+  public String getNullIndicator() {
+    return this.nullIndicator; 
+  }
+
+  /**
    * Begin joining a field. Append the separator if this is
    * the first field.
    *
