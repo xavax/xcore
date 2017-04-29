@@ -96,7 +96,7 @@ public class EventQueue {
    * @return the specified queue from the queue map.
    */
   private ConcurrentLinkedQueue<Event> getQueue(final int type, final boolean create) {
-    final Integer key = new Integer(type);
+    final Integer key = type;
     ConcurrentLinkedQueue<Event> queue = queueMap.get(key);
     if ( queue == null && create ) {
       mapLock.lock();
