@@ -21,10 +21,11 @@ public final class Constants {
   public final static char RIGHT_BRACKET = ']';
   public final static char RIGHT_PAREN = ')';
 
-  public static final String EMPTY_STRING = "";
-  public static final String FALSE_STRING = "false";
-  public static final String TRUE_STRING = "true";
-  public static final String NULL_STRING = "null";
+  public final static String ELLIPSIS = "...";
+  public final static String EMPTY_STRING = "";
+  public final static String FALSE_STRING = "false";
+  public final static String TRUE_STRING = "true";
+  public final static String NULL_STRING = "null";
   public final static String NULL_INDICATOR = "<null>";
   public final static String COLON_SEPARATOR = ": ";
   public final static String COMMA_SEPARATOR = ", ";

@@ -13,16 +13,25 @@ import java.util.Collection;
  * Joiner supports the efficient implementation of toString methods
  * for complex objects.
  */
+@SuppressWarnings("PMD.ExcessivePublicCount")
 public class Joiner {
   private final static int DEFAULT_INITIAL_CAPACITY = 64;
+  private final static int MAX_LEVEL = Long.SIZE - 1;
 
-  private boolean first = true;
   private boolean quoteStrings;
   private boolean reusable;
   private boolean skipNulls;
+  private boolean withFieldNames = true;
+  private int depth;
+  private int maxDepth;
+  private String defaultSeparator = COMMA_SEPARATOR;
+  private String itemSeparator = COMMA_SEPARATOR;
+  private String nameSeparator = COLON_SEPARATOR;
   private String nullIndicator = NULL_INDICATOR;
-  private String separator = COMMA_SEPARATOR;
-  
+  private String prefix = EMPTY_STRING;
+  private String suffix = EMPTY_STRING;
+  private final Tracker tracker = new Tracker();
+
   // Joiner is a transient object so this warning is not relevant.
   @SuppressWarnings("PMD.AvoidStringBufferField")
   private final StringBuilder builder;
@@ -41,6 +50,7 @@ public class Joiner {
    */
   public Joiner(final int initialCapacity) {
     builder = new StringBuilder(initialCapacity);
+    depth = 1;
   }
 
   /**
@@ -89,8 +99,8 @@ public class Joiner {
    * @param nullIndicator  the new null indicator.
    * @return this Joiner.
    */
-  public Joiner withNullIndicator(final String nullIndicator) {
-    this.nullIndicator = nullIndicator;
+  public final Joiner withNullIndicator(final String nullIndicator) {
+    this.nullIndicator = nullIndicator == null ? EMPTY_STRING : nullIndicator;
     return this;
   }
 
@@ -111,9 +121,109 @@ public class Joiner {
    * @param separator  the new separator.
    * @return this Joiner.
    */
-  public Joiner withSeparator(final String separator) {
-    this.separator = separator;
+  public final Joiner withSeparator(final String separator) {
+    defaultSeparator = separator == null ? EMPTY_STRING : separator;
+    tracker.setSeparator(defaultSeparator);
     return this;
+  }
+
+  /**
+   * Sets the item separator to the specified string. This
+   * is used to separate items in an array or collection.
+   *
+   * @param separator the new item separator.
+   * @return this Joiner.
+   */
+  public final Joiner withItemSeparator(final String separator) {
+    this.itemSeparator = separator == null ? EMPTY_STRING : separator;
+    return this;
+  }
+
+  /**
+   * Sets the field name separator to the specified string.
+   * This can be used to achieve the appearance:
+   *   street = 123 Main Street
+   * by setting the field name separator to " = ". The
+   * default is ": " which has the appearance:
+   *   street: 123 Main Street
+   *
+   * @param separator the new field name separator.
+   * @return this Joiner.
+   */
+  public final Joiner withFieldNameSeparator(final String separator) {
+    this.nameSeparator = separator == null ? COLON_SEPARATOR : separator;
+    return this;
+  }
+
+  /**
+   * Sets the withFieldNames flag. If this flag is true and
+   * field names are displayed, fields will be displayed as:
+   *   firstName: John
+   *
+   * @param withFieldNames
+   * @return
+   */
+  public Joiner withFieldNames(final boolean withFieldNames) {
+    this.withFieldNames = withFieldNames;
+    return this;
+  }
+
+  /**
+   * Set the max depth for joining nested joinable objects.
+   * The maximum level is specified by MAX_LEVEL.
+   *
+   * @param maxDepth  the maximum depth.
+   * @return this joiner.
+   */
+  public Joiner withMaxDepth(final int maxDepth) {
+    this.maxDepth = maxDepth < 0 ? 0 : maxDepth;
+    return this;
+  }
+
+  /**
+   * Sets the prefix to the specified string. The prefix will
+   * be prepended to the final result of joining. This is only
+   * used by the join method.
+   *
+   * @param prefix  the prefix string.
+   * @return  this Joiner.
+   */
+  public final Joiner withPrefix(final String prefix) {
+    this.prefix = prefix == null ? EMPTY_STRING : prefix;
+    return this;
+  }
+
+  /**
+   * Sets the suffix to the specified string. The suffix will
+   * be appended to the final result of joining. This is only
+   * used by the join method.
+   *
+   * @param suffix  the suffix string.
+   * @return  this Joiner.
+   */
+  public final Joiner withSuffix(final String suffix) {
+    this.suffix = suffix == null ? EMPTY_STRING : suffix;
+    return this;
+  }
+
+  /**
+   * Join a variable length array of objects.
+   *
+   * @param objects  the array of objects to be joined.
+   * @return this Joiner.
+   */
+  public String join(final Object... objects) {
+    builder.append(prefix);
+    tracker.clearFlag();;
+    for ( final Object object : objects ) {
+      if ( check(null, object) ) {
+	tracker.addSeparator();
+	append(object);
+	tracker.setFlag();
+      }
+    }
+    builder.append(suffix);
+    return toString();
   }
 
   /**
@@ -136,6 +246,7 @@ public class Joiner {
   public Joiner append(final String name, final boolean value) {
     beginField(name);
     builder.append(value);
+    tracker.setFlag();
     return this;
   }
 
@@ -180,6 +291,7 @@ public class Joiner {
   public Joiner append(final String name, final char value) {
     beginField(name);
     builder.append(value);
+    tracker.setFlag();
     return this;
   }
 
@@ -224,6 +336,7 @@ public class Joiner {
   public Joiner append(final String name, final byte value) {
     beginField(name);
     builder.append(value);
+    tracker.setFlag();
     return this;
   }
 
@@ -247,6 +360,7 @@ public class Joiner {
   public Joiner append(final String name, final short value) {
     beginField(name);
     builder.append(value);
+    tracker.setFlag();
     return this;
   }
 
@@ -270,6 +384,7 @@ public class Joiner {
   public Joiner append(final String name, final int value) {
     beginField(name);
     builder.append(value);
+    tracker.setFlag();
     return this;
   }
 
@@ -293,6 +408,7 @@ public class Joiner {
   public Joiner append(final String name, final long value) {
     beginField(name);
     builder.append(value);
+    tracker.setFlag();
     return this;
   }
 
@@ -303,7 +419,7 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner append(final Number value) {
-    return appendField(null, value);
+    return append(null, value);
   }
 
   /**
@@ -326,15 +442,10 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner appendField(final String name, final Object field) {
-    if ( field == null ) {
-      if ( !skipNulls ) {
-	beginField(name);
-	builder.append(nullIndicator);
-      }
-    }
-    else {
+    if ( check(name, field) ) {
       beginField(name);
       builder.append(field);
+      tracker.setFlag();
     }
     return this;
   }
@@ -357,13 +468,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner append(final String name, final String string) {
-    if ( string == null ) {
-      if ( !skipNulls ) {
-	beginField(name);
-	builder.append(nullIndicator);
-      }
-    }
-    else {
+    if ( check(name, string) ) {
       beginField(name);
       if ( quoteStrings ) {
 	builder.append('"')
@@ -373,18 +478,46 @@ public class Joiner {
       else {
 	builder.append(string);
       }
+      tracker.setFlag();
     }
     return this;
   }
 
   /**
-   * Append an object.
+   * Append an object. If the object is Joinable,
+   * do a nested join.
    *
    * @param object  the object to be joined.
    * @return this Joiner.
    */
   public Joiner append(final Object object) {
-    return append(null, object);
+    if ( check(null, object) ) {
+      if ( object instanceof Joinable ) {
+	nest((Joinable) object);
+      }
+      else {
+	builder.append(object.toString());
+	tracker.clearFlag();
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Attempt to join a nested object.
+   */
+  public Joiner nest(final Joinable object) {
+    if ( maxDepth == 0 || depth <= maxDepth ) {
+      ++depth;
+      tracker.push(null);
+      object.join(this);
+      tracker.pop();
+      --depth;
+    }
+    else {
+      builder.append(ELLIPSIS);
+    }
+    return this;
   }
 
   /**
@@ -395,21 +528,11 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner append(final String name, final Object object) {
-    if ( object == null ) {
-      if ( !skipNulls ) {
-	beginField(name);
-	builder.append(nullIndicator);
-      }
-    }
-    else {
-      if ( object instanceof Joinable ) {
-	((Joinable) object).join(this);
-      }
-      else {
-	beginObject();
-	builder.append(object.toString());   
-	endObject();
-      }
+    if ( check(name, object) ) {
+      beginField(name);
+      beginObject();
+      append(object);
+      endObject();
     }
     return this;
   }
@@ -420,21 +543,17 @@ public class Joiner {
    * @param objects  the array of objects to be joined.
    * @return this Joiner.
    */
-  public Joiner append(final Object... objects) {
-    if ( objects == null ) {
-      if ( !skipNulls ) {
-	builder.append(nullIndicator);
-      }
-    }
-    else {
+  public Joiner append(final Object...objects) {
+    if ( check(null, objects) ) {
       beginArray();
       for ( final Object object : objects ) {
-	append(object);
+	appendItem(object);
       }
       endArray();
     }
     return this;
   }
+
 
   /**
    * Append a collection.
@@ -443,19 +562,29 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner append(final Collection<?> collection) {
-    if ( collection == null ) {
-      if ( !skipNulls ) {
-	builder.append(nullIndicator);
-      }
-    }
-    else {
+    if ( check(null, collection) ) {
       beginCollection();
       for ( final Object object : collection ) {
-	append(object);
+	appendItem(object);
       }
       endCollection();
     }
     return this;
+  }
+
+  /**
+   * Append an item from an array or collection.
+   *
+   * @param object         the item to append.
+   */
+  public void appendItem(final Object object) {
+    if ( check(null, object) ) {
+      tracker.addSeparator();
+      beginObject();
+      append(object);
+      endObject();
+      tracker.setFlag();
+    }
   }
 
   /**
@@ -558,23 +687,19 @@ public class Joiner {
   }
 
   /**
-   * Begin joining a field. Append the separator if this is
-   * the first field.
+   * Begin joining a field. Append the list separator if
+   * this is the first field.
    *
    * @param name  the field name (omit if null).
    * @return this Joiner.
    */
   private Joiner beginField(final String name) {
-    if ( first ) {
-      first = false;
-    }
-    else {
-      builder.append(separator);
-    }
-    if ( name != null ) {
+    tracker.addSeparator();
+    if ( withFieldNames && name != null ) {
       builder.append(name)
-             .append(COLON_SEPARATOR);
+             .append(nameSeparator);
     }
+    tracker.clearFlag();
     return this;
   }
 
@@ -585,11 +710,9 @@ public class Joiner {
    * @return this Joiner.
    */
   private Joiner beginEntity(final char beginChar) {
-    if ( !first ) {
-      builder.append(separator);
-      first = true;
-    }
+    tracker.addSeparator();
     builder.append(beginChar);
+    tracker.push(itemSeparator);
     return this;
   }
 
@@ -599,8 +722,138 @@ public class Joiner {
    * @return
    */
   private Joiner endEntity(final char endChar) {
-    first = false;
     builder.append(endChar);
+    tracker.pop();
     return this;
+  }
+
+  /**
+   * Append the null indicator if we are not skipping nulls.
+   * Add a leading separator if needed.
+   */
+  private boolean check(final String name, final Object object) {
+    boolean result = true;
+    if ( object == null ) {
+      if ( !skipNulls ) {
+	tracker.addSeparator();
+	if ( name != null ) {
+	  beginField(name);
+	}
+	builder.append(nullIndicator);
+	tracker.setFlag();
+      }
+      result = false;
+    }
+    return result;
+  }
+
+  /**
+   * Returns the Tracker. This is only for testing.
+   * @return the Tracker.
+   */
+  Tracker getTracker() {
+    return tracker;
+  }
+
+  /**
+   * Tracker keeps track of the levels of nested items and
+   * whether we currently need a separator at each level.
+   */
+  class Tracker {
+
+    private int level;
+    private long flags;
+    private String[] stack = new String[MAX_LEVEL + 1];
+
+    /**
+     * Construct a Tracker with the specified separator.
+     *
+     * @param separator  the string to use as a separator.
+     */
+    public Tracker() {
+      stack[0] = defaultSeparator;
+    }
+
+    /**
+     * Increment the level and push a separator onto the stack.
+     *
+     * @param separator  the new separator.
+     */
+    public void push(final String separator) {
+      if ( level < MAX_LEVEL ) {
+	stack[++level] = separator == null ? defaultSeparator : separator;
+	clearFlag();
+      }
+    }
+
+    /**
+     * Decrement the level.
+     */
+    public void pop() {
+      if ( level > 0 ) {
+	--level;
+	setFlag();
+      }
+    }
+
+    /**
+     * Add a separator to the output if needed.
+     */
+    public void addSeparator() {
+      if ( isSet() ) {
+	builder.append(stack[level]);
+	clearFlag();
+      }
+    }
+
+    /**
+     * Sets the separator for the current level.
+     *
+     * @param separator  the new separator.
+     */
+    public void setSeparator(final String separator) {
+       stack[level] = separator;
+    }
+
+    /**
+     * Set the flag for this level to indicate an item was
+     * added and the output now needs a separator.
+     */
+    public void setFlag() {
+      flags |= 1 << level;
+    }
+
+    /**
+     * Clear the flag for this level to indicate a separator
+     * is not needed.
+     */
+    public void clearFlag() {
+      flags &= ~(1 << level);
+    }
+
+    /**
+     * Returns the flag for this level.
+     * @return the flag for this level.
+     */
+    public boolean isSet() {
+      return (flags & (1 << level)) != 0;
+    }
+
+    /**
+     * Returns the current level. This is only for testing.
+     * @return the current level.
+     */
+    int getLevel() {
+      return level;
+    }
+
+    /**
+     * Sets the level. This is only for testing.
+     *
+     * @param level  the new level.
+     */
+    void setLevel(final int level) {
+      this.level = level;
+    }
   }
 }
