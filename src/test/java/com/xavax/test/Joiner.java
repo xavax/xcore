@@ -46,7 +46,7 @@ final public class Joiner {
    * @param buffer      the output buffer.
    * @param parameters  the array of parameters to add.
    */
-  private static void join(final StringBuilder buffer, final Object[] parameters) {
+  private static void join(final StringBuilder buffer, final Object...parameters) {
     buffer.append('[');
     boolean first = true;
     for ( final Object parameter : parameters ) {

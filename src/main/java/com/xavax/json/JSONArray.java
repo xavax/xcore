@@ -18,7 +18,7 @@ import static com.xavax.util.Constants.*;
 /**
  * JSONArray represents an array field in a JSON.
  */
-public class JSONArray extends ArrayList<Object> {
+public final class JSONArray extends ArrayList<Object> {
   public final static long serialVersionUID = 0;
 
   /**

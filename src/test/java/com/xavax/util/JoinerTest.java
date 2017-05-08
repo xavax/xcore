@@ -126,9 +126,9 @@ public class JoinerTest {
    */
   @Test
   public void testArrays() {
-    String result = Joiner.create().append(ADDRESSES).toString();
+    String result = Joiner.create().append((Object[]) ADDRESSES).toString();
     assertEquals(result, EXPECT4A);
-    result = Joiner.create().skipNulls().append(ADDRESSES).toString();
+    result = Joiner.create().skipNulls().append((Object[]) ADDRESSES).toString();
     assertEquals(result, EXPECT4B);
     result = Joiner.create().append((Object[]) null).toString();
     assertEquals(result, INDICATOR);
@@ -259,8 +259,8 @@ public class JoinerTest {
    */
   @Test
   public void testTracker() {
-    Joiner joiner = Joiner.create();
-    Joiner.Tracker tracker = joiner.getTracker();
+    final Joiner joiner = Joiner.create();
+    final Joiner.Tracker tracker = joiner.getTracker();
     tracker.setLevel(0);
     tracker.pop();
     assertEquals(tracker.getLevel(), 0);

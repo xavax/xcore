@@ -38,7 +38,7 @@ public class Varargs {
    *
    * @return a new Varargs instance.
    */
-  public static Varargs getInstance() {
+  public static Varargs create() {
     return new Varargs();
   }
 
@@ -48,7 +48,7 @@ public class Varargs {
    * @param capacity  the initial capacity of the container.
    * @return a new Varargs instance.
    */
-  public static Varargs getInstance(final int capacity) {
+  public static Varargs create(final int capacity) {
     return new Varargs(capacity);
   }
 

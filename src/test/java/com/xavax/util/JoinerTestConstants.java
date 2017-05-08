@@ -1,6 +1,9 @@
 package com.xavax.util;
 
-public class JoinerTestConstants {
+/**
+ * Constants shared by the Joiner test cases.
+ */
+public final class JoinerTestConstants {
 
   public final static int CAPACITY = 128;
 

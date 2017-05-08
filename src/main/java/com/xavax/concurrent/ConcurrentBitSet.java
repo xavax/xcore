@@ -129,7 +129,7 @@ public class ConcurrentBitSet implements Joinable {
     }
     metrics.incrementOperations();
     final Segment segment = getSegment(index, false);
-    return segment == null ? false : segment.get((int) (index & segmentMask));
+    return segment != null && segment.get((int) (index & segmentMask));
   }
 
   /**

@@ -15,7 +15,7 @@ import static com.xavax.util.Constants.*;
  * 
  * @author Phil Harbison
  */
-public class JSONPath extends ArrayList<String> {
+public final class JSONPath extends ArrayList<String> {
   public final static long serialVersionUID = 0;
 
   private final static String SEPARATOR_REGEX = "[.]";

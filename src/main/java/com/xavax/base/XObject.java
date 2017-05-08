@@ -62,7 +62,7 @@ public class XObject {
    */
   public boolean debugEnabled()
   {
-    return logger == null ? false : logger.isDebugEnabled();
+    return logger != null && logger.isDebugEnabled();
   }
 
   /**
@@ -328,7 +328,7 @@ public class XObject {
    */
   public boolean traceEnabled()
   {
-    return logger == null ? false : logger.isTraceEnabled();
+    return logger != null && logger.isTraceEnabled();
   }
 
   /**

@@ -38,9 +38,9 @@ public class VarargsTest {
     assertNotNull(varargs);
     varargs = new Varargs(CAPACITY);
     assertNotNull(varargs);
-    varargs = Varargs.getInstance();
+    varargs = Varargs.create();
     assertNotNull(varargs);
-    varargs = Varargs.getInstance(CAPACITY);
+    varargs = Varargs.create(CAPACITY);
     assertNotNull(varargs);
   }
 
@@ -50,7 +50,7 @@ public class VarargsTest {
   @Test
   public void testAppendObject() {
     final Object[] args =
-	Varargs.getInstance().append(PARAMA1).append(PARAMB1).toArray();
+	Varargs.create().append(PARAMA1).append(PARAMB1).toArray();
     final String output = Joiner.join(args);
     assertEquals(output, "[A1, B1]");
   }
@@ -61,7 +61,7 @@ public class VarargsTest {
   @Test
   public void appendArray() {
     final Object[] args =
-	Varargs.getInstance()
+	Varargs.create()
 	       .append((Object[]) APARAMS)
 	       .append((Object[]) BPARAMS)
 	       .toArray();
@@ -75,7 +75,7 @@ public class VarargsTest {
   @Test
   public void appendCollection() {
     final Object[] args =
-	Varargs.getInstance()
+	Varargs.create()
 	       .append(ALIST)
 	       .append(BLIST)
 	       .toArray();
@@ -90,7 +90,7 @@ public class VarargsTest {
   @Test
   public void flattenArray() {
     final Object[] args =
-	Varargs.getInstance()
+	Varargs.create()
 	       .flatten((Object[]) null)
 	       .flatten((Object[]) APARAMS)
 	       .flatten((Object[]) BPARAMS)
@@ -105,7 +105,7 @@ public class VarargsTest {
   @Test
   public void flattenCollection() {
     final Object[] args =
-	Varargs.getInstance()
+	Varargs.create()
 	       .flatten(ALIST)
 	       .flatten(BLIST)
 	       .flatten((Collection<String>) null)

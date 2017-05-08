@@ -18,7 +18,7 @@ import static com.xavax.util.Constants.*;
 /**
  * JSON represents a JSON object as nested hashmaps.
  */
-public class JSON extends HashMap<String, Object> {
+public final class JSON extends HashMap<String, Object> {
 
   public final static long serialVersionUID = 0;
 

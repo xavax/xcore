@@ -135,6 +135,7 @@ public class XObjectTest extends XObject {
    * Widget is an example use of XObject.
    */
   public static class Widget extends XObject {
+    private final static String TEST_INFO = "testInfo";
     private final static String MESSAGE = "a log message from Example";
     private final static Logger LOGGER = Logger.getLogger(Widget.class);
 
@@ -190,7 +191,7 @@ public class XObjectTest extends XObject {
      */
     public void testInfo()
     {
-      final String method = "testInfo";
+      final String method = TEST_INFO;
       info(method, MESSAGE);
       info(method, FORMAT, PARAM1, 123, 5.678);
       final Exception cause = new FileNotFoundException(MESSAGE);
@@ -203,7 +204,7 @@ public class XObjectTest extends XObject {
      */
     public void testWarn()
     {
-      final String method = "testInfo";
+      final String method = TEST_INFO;
       warn(method, MESSAGE);
       warn(method, FORMAT, PARAM1, 123, 5.678);
       final Exception cause = new FileNotFoundException(MESSAGE);
@@ -216,7 +217,7 @@ public class XObjectTest extends XObject {
      */
     public void testError()
     {
-      final String method = "testInfo";
+      final String method = TEST_INFO;
       error(method, MESSAGE);
       error(method, FORMAT, PARAM1, 123, 5.678);
       final Exception cause = new FileNotFoundException(MESSAGE);
@@ -229,7 +230,7 @@ public class XObjectTest extends XObject {
      */
     public void testFatal()
     {
-      final String method = "testInfo";
+      final String method = TEST_INFO;
       fatal(method, MESSAGE);
       fatal(method, FORMAT, PARAM1, 123, 5.678);
       final Exception cause = new FileNotFoundException(MESSAGE);
