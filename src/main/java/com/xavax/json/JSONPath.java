@@ -51,7 +51,7 @@ public final class JSONPath extends ArrayList<String> {
       if ( path != null && !path.equals(EMPTY_STRING) ) {
 	final String[] parts = path.trim().split(SEPARATOR_REGEX);
 	for ( final String part : parts ) {
-	  if ( part != null && !part.equals(EMPTY_STRING) ) {
+	  if ( !part.isEmpty() ) {
 	    add(part);
 	  }
 	}

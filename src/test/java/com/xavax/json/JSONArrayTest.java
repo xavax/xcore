@@ -5,6 +5,7 @@
 //
 package com.xavax.json;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,12 @@ import static org.testng.Assert.*;
 public class JSONArrayTest {
   private JSONParser parser;
 
+  private final static String ATL = "Atlanta";
+  private final static String BHM = "Birmingham";
+  private final static String CHI = "Chicago";
+  private final static String CLT = "Charlotte";
+  private final static String LAX = "Los Angeles";
+  private final static String NYC = "New York";
   private final static String INPUT_ATL =
       "{name: 'Atlanta', x: 3.0000, y: 4.0000, pop: 4500000}";
   private final static String INPUT_BHM =
@@ -35,6 +42,19 @@ public class JSONArrayTest {
       "[" + INPUT_ATL + "," + INPUT_BHM + "," + INPUT_CLT + "]";
   private final static String CITIES2 =
       "[" + INPUT_CHI + "," + INPUT_LAX + "," + INPUT_NYC + "]";  
+  private final static String[] NAMES = new String[] {
+      ATL, BHM, CHI, CLT, LAX, NYC
+  };
+
+  private final static String EXPECT1 = "[]";
+  private final static String EXPECT2 =
+      "[{pop:4500000,name:'Atlanta',x:3.0,y:4.0}," +
+      "{pop:1250000,name:'Birmingham',x:1.0,y:2.0}," +
+      "{pop:2000000,name:'Charlotte',x:5.0,y:6.0}]";
+  private final static String EXPECT3 =
+      "{0:'{pop:4500000,name:\\'Atlanta\\',x:3.0,y:4.0}'," +
+      "1:'{pop:1250000,name:\\'Birmingham\\',x:1.0,y:2.0}'," +
+      "2:'{pop:2000000,name:\\'Charlotte\\',x:5.0,y:6.0}'}";
 
   /**
    * Test setup.
@@ -45,20 +65,55 @@ public class JSONArrayTest {
   }
 
   /**
+   * Test constructors.
+   */
+  @Test
+  public void testConstructors() {
+    JSONArray jsarray = new JSONArray(Arrays.asList((Object[]) NAMES));
+    List<String> result = jsarray.flatten();
+    assertEquals(result.size(), 6);
+    assertEquals(result.get(0), ATL);
+    jsarray = new JSONArray(ATL, BHM, CHI, CLT, LAX, NYC);
+    result = jsarray.flatten();
+    assertEquals(result.size(), 6);
+    assertEquals(result.get(0), ATL);
+    final JSONArray jsarray2 = new JSONArray(jsarray);
+    result = jsarray2.flatten();
+    assertEquals(result.size(), 6);
+    assertEquals(result.get(0), ATL);
+  }
+
+  /**
+   * Test add methods.
+   */
+  @Test
+  public void testAdd() {
+    JSONArray array = new JSONArray();
+    array.add(Arrays.asList((Object[]) NAMES));
+    Object object = array.get(0);
+    assertTrue(object instanceof JSONArray);
+    final JSON json = parser.parse(INPUT_ATL);
+    assertTrue(parser.isValid());
+    array = new JSONArray();
+    array.add(json);
+    object = array.get(0);
+    assertTrue(object instanceof JSON);
+  }
+
+  /**
    * Test the addAll method.
    */
   @Test
   public void testAddAll() {
     final JSONArray ja1 = parser.parseArray(CITIES1);
     assertTrue(parser.isValid());
-    List<String> list = ja1.flatten();
-    assertEquals(list.size(), 3);
     final JSONArray ja2 = parser.parseArray(CITIES2);
     assertTrue(parser.isValid());
-    list = ja2.flatten();
-    assertEquals(list.size(), 3);
     assertTrue(ja1.addAll(ja2));
-    list = ja1.flatten();
+    final JSONArray ja3 = new JSONArray(ATL, BHM, ja1, CHI, CLT, ja2);
+    final JSONArray ja4 = new JSONArray();
+    ja4.addAll(ja3);
+    final List<String> list = ja4.flatten();
     assertEquals(list.size(), 6);
   }
 
@@ -67,15 +122,18 @@ public class JSONArrayTest {
    */
   @Test
   public void testFlatten() {
-    final JSONArray array = parser.parseArray(CITIES1);
+    final JSONArray ja1 = parser.parseArray(CITIES1);
     assertTrue(parser.isValid());
+    final JSONArray ja2 = parser.parseArray(CITIES2);
+    assertTrue(parser.isValid());
+    final JSONArray array = new JSONArray(ATL, BHM, null, ja1, null, ja2);
     final List<String> list = array.flatten();
-    assertEquals(list.size(), 3);
-    assertEquals(list.get(0).length(), 40);
+    assertEquals(list.size(), 6);
+    assertEquals(list.get(0).length(), 7);
   }
 
   /**
-   * Test the asMap method.
+   * Test the asMap and add(Map) methods.
    */
   @Test
   public void testAsMap() {
@@ -84,5 +142,25 @@ public class JSONArrayTest {
     final Map<String, String> map = array.asMap();
     assertEquals(map.size(), 3);
     assertEquals(map.get("0").length(), 40);
+    final JSONArray array2 = new JSONArray();
+    array2.add(map);
+    final List<String> list = array2.flatten();
+    assertEquals(list.size(), 1);
+    final String result = list.get(0);
+    assertEquals(result, EXPECT3);
+  }
+
+  /**
+   * Test the toString method.
+   */
+  @Test
+  public void testToString() {
+    JSONArray array = parser.parseArray(CITIES1);
+    assertTrue(parser.isValid());
+    String result = array.toString();
+    assertEquals(result, EXPECT2);
+    array = new JSONArray();
+    result = array.toString();
+    assertEquals(result, EXPECT1);
   }
 }

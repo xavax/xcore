@@ -68,7 +68,7 @@ public final class JSONArray extends ArrayList<Object> {
    * @param map  the map of items to add.
    * @return true if this array was modified.
    */
-  public boolean add(final Map<String, Object> map) {
+  public boolean add(final Map<String, ? extends Object> map) {
     final JSON json = new JSON(map);
     return super.add((Object) json);
   }

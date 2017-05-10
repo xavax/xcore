@@ -34,8 +34,8 @@ public final class JSON extends HashMap<String, Object> {
    *
    * @param map  a map to populate the new JSON
    */
-  public JSON(final Map<String, Object> map) {
-    for ( final Map.Entry<String, Object> entry : map.entrySet()) {
+  public JSON(final Map<String, ? extends Object> map) {
+    for ( final Map.Entry<String, ? extends Object> entry : map.entrySet()) {
       super.put(entry.getKey(), entry.getValue());
     }
   }
