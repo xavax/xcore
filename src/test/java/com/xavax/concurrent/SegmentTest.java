@@ -19,7 +19,7 @@ import static com.xavax.util.Constants.*;
 public class SegmentTest {
   private final static int MAX_BIT_INDEX = 1 << LOG2_DEFAULT_SEGMENT_SIZE;
   private final static int MAX_ENTRY_INDEX = 1 << (LOG2_DEFAULT_SEGMENT_SIZE - LOG2_BITS_PER_PAGE);
-  private final static String EXPECTED = "[" + NULL_INDICATOR + COMMA_SEPARATOR + NULL_INDICATOR;
+  private final static String EXPECTED = "pageCount: 0, [<null>, <null>,";
 
   private Segment segment;
 
@@ -73,8 +73,8 @@ public class SegmentTest {
    */
   @Test
   public void testToString() {
-    final String result = segment.toString().substring(0, EXPECTED.length());
-    assertEquals(result, EXPECTED);
+    final String result = segment.toString();
+    assertEquals(result.substring(0, EXPECTED.length()), EXPECTED);
   }
 
   /**

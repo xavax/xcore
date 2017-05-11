@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.xavax.exception.RangeException;
+import com.xavax.util.AbstractJoinableObject;
 import com.xavax.util.Joinable;
 import com.xavax.util.Joiner;
 
@@ -37,7 +38,7 @@ import static com.xavax.util.Constants.*;
  * 
  * @author alvitar@xavax.com Phillip L Harbison
  */
-public class ConcurrentBitSet implements Joinable {
+public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable {
   final static int LOG2_BITS_PER_BYTE = 3;
   final static int LOG2_BITS_PER_INT  = 5;
   final static int LOG2_BITS_PER_LONG = 6;
@@ -45,7 +46,7 @@ public class ConcurrentBitSet implements Joinable {
   final static int BITS_PER_INT = 1 << LOG2_BITS_PER_INT;
   final static int BITS_PER_LONG = 1 << LOG2_BITS_PER_LONG;
   final static int BITS_PER_PAGE = 1 << LOG2_BITS_PER_PAGE;
-  final static int DEFAULT_BUFFER_SIZE = 32768;
+  final static int BITSET_BUFFER_SIZE = 32768;
 
   final static int LOG2_DEFAULT_SEGMENT_SIZE = 16;
   final static int LOG2_MAX_SEGMENT_SIZE = BITS_PER_INT + LOG2_BITS_PER_PAGE;
@@ -194,9 +195,8 @@ public class ConcurrentBitSet implements Joinable {
     if ( fromIndex < 0 ) {
       throw new RangeException(0, Long.MAX_VALUE, fromIndex);
     }
-    final long result = 0;
-    
-    return result;
+    // TODO: finish implementing this method.
+    return 0;
   }
 
   /**
@@ -209,9 +209,8 @@ public class ConcurrentBitSet implements Joinable {
     if ( fromIndex < 0 ) {
       throw new RangeException(0, Long.MAX_VALUE, fromIndex);
     }
-    final long result = 0;
-    
-    return result;
+    // TODO: finish implementing this method.    
+    return 0;
   }
 
   /**
@@ -287,8 +286,9 @@ public class ConcurrentBitSet implements Joinable {
    *
    * @return a string representation of this bit set.
    */
+  @Override
   public String toString() {
-    return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
+    return doJoin(Joiner.create(BITSET_BUFFER_SIZE)).toString();
   }
 
   /**
@@ -298,11 +298,11 @@ public class ConcurrentBitSet implements Joinable {
    * @return the joiner.
    */
   @Override
-  public Joiner join(final Joiner joiner) {
-    return joiner == null ? null :
-      joiner.beginObject()
-            .append((Object[]) segmentMap)
-            .endObject();
+  public Joiner doJoin(final Joiner joiner) {
+    joiner.append("currentMapSize", currentMapSize)
+          .append("logSegmentSize", logSegmentSize)
+          .append("segmentMap", (Object[]) segmentMap);
+    return joiner;
   }
 
   /**
@@ -310,8 +310,8 @@ public class ConcurrentBitSet implements Joinable {
    * segment). It reduces thread contention by allowing us to synchronize on one
    * entry rather than the entire segment map.
    */
-  static class SegmentMapEntry implements Joinable {
-    final static int DEFAULT_BUFFER_SIZE = 8192;
+  static class SegmentMapEntry extends AbstractJoinableObject implements Joinable {
+    final static int SEGMAP_BUFFER_SIZE = 8192;
 
     private Segment segment;
 
@@ -344,8 +344,9 @@ public class ConcurrentBitSet implements Joinable {
      *
      * @return a string representation of this map entry.
      */
+    @Override
     public String toString() {
-      return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
+      return doJoin(Joiner.create(SEGMAP_BUFFER_SIZE)).toString();
     }
 
     /**
@@ -355,8 +356,9 @@ public class ConcurrentBitSet implements Joinable {
      * @return the joiner.
      */
     @Override
-    public Joiner join(final Joiner joiner) {
-      return joiner == null ? null : joiner.append(segment);
+    public Joiner doJoin(final Joiner joiner) {
+      joiner.append("segment", segment);
+      return joiner;
     }
   }
 
@@ -364,9 +366,9 @@ public class ConcurrentBitSet implements Joinable {
    * Segment encapsulates a fixed-size segment of the bit set. Segment sizes are
    * always a power of 2 to simplify calculations.
    */
-  static class Segment implements Joinable {
+  static class Segment extends AbstractJoinableObject implements Joinable {
     final static int BIT_INDEX_MASK = (1 << LOG2_BITS_PER_PAGE) - 1;
-    final static int DEFAULT_BUFFER_SIZE = 8192;
+    final static int SEGMENT_BUFFER_SIZE = 8192;
 
     private int pageCount;
     private final Page[] map;
@@ -538,8 +540,9 @@ public class ConcurrentBitSet implements Joinable {
      *
      * @return a string representation of this segment.
      */
+    @Override
     public String toString() {
-      return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
+      return doJoin(Joiner.create(SEGMENT_BUFFER_SIZE)).toString();
     }
 
     /**
@@ -549,9 +552,10 @@ public class ConcurrentBitSet implements Joinable {
      * @return the joiner.
      */
     @Override
-    public Joiner join(final Joiner joiner) {
-      return joiner == null ? null :
-	joiner.append((Object[]) map);
+    public Joiner doJoin(final Joiner joiner) {
+      joiner.append("pageCount", pageCount)
+            .append("map", map);
+      return joiner;
     }
 
     /**
@@ -609,10 +613,10 @@ public class ConcurrentBitSet implements Joinable {
    * Page encapsulates a small array of longs used to represent a portion
    * of a bit set.
    */
-  static class Page implements Joinable {
+  static class Page extends AbstractJoinableObject implements Joinable {
     final static int BIT_MAP_ARRAY_SIZE = 1 << (LOG2_BITS_PER_PAGE - LOG2_BITS_PER_BYTE);
     final static int BIT_MAP_INDEX_MASK = (1 << LOG2_BITS_PER_BYTE) - 1;
-    final static int DEFAULT_BUFFER_SIZE = 8192;
+    final static int PAGE_BUFFER_SIZE = 8192;
 
     private final static String[] NIBBLES = new String[] {
         "0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111",
@@ -783,8 +787,9 @@ public class ConcurrentBitSet implements Joinable {
      *
      * @return a string representation of this page.
      */
+    @Override
     public String toString() {
-      return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
+      return doJoin(Joiner.create(PAGE_BUFFER_SIZE)).toString();
     }
 
     /**
@@ -794,44 +799,29 @@ public class ConcurrentBitSet implements Joinable {
      * @return the joiner.
      */
     @Override
-    public Joiner join(final Joiner joiner) {
-      if ( joiner != null ) {
-	toString(joiner.getBuilder());
-      }
-      return joiner;
-    }
-
-    /**
-     * Format a string representation of this page using the supplied builder.
-     *
-     * @param builder  the builder.
-     * @return the builder.
-     */
-    public StringBuilder toString(final StringBuilder builder) {
-      if ( builder != null ) {
-	boolean first = true;
-	builder.append(LEFT_BRACKET);
-	for ( final byte b : bits ) {
-	  if ( first ) {
-	    first = false;
-	  }
-	  else {
-	    builder.append(PERIOD);
-	  }
-	  builder.append(NIBBLES[(b & 0xF0) >>> 4])
-	         .append(NIBBLES[b & 0x0F]);
+    public Joiner doJoin(final Joiner joiner) {
+      boolean first = true;
+      joiner.appendRaw(LEFT_BRACKET);
+      for ( final byte b : bits ) {
+	if ( first ) {
+	  first = false;
 	}
-	builder.append(RIGHT_BRACKET);
+	else {
+	  joiner.appendRaw(PERIOD);
+	}
+	joiner.appendRaw(NIBBLES[(b & 0xF0) >>> 4])
+	      .appendRaw(NIBBLES[b & 0x0F]);
       }
-      return builder;
+      joiner.appendRaw(RIGHT_BRACKET);
+      return joiner;
     }
   }
 
   /**
    * Metrics is a public snapshot of the internal metrics.
    */
-  public static class Metrics implements Joinable {
-    private final static int DEFAULT_BUFFER_SIZE = 128;
+  public static class Metrics extends AbstractJoinableObject implements Joinable {
+    private final static int METRICS_BUFFER_SIZE = 128;
 
     private final long pagesCreated;
     private final long segmentMapLocks;
@@ -892,9 +882,10 @@ public class ConcurrentBitSet implements Joinable {
      *
      * @return the metrics as a string.
      */
+    @Override
     public String toString() {
       // return toString(new StringBuilder(DEFAULT_BUFFER_SIZE)).toString();
-      return join(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
+      return doJoin(Joiner.create(METRICS_BUFFER_SIZE)).toString();
     }
 
     /**
@@ -904,14 +895,14 @@ public class ConcurrentBitSet implements Joinable {
      * @return the joiner.
      */
     @Override
-    public Joiner join(final Joiner joiner) {
-      return joiner == null ? null :
-	joiner.appendRaw("{ ")
-	      .append("pc", pagesCreated)
-	      .append("sc", segmentsCreated)
-	      .append("sel", segmentMapLocks)
-	      .append("ops", totalOperations)
-	      .appendRaw(" }");
+    public Joiner doJoin(final Joiner joiner) {
+      joiner.appendRaw("{ ")
+	  .append("pc",  pagesCreated)
+	  .append("sc",  segmentsCreated)
+	  .append("sel", segmentMapLocks)
+	  .append("ops", totalOperations)
+	  .appendRaw(" }");
+      return joiner;
     }
   }
 
@@ -963,4 +954,5 @@ public class ConcurrentBitSet implements Joinable {
       segmentsCreated.incrementAndGet();
     }
   }
+
 }

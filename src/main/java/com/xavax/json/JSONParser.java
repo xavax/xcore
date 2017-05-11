@@ -137,19 +137,18 @@ public class JSONParser {
   public JSON parse() {
     level = 0;
     final JSON json = new JSON();
+    boolean flag = false;
     try {
       if ( expect('{', true) ) {
+	flag = true;
 	parseItems(json);
-      }
-      if ( level != 0 ) {
-	addError("unmatched braces or brackets");
       }
     }
     catch (UnexpectedEndOfInputException e) {
       final String msg = "unexpected end of input";
       addError(msg);
     }
-    if ( hasNext() ) {
+    if ( flag && hasNext() ) {
       addError("unexpected characters after closing brace");
     }
     return json;
@@ -344,7 +343,7 @@ public class JSONParser {
 	break;
       }
       else if ( input != ',' ) {
-	expected(',', input);
+	expected(',', ']', input);
 	break;
       }
     }
@@ -616,6 +615,10 @@ public class JSONParser {
 
   private void expected(final char expected, final char received) {
     addError("expected [" + expected + "] but received [" + received + "]");
+  }
+
+  private void expected(final char expected1, final char expected2, final char received) {
+    addError("expected [" + expected1 + "] or [" + expected2 + "] but received [" + received + "]");
   }
 
   private void expected(final String expected, final char received) {

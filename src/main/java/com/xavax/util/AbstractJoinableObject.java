@@ -3,7 +3,7 @@ package com.xavax.util;
 /**
  * AbstractJoinableObject is a base class for objects implementing Joinable.
  */
-abstract class AbstractJoinableObject implements Joinable {
+abstract public class AbstractJoinableObject implements Joinable {
 
   final static int DEFAULT_BUFFER_SIZE = 256;
 

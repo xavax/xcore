@@ -20,6 +20,7 @@ import static com.xavax.util.Constants.*;
  * Test cases for ConcurrentBitSet.
  */
 public class ConcurrentBitSetTest {
+  private final static long TINY_BIT_SET_SIZE = 1 << 10;
   private final static long SMALL_BIT_SET_SIZE = 1 << 20;
   private final static long LARGE_BIT_SET_SIZE = 1 << 32;
   private final static int LOG2_SEGMENT_SIZE = 18;
@@ -27,7 +28,7 @@ public class ConcurrentBitSetTest {
   private final static int RANDOM_BOUNDS = 4000000;
   private final static int RANDOM_COUNT = 1000000;
   private final static String EXPECTED =
-      "([" + NULL_INDICATOR + COMMA_SEPARATOR + NULL_INDICATOR;
+      "currentMapSize: 16, logSegmentSize: 16, [(segment: (pageCount: 2, [([11111111.";
 
   private ConcurrentBitSet bitSet;
 
@@ -146,7 +147,8 @@ public class ConcurrentBitSetTest {
    */
   @Test
   public void testToString() {
-    final String result = bitSet.toString().substring(0, EXPECTED.length());
-    assertEquals(result, EXPECTED);
+    testSet(TINY_BIT_SET_SIZE);
+    final String result = bitSet.toString();
+    assertEquals(result.substring(0, EXPECTED.length()), EXPECTED);
   }
 }

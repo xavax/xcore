@@ -5,8 +5,9 @@
 //
 package com.xavax.json;
 
-import java.io.FileNotFoundException;
+import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
@@ -79,8 +80,9 @@ public class JSONParserTest {
   private final static String INPUT9B  = "{cities:" + INPUT9A + "}";
   private final static String INPUT10A = "{ foo: {}, bar: {}, baz: {}}";
   private final static String INPUT11A = "{ foo: [], bar: [], baz: []}";
-
-
+  private final static String INPUT12A = "foo: 1.2345, bar: -1, baz: 1.2e03, abc: 'abc' }";
+  private final static String INPUT12B = "{ foo: 1.2345, bar: -1, baz: 1.2e03, abc: 'abc'";
+  private final static String INPUT12C = "{ inner: { foo: [ 'abc', 'def' }";
   private JSONParser parser;
 
   /**
@@ -147,6 +149,12 @@ public class JSONParserTest {
     result = parser.parse(INPUT2K);
     assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
+    result = parser.parse(INPUT12A);
+    assertEquals(parser.getErrors().size(), 1);
+    result = parser.parse(INPUT12B);
+    assertEquals(parser.getErrors().size(), 1);
+    result = parser.parse(INPUT12C);
+    assertEquals(parser.getErrors().size(), 2);
     final StringReader reader = new StringReader(INPUT2A);
     final JSONParser parser2 = new JSONParser(reader, SOURCE);
     result = parser2.parse();
@@ -278,16 +286,21 @@ public class JSONParserTest {
 
   /**
    * Test parsing input file.
-   *
-   * @throws FileNotFoundException
+   * @throws IOException 
    */
   @Test
-  public void testFileInput() throws FileNotFoundException {
-    final String filename = FILENAME;
-    final Reader reader = new FileReader(filename);
-    final JSONParser parser2 = new JSONParser(reader, filename);
-    final JSON result = parser2.parse();
+  public void testFileInput() throws IOException {
+    Reader reader = new FileReader(FILENAME);
+    final JSONParser parser2 = new JSONParser(reader, FILENAME);
+    JSON result = parser2.parse();
     assertNotNull(result);
     assertTrue(parser2.isValid());
+    reader.close();
+    reader = new FileReader(FILENAME);
+    final BufferedReader buffer = new BufferedReader(reader);
+    result = JSONParser.parse(buffer, FILENAME);
+    assertTrue(result instanceof JSON);
+    result = JSONParser.parse(null, FILENAME);
+    assertNull(result);
   }
 }

@@ -57,7 +57,7 @@ public class JSONPathTest {
   @Test
   public void testToString() {
     final JSONPath path = JSONPath.create(ABC_DEF_GHI, P123_456_789);
-    String result = path.toString();
+    final String result = path.toString();
     assertEquals(result, EXPECT1);
   }
 }

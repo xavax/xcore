@@ -544,7 +544,19 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner append(final Object...objects) {
-    if ( check(null, objects) ) {
+    append(null, objects);
+    return this;
+  }
+
+  /**
+   * Append an array of objects.
+   *
+   * @param name  the field name.
+   * @param objects  the array of objects to be joined.
+   * @return this Joiner.
+   */
+  public Joiner append(final String name, final Object...objects) {
+    if ( check(name, objects) ) {
       beginArray();
       for ( final Object object : objects ) {
 	appendItem(object);
@@ -639,6 +651,17 @@ public class Joiner {
    */
   public Joiner endObject() {
     return endEntity(RIGHT_PAREN);
+  }
+
+  /**
+   * Append a character to the output.
+   *
+   * @param character  the character to append.
+   * @return this Joiner.
+   */
+  public Joiner appendRaw(final char character) {
+    builder.append(character);
+    return this;
   }
 
   /**

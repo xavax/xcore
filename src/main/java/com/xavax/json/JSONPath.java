@@ -7,6 +7,9 @@ package com.xavax.json;
 
 import java.util.ArrayList;
 
+import com.xavax.util.Joinable;
+import com.xavax.util.Joiner;
+
 import static com.xavax.util.Constants.*;
 
 /**
@@ -15,7 +18,7 @@ import static com.xavax.util.Constants.*;
  * 
  * @author Phil Harbison
  */
-public final class JSONPath extends ArrayList<String> {
+public final class JSONPath extends ArrayList<String> implements Joinable {
   public final static long serialVersionUID = 0;
 
   private final static String SEPARATOR_REGEX = "[.]";
@@ -78,17 +81,28 @@ public final class JSONPath extends ArrayList<String> {
    */
   @Override
   public String toString() {
-    final StringBuilder builder = new StringBuilder();
-    boolean first = true;
-    for ( final String string : this ) {
-      if ( first ) {
-	first = false;
+    return join(new Joiner()).toString();
+  }
+
+  /**
+   * Join this object to the specified joiner.
+   *
+   * @param joiner  the joiner to use.
+   * @return the joiner.
+   */
+  public Joiner join(final Joiner joiner) {
+    if ( joiner != null ) {
+      boolean first = true;
+      for ( final String string : this ) {
+	if ( first ) {
+	  first = false;
+	}
+	else {
+	  joiner.appendRaw(PERIOD);
+	}
+	joiner.appendRaw(string);
       }
-      else {
-	builder.append(PERIOD);
-      }
-      builder.append(string);
     }
-    return builder.toString();
+    return joiner;
   }
 }

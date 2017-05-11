@@ -14,7 +14,6 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertNotNull;
 
 import static com.xavax.concurrent.ConcurrentBitSet.*;
-import static com.xavax.util.Constants.NULL_INDICATOR;
 
 /**
  * Test the ConcurrentBitSet.SegmentMapEntry class.
@@ -22,7 +21,8 @@ import static com.xavax.util.Constants.NULL_INDICATOR;
 @SuppressWarnings("PMD.TooManyStaticImports")
 public class SegmentMapEntryTest {
   private final static int DEFAULT_SIZE = LOG2_DEFAULT_SEGMENT_SIZE;
-
+  private final static String EXPECTED1 = "segment: <null>";
+  private final static String EXPECTED2 = "segment: (pageCount: 0, [<null>,";
   private ConcurrentBitSet bitSet;
   private SegmentMapEntry entry;
 
@@ -57,9 +57,11 @@ public class SegmentMapEntryTest {
    */
   @Test
   public void testToString() {
-    assertEquals(entry.toString(), NULL_INDICATOR);
+    String result = entry.toString();
+    assertEquals(result, EXPECTED1);
     final Segment segment = new Segment(bitSet, LOG2_DEFAULT_SEGMENT_SIZE);
     entry.set(segment);
-    assertNotNull(entry.toString());
+    result = entry.toString();
+    assertEquals(result.substring(0, EXPECTED2.length()), EXPECTED2);
   }
 }
