@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.xavax</groupId>
   <artifactId>xcore</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
   <name>Xavax Core Library</name>
   <url>http://www.xavax.com</url>
   <description>Core classes used by other Xavax projects.</description>
