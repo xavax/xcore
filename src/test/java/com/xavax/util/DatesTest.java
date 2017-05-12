@@ -35,6 +35,7 @@ public class DatesTest {
     assertEquals(Dates.timestamp(date, false), EXPECT4);
     assertEquals(Dates.timestamp(true).length(), EXPECT1.length());
     assertEquals(Dates.timestamp().length(), EXPECT2.length());
+    assertTrue(Dates.timestamp(null, true).isEmpty());
   }
 
   /**

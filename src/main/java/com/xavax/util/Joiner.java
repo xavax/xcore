@@ -128,6 +128,14 @@ public class Joiner {
   }
 
   /**
+   * Returns the default separator.
+   * @return the default separator.
+   */
+  public String getSeparator() {
+    return defaultSeparator;
+  }
+
+  /**
    * Sets the item separator to the specified string. This
    * is used to separate items in an array or collection.
    *
@@ -137,6 +145,14 @@ public class Joiner {
   public final Joiner withItemSeparator(final String separator) {
     this.itemSeparator = separator == null ? EMPTY_STRING : separator;
     return this;
+  }
+
+  /**
+   * Returns the item separator.
+   * @return the item separator.
+   */
+  public String getItemSeparator() {
+    return itemSeparator;
   }
 
   /**
@@ -156,6 +172,14 @@ public class Joiner {
   }
 
   /**
+   * Returns the field name separator.
+   * @return the field name separator.
+   */
+  public String getFieldNameSeparator() {
+    return nameSeparator;
+  }
+
+  /**
    * Sets the withFieldNames flag. If this flag is true and
    * field names are displayed, fields will be displayed as:
    *   firstName: John
@@ -169,6 +193,14 @@ public class Joiner {
   }
 
   /**
+   * Returns true if field name are enabled.
+   * @return true if field name are enabled.
+   */
+  public boolean hasFieldNames() {
+    return withFieldNames;
+  }
+
+  /**
    * Set the max depth for joining nested joinable objects.
    * The maximum level is specified by MAX_LEVEL.
    *
@@ -178,6 +210,14 @@ public class Joiner {
   public Joiner withMaxDepth(final int maxDepth) {
     this.maxDepth = maxDepth < 0 ? 0 : maxDepth;
     return this;
+  }
+
+  /**
+   * Returns the maximum depth.
+   * @return the maximum depth.
+   */
+  public int getMaxDepth() {
+    return maxDepth;
   }
 
   /**
@@ -194,6 +234,14 @@ public class Joiner {
   }
 
   /**
+   * Returns the prefix.
+   * @return the prefix
+   */
+  public String getPrefix() {
+    return prefix;
+  }
+
+  /**
    * Sets the suffix to the specified string. The suffix will
    * be appended to the final result of joining. This is only
    * used by the join method.
@@ -204,6 +252,14 @@ public class Joiner {
   public final Joiner withSuffix(final String suffix) {
     this.suffix = suffix == null ? EMPTY_STRING : suffix;
     return this;
+  }
+
+  /**
+   * Returns the suffix.
+   * @return the suffix
+   */
+  public String getSuffix() {
+    return suffix;
   }
 
   /**
@@ -529,8 +585,7 @@ public class Joiner {
    */
   public Joiner append(final String name, final Object object) {
     if ( check(name, object) ) {
-      beginField(name);
-      beginObject();
+      beginObject(name);
       append(object);
       endObject();
     }
@@ -544,8 +599,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner append(final Object...objects) {
-    append(null, objects);
-    return this;
+    return append(null, objects);
   }
 
   /**
@@ -557,7 +611,7 @@ public class Joiner {
    */
   public Joiner append(final String name, final Object...objects) {
     if ( check(name, objects) ) {
-      beginArray();
+      beginArray(name);
       for ( final Object object : objects ) {
 	appendItem(object);
       }
@@ -566,7 +620,6 @@ public class Joiner {
     return this;
   }
 
-
   /**
    * Append a collection.
    *
@@ -574,8 +627,19 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner append(final Collection<?> collection) {
-    if ( check(null, collection) ) {
-      beginCollection();
+    return append(null, collection);
+  }
+
+  /**
+   * Append a collection.
+   *
+   * @param name  the name of this field.
+   * @param collection  the collection to be joined.
+   * @return this Joiner.
+   */
+  public Joiner append(final String name, final Collection<?> collection) {
+    if ( check(name, collection) ) {
+      beginCollection(name);
       for ( final Object object : collection ) {
 	appendItem(object);
       }
@@ -592,7 +656,7 @@ public class Joiner {
   public void appendItem(final Object object) {
     if ( check(null, object) ) {
       tracker.addSeparator();
-      beginObject();
+      beginObject(null);
       append(object);
       endObject();
       tracker.setFlag();
@@ -602,9 +666,11 @@ public class Joiner {
   /**
    * Begin joining an array.
    *
+   * @param name  the name of this field.
    * @return this Joiner.
    */
-  public Joiner beginArray() {
+  public Joiner beginArray(final String name) {
+    beginField(name);
     return beginEntity(LEFT_BRACKET);
   }
 
@@ -620,9 +686,11 @@ public class Joiner {
   /**
    * Begin joining an collection.
    *
+   * @param name  the name of this field.
    * @return this Joiner.
    */
-  public Joiner beginCollection() {
+  public Joiner beginCollection(final String name) {
+    beginField(name);
     return beginEntity(LEFT_BRACE);
   }
 
@@ -638,9 +706,11 @@ public class Joiner {
   /**
    * Begin joining an object.
    *
+   * @param name  the name of this field.
    * @return this Joiner.
    */
-  public Joiner beginObject() {
+  public Joiner beginObject(final String name) {
+    beginField(name);
     return beginEntity(LEFT_PAREN);
   }
 
@@ -721,8 +791,8 @@ public class Joiner {
     if ( withFieldNames && name != null ) {
       builder.append(name)
              .append(nameSeparator);
+      tracker.clearFlag();
     }
-    tracker.clearFlag();
     return this;
   }
 

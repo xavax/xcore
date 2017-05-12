@@ -1,6 +1,7 @@
 package com.xavax.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class JoinerTest {
   private final static String ZIP1 = "30303";
   private final static String ZIP2 = "35802";
   private final static String GADGET1 = "Gadget1";
+  private final static String FIELDNAME = "addresses";
 
   private final static String EXPECT1 =
       STREET1 + SEPARATOR + ATL + SEPARATOR + GEORGIA + SEPARATOR + ZIP1;
@@ -43,6 +45,9 @@ public class JoinerTest {
       LPAREN + EXPECT2 + RPAREN + SEPARATOR + INDICATOR + RBRACKET;
   private final static String EXPECT4B =
       LBRACKET + LPAREN + EXPECT1 + RPAREN + SEPARATOR + LPAREN + EXPECT2 + RPAREN + RBRACKET;
+  private final static String EXPECT4C =
+      FIELDNAME + SEPARATOR3 + LBRACE + LPAREN + EXPECT1 + RPAREN + SEPARATOR +
+      LPAREN + EXPECT2 + RPAREN + SEPARATOR + INDICATOR + RBRACE;
   private final static String EXPECT5 =
       QUOTE + FIRST_NAME + QUOTE + SEPARATOR + QUOTE + LAST_NAME + QUOTE;
   private final static String EXPECT6 =
@@ -59,6 +64,7 @@ public class JoinerTest {
   private final static String EXPECT13 = GADGET1;
   private final static String EXPECT14 = FIELD_NAME + SEPARATOR3 + INDICATOR;
   private final static String EXPECT15 = "true, 123, 456, 3.14, false, hello";
+  private final static String EXPECT15B = EXPECT15 + ", <null>";
   private final static String EXPECT16 = LBRACE + EXPECT15 + RBRACE;
   private final static String EXPECT17 = GADGET1 + SEPARATOR3 + LPAREN + GADGET1 + RPAREN;
 
@@ -81,22 +87,53 @@ public class JoinerTest {
   }
 
   /**
+   * Test the fluent interface.
+   */
+  @Test
+  public void testInterface() {
+    final Joiner joiner = Joiner.create();
+    assertEquals(joiner.withMaxDepth(5).getMaxDepth(), 5);
+    assertEquals(joiner.withMaxDepth(-5).getMaxDepth(), 0);
+    assertEquals(joiner.withPrefix(LBRACE).getPrefix(), LBRACE);
+    assertTrue(joiner.withPrefix(null).getPrefix().isEmpty());
+    assertEquals(joiner.withSuffix(RBRACE).getSuffix(), RBRACE);
+    assertTrue(joiner.withSuffix(null).getSuffix().isEmpty());
+    assertEquals(joiner.withPrefix(LBRACE).getPrefix(), LBRACE);
+    assertTrue(joiner.withPrefix(null).getPrefix().isEmpty());
+    assertEquals(joiner.withSeparator(SEPARATOR).getSeparator(), SEPARATOR);
+    assertTrue(joiner.withSeparator(null).getSeparator().isEmpty());
+    assertEquals(joiner.withItemSeparator(SEPARATOR).getItemSeparator(), SEPARATOR);
+    assertTrue(joiner.withItemSeparator(null).getItemSeparator().isEmpty());
+    assertEquals(joiner.withFieldNameSeparator(SEPARATOR).getFieldNameSeparator(), SEPARATOR);
+    assertEquals(joiner.withFieldNameSeparator(null).getFieldNameSeparator(), SEPARATOR3);
+    assertTrue(joiner.withFieldNames(true).hasFieldNames());
+    assertFalse(joiner.withFieldNames(false).hasFieldNames());
+  }
+
+  /**
    * Test the join method.
    */
   @Test
   public void testJoin() {
     String result =
 	Joiner.create()
+	      .skipNulls()
 	      .withSeparator(SEPARATOR)
-	      .join(true, 123, 456, 3.14, false, "hello");
-    assertTrue(EXPECT15.equals(result));
+	      .join(true, 123, 456, 3.14, false, "hello", null);
+    assertEquals(result, EXPECT15);
+    result =
+	Joiner.create()
+	      .withSeparator(SEPARATOR)
+	      .join(true, 123, 456, 3.14, false, "hello", null);
+    assertEquals(result, EXPECT15B);
     result =
 	Joiner.create()
 	      .withSeparator(SEPARATOR)
 	      .withPrefix(LBRACE)
 	      .withSuffix(RBRACE)
-	      .join(true, 123, 456, 3.14, false, "hello");
-    assertTrue(EXPECT16.equals(result));
+	      .skipNulls()
+	      .join(true, 123, 456, 3.14, false, "hello", null);
+    assertEquals(result, EXPECT16);
   }
 
   /**
@@ -116,9 +153,11 @@ public class JoinerTest {
     result = Joiner.create().append(GADGET1, gadget).toString();
     assertTrue(EXPECT17.equals(result));
     result = Joiner.create().append((Object) null).toString();
-    assertTrue(INDICATOR.equals(result));
+    assertEquals(result, INDICATOR);
     result = Joiner.create().append("name", (Object) null).toString();
-    assertTrue(EXPECT14.equals(result));
+    assertEquals(result, EXPECT14);
+    result = ADDRESSES[0].join(null).toString();
+    assertEquals(result, EXPECT1);
   }
 
   /**
@@ -145,6 +184,9 @@ public class JoinerTest {
     assertEquals(result, INDICATOR);
     result = Joiner.create().skipNulls().append((Collection<?>) null).toString();
     assertEquals(result, EMPTY);
+    final List<Address> list = Arrays.asList(ADDRESSES);
+    result = Joiner.create().append("addresses", list).toString();
+    assertEquals(result, EXPECT4C);
   }
 
   /**
@@ -202,7 +244,9 @@ public class JoinerTest {
    */
   @Test
   public void testWithNullIndicator() {
-    final Joiner joiner = Joiner.create().withNullIndicator(INDICATOR2);
+    Joiner joiner = Joiner.create().withNullIndicator(null);
+    assertTrue(joiner.getNullIndicator().isEmpty());
+    joiner = Joiner.create().withNullIndicator(INDICATOR2);
     assertEquals(joiner.getNullIndicator(), INDICATOR2);
     final Person nobody = new Person(null, null, 0);
     final String result = joiner.append(nobody).toString();
@@ -231,9 +275,10 @@ public class JoinerTest {
    */
   @Test
   public void testFieldNames() {
-    final Joiner joiner = new Joiner();
-    joiner.appendField(FIELD_NAME, LAST_NAME);
+    Joiner joiner = Joiner.create().appendField(FIELD_NAME, LAST_NAME);
     assertEquals(joiner.toString(), EXPECT12);
+    joiner = Joiner.create().withFieldNames(false).appendField(FIELD_NAME, LAST_NAME);
+    assertEquals(joiner.toString(), LAST_NAME);
   }
 
   /**
@@ -343,8 +388,7 @@ public class JoinerTest {
      */
     @Override
     protected Joiner doJoin(final Joiner joiner) {
-      joiner.withSeparator(SEPARATOR)
-      	    .append(firstName)
+      joiner.append(firstName)
       	    .append(lastName)
       	    .append(age)
       	    .append(addresses);

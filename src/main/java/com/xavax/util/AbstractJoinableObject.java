@@ -13,7 +13,7 @@ abstract public class AbstractJoinableObject implements Joinable {
    */
   @Override
   public String toString() {
-    return Joiner.create().append(this).toString();
+    return doJoin(Joiner.create(DEFAULT_BUFFER_SIZE)).toString();
   }
 
   /**

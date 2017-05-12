@@ -114,11 +114,6 @@ public class JoinerNestingTest {
   private final static String EXPECT_TREED = ROOT + LPAREN + EXPECT_NODE8C + RPAREN;
   private final static String EXPECT_TREEE = ROOT + LPAREN + EXPECT_NODE8D + RPAREN;
 
-
-
-
-  
-
   private final static TreeNode<Long> NODE1  = new TreeNode<>(new Long(1));
   private final static TreeNode<Long> NODE3  = new TreeNode<>(new Long(3));
   private final static TreeNode<Long> NODE2  = new TreeNode<>(new Long(2), NODE1, NODE3);
