@@ -185,8 +185,8 @@ public class Joiner {
    * field names are displayed, fields will be displayed as:
    *   firstName: John
    *
-   * @param withFieldNames
-   * @return
+   * @param withFieldNames  true if field names should be displayed.
+   * @return this joiner.
    */
   public Joiner withFieldNames(final boolean withFieldNames) {
     this.withFieldNames = withFieldNames;
@@ -562,6 +562,9 @@ public class Joiner {
 
   /**
    * Attempt to join a nested object.
+   *
+   * @param object  the object to be joined.
+   * @return this joiner.
    */
   public Joiner nest(final Joinable object) {
     if ( maxDepth == 0 || depth <= maxDepth ) {
@@ -685,7 +688,7 @@ public class Joiner {
   /**
    * Append an item from an array or collection.
    *
-   * @param key     the key for this item (only used for Maps).
+   * @param name    the name for this item (only used for Maps).
    * @param object  the item to append.
    */
   public void appendItem(final String name, final Object object) {
