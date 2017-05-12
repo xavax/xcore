@@ -22,7 +22,7 @@ import static com.xavax.concurrent.ConcurrentBitSet.*;
 public class SegmentMapEntryTest {
   private final static int DEFAULT_SIZE = LOG2_DEFAULT_SEGMENT_SIZE;
   private final static String EXPECTED1 = "segment: <null>";
-  private final static String EXPECTED2 = "segment: (pageCount: 0, [<null>,";
+  private final static String EXPECTED2 = "segment: (pageCount: 0, map: [<null>,";
   private ConcurrentBitSet bitSet;
   private SegmentMapEntry entry;
 

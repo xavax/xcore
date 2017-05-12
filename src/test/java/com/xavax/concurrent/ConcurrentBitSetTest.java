@@ -14,7 +14,6 @@ import org.testng.annotations.BeforeMethod;
 import com.xavax.exception.RangeException;
 
 import static org.testng.Assert.*;
-import static com.xavax.util.Constants.*;
 
 /**
  * Test cases for ConcurrentBitSet.
@@ -28,7 +27,7 @@ public class ConcurrentBitSetTest {
   private final static int RANDOM_BOUNDS = 4000000;
   private final static int RANDOM_COUNT = 1000000;
   private final static String EXPECTED =
-      "currentMapSize: 16, logSegmentSize: 16, [(segment: (pageCount: 2, [([11111111.";
+      "currentMapSize: 16, logSegmentSize: 16, segmentMap: [(segment: (pageCount: 2, map: [([11111111.";
 
   private ConcurrentBitSet bitSet;
 
