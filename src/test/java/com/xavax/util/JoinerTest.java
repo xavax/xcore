@@ -3,7 +3,9 @@ package com.xavax.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -18,6 +20,8 @@ import static com.xavax.util.JoinerTestConstants.*;
 public class JoinerTest {
 
 
+  private final static String HELLO = "hello";
+  private final static String ADDR_NAME = "addresses";
   private final static String FIELD_NAME = "name";
   private final static String FIRST_NAME = "Thomas";
   private final static String LAST_NAME = "Jefferson";
@@ -67,10 +71,15 @@ public class JoinerTest {
   private final static String EXPECT15B = EXPECT15 + ", <null>";
   private final static String EXPECT16 = LBRACE + EXPECT15 + RBRACE;
   private final static String EXPECT17 = GADGET1 + SEPARATOR3 + LPAREN + GADGET1 + RPAREN;
+  private final static String EXPECT18A = "{<null>: (" + EXPECT1 + 
+      "), XX: <null>, GA: (" + EXPECT1 + "), AL: (" + EXPECT2 + ")}";
+  private final static String EXPECT18B = "addresses: " + EXPECT18A;
+  private final static String EXPECT18C = "{<null>: (" + EXPECT1 +
+      "), GA: (" + EXPECT1 + "), AL: (" + EXPECT2 + ")}";
 
   private final static Address[] ADDRESSES = new Address[] {
-      new Address(STREET1, ATL, "GA", ZIP1),
-      new Address(STREET2, HSV, "AL", ZIP2),
+      new Address(STREET1, ATL, GEORGIA, ZIP1),
+      new Address(STREET2, HSV, ALABAMA, ZIP2),
       null
   };
 
@@ -119,12 +128,12 @@ public class JoinerTest {
 	Joiner.create()
 	      .skipNulls()
 	      .withSeparator(SEPARATOR)
-	      .join(true, 123, 456, 3.14, false, "hello", null);
+	      .join(true, 123, 456, 3.14, false, HELLO, null);
     assertEquals(result, EXPECT15);
     result =
 	Joiner.create()
 	      .withSeparator(SEPARATOR)
-	      .join(true, 123, 456, 3.14, false, "hello", null);
+	      .join(true, 123, 456, 3.14, false, HELLO, null);
     assertEquals(result, EXPECT15B);
     result =
 	Joiner.create()
@@ -132,7 +141,7 @@ public class JoinerTest {
 	      .withPrefix(LBRACE)
 	      .withSuffix(RBRACE)
 	      .skipNulls()
-	      .join(true, 123, 456, 3.14, false, "hello", null);
+	      .join(true, 123, 456, 3.14, false, HELLO, null);
     assertEquals(result, EXPECT16);
   }
 
@@ -154,7 +163,7 @@ public class JoinerTest {
     assertTrue(EXPECT17.equals(result));
     result = Joiner.create().append((Object) null).toString();
     assertEquals(result, INDICATOR);
-    result = Joiner.create().append("name", (Object) null).toString();
+    result = Joiner.create().append(FIELD_NAME, (Object) null).toString();
     assertEquals(result, EXPECT14);
     result = ADDRESSES[0].join(null).toString();
     assertEquals(result, EXPECT1);
@@ -185,8 +194,28 @@ public class JoinerTest {
     result = Joiner.create().skipNulls().append((Collection<?>) null).toString();
     assertEquals(result, EMPTY);
     final List<Address> list = Arrays.asList(ADDRESSES);
-    result = Joiner.create().append("addresses", list).toString();
+    result = Joiner.create().append(ADDR_NAME, list).toString();
     assertEquals(result, EXPECT4C);
+  }
+
+  /**
+   * Test maps.
+   */
+  @Test
+  public void testMaps() {
+    final Map<String, Address> map = new HashMap<>();
+    map.put(GEORGIA, ADDRESSES[0]);
+    map.put(ALABAMA, ADDRESSES[1]);
+    map.put(null, ADDRESSES[0]);
+    map.put("XX", null);
+    String result = Joiner.create().append(map).toString();
+    assertEquals(result, EXPECT18A);
+    result = Joiner.create().append(null, map).toString();
+    assertEquals(result, EXPECT18A);
+    result = Joiner.create().append(ADDR_NAME, map).toString();
+    assertEquals(result, EXPECT18B);
+    result = Joiner.create().skipNulls().append(null, map).toString();
+    assertEquals(result, EXPECT18C);
   }
 
   /**

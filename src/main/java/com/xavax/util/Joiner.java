@@ -8,6 +8,7 @@ package com.xavax.util;
 import static com.xavax.util.Constants.*;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Joiner supports the efficient implementation of toString methods
@@ -613,7 +614,7 @@ public class Joiner {
     if ( check(name, objects) ) {
       beginArray(name);
       for ( final Object object : objects ) {
-	appendItem(object);
+	appendItem(null, object);
       }
       endArray();
     }
@@ -641,7 +642,40 @@ public class Joiner {
     if ( check(name, collection) ) {
       beginCollection(name);
       for ( final Object object : collection ) {
-	appendItem(object);
+	appendItem(null, object);
+      }
+      endCollection();
+    }
+    return this;
+  }
+
+  /**
+   * Append a map.
+   *
+   * @param map  the map to be joined.
+   * @return this Joiner.
+   */
+  public Joiner append(final Map<?,?> map) {
+    return append(null, map);
+  }
+
+  /**
+   * Append a map.
+   *
+   * @param name  the name of this field.
+   * @param map  the map to be joined.
+   * @return this Joiner.
+   */
+  public Joiner append(final String name, final Map<?,?> map) {
+    if ( check(name, map) ) {
+      beginCollection(name);
+      for ( final Map.Entry<?,?> entry : map.entrySet() ) {
+	final Object key = entry.getKey();
+	final Object value = entry.getValue();
+	final String entryName = key == null ? nullIndicator : key.toString();
+	if ( check(entryName, value) ) {
+	  appendItem(entryName, value);
+	}
       }
       endCollection();
     }
@@ -651,12 +685,13 @@ public class Joiner {
   /**
    * Append an item from an array or collection.
    *
-   * @param object         the item to append.
+   * @param key     the key for this item (only used for Maps).
+   * @param object  the item to append.
    */
-  public void appendItem(final Object object) {
-    if ( check(null, object) ) {
+  public void appendItem(final String name, final Object object) {
+    if ( check(name, object) ) {
       tracker.addSeparator();
-      beginObject(null);
+      beginObject(name);
       append(object);
       endObject();
       tracker.setFlag();
@@ -829,9 +864,7 @@ public class Joiner {
     if ( object == null ) {
       if ( !skipNulls ) {
 	tracker.addSeparator();
-	if ( name != null ) {
-	  beginField(name);
-	}
+	beginField(name);
 	builder.append(nullIndicator);
 	tracker.setFlag();
       }
