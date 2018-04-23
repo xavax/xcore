@@ -18,20 +18,24 @@ import org.testng.annotations.Test;
 import static org.testng.Assert.*;
 
 import static com.xavax.util.JoinerTestConstants.*;
+import static com.xavax.util.StringProcessors.*;
 
 /**
  * Test cases for the Joiner class nesting.
  */
 public class JoinerTest {
 
-
   private final static String HELLO = "hello";
   private final static String ADDR_NAME = "addresses";
+  private final static String CITY_FIELD = "city";
   private final static String FIELD_NAME = "name";
   private final static String FIRST_NAME = "Thomas";
   private final static String LAST_NAME = "Jefferson";
   private final static String ATL = "Atlanta";
   private final static String HSV = "Huntsville";
+  private final static String POSTAL_CODE_FIELD = "postalCode";
+  private final static String STATE_FIELD = "state";
+  private final static String STREET_FIELD = "street";
   private final static String STREET1 = "210 Peachtree St NW";
   private final static String STREET2 = "1 Traquility Base";
   private final static String ALABAMA = "AL";
@@ -55,7 +59,7 @@ public class JoinerTest {
   private final static String EXPECT4B =
       LBRACKET + LPAREN + EXPECT1 + RPAREN + SEPARATOR + LPAREN + EXPECT2 + RPAREN + RBRACKET;
   private final static String EXPECT4C =
-      FIELDNAME + SEPARATOR3 + LBRACE + LPAREN + EXPECT1 + RPAREN + SEPARATOR +
+      LBRACE + LPAREN + EXPECT1 + RPAREN + SEPARATOR +
       LPAREN + EXPECT2 + RPAREN + SEPARATOR + INDICATOR + RBRACE;
   private final static String EXPECT5 =
       QUOTE + FIRST_NAME + QUOTE + SEPARATOR + QUOTE + LAST_NAME + QUOTE;
@@ -69,7 +73,8 @@ public class JoinerTest {
   private final static String EXPECT10 =
       "true, x, 0, 0, 0, 0, <null>, <null>, <null>, <null>, <null>, <null>";
   private final static String EXPECT11 = "true, x, 0, 0, 0, 0";
-  private final static String EXPECT12 = FIELD_NAME + SEPARATOR3 + LAST_NAME;
+  private final static String EXPECT12A = FIELD_NAME + SEPARATOR3 + LAST_NAME;
+  private final static String EXPECT12B = QUOTE + FIELD_NAME + QUOTE + SEPARATOR3 + LAST_NAME;
   private final static String EXPECT13 = GADGET1;
   private final static String EXPECT14 = FIELD_NAME + SEPARATOR3 + INDICATOR;
   private final static String EXPECT15 = "true, 123, 456, 3.14, false, hello";
@@ -81,6 +86,14 @@ public class JoinerTest {
   private final static String EXPECT18B = "addresses: " + EXPECT18A;
   private final static String EXPECT18C = "{<null>: (" + EXPECT1 +
       "), GA: (" + EXPECT1 + "), AL: (" + EXPECT2 + ")}";
+  private final static String EXPECT19A = "ALABAMA, GEORGIA";
+  private final static String EXPECT19B = "alabama, georgia";
+  private final static String EXPECT19C = "Some\\ttext\\rwith\\nJava\\tspecial\\tcharacters.\\n";
+  private final static String EXPECT19D = "SOME\\tTEXT\\rWITH\\nJAVA\\tSPECIAL\\tCHARACTERS.\\n";
+  private final static String EXPECT20 = "";
+
+  private final static String INPUT19A = "Alabama, Georgia";
+  private final static String INPUT19B = "Some\ttext\rwith\nJava\tspecial\tcharacters.\n";
 
   private final static Address[] ADDRESSES = new Address[] {
       new Address(STREET1, ATL, GEORGIA, ZIP1),
@@ -105,7 +118,7 @@ public class JoinerTest {
    */
   @Test
   public void testInterface() {
-    final Joiner joiner = Joiner.create();
+    final Joiner joiner = Joiner.create(new JoinerFormat());
     assertEquals(joiner.withMaxDepth(5).getMaxDepth(), 5);
     assertEquals(joiner.withMaxDepth(-5).getMaxDepth(), 0);
     assertEquals(joiner.withPrefix(LBRACE).getPrefix(), LBRACE);
@@ -130,18 +143,18 @@ public class JoinerTest {
   @Test
   public void testJoin() {
     String result =
-	Joiner.create()
+	Joiner.create(new JoinerFormat())
 	      .skipNulls()
 	      .withSeparator(SEPARATOR)
 	      .join(true, 123, 456, 3.14, false, HELLO, null);
     assertEquals(result, EXPECT15);
     result =
-	Joiner.create()
+	Joiner.create(new JoinerFormat())
 	      .withSeparator(SEPARATOR)
 	      .join(true, 123, 456, 3.14, false, HELLO, null);
     assertEquals(result, EXPECT15B);
     result =
-	Joiner.create()
+	Joiner.create(new JoinerFormat())
 	      .withSeparator(SEPARATOR)
 	      .withPrefix(LBRACE)
 	      .withSuffix(RBRACE)
@@ -155,20 +168,20 @@ public class JoinerTest {
    */
   @Test
   public void testObjects() {
-    String result = Joiner.create().append(ADDRESSES[0]).toString();
+    String result = Joiner.create(new JoinerFormat()).append(ADDRESSES[0]).toString();
     assertEquals(result, EXPECT1);
-    result = Joiner.create().append(ADDRESSES[1]).toString();
+    result = Joiner.create(new JoinerFormat()).append(ADDRESSES[1]).toString();
     assertEquals(result, EXPECT2);
-    result = Joiner.create().append(person).toString();
+    result = Joiner.create(new JoinerFormat()).append(person).toString();
     assertEquals(result, EXPECT3);
     final Gadget gadget = new Gadget(GADGET1);
-    result = Joiner.create().append(gadget).toString();
+    result = Joiner.create(new JoinerFormat()).append(gadget).toString();
     assertEquals(result, EXPECT13);
-    result = Joiner.create().append(GADGET1, gadget).toString();
+    result = Joiner.create(new JoinerFormat()).append(GADGET1, gadget).toString();
     assertTrue(EXPECT17.equals(result));
-    result = Joiner.create().append((Object) null).toString();
+    result = Joiner.create(new JoinerFormat()).append((Object) null).toString();
     assertEquals(result, INDICATOR);
-    result = Joiner.create().append(FIELD_NAME, (Object) null).toString();
+    result = Joiner.create(new JoinerFormat()).append(FIELD_NAME, (Object) null).toString();
     assertEquals(result, EXPECT14);
     result = ADDRESSES[0].join(null).toString();
     assertEquals(result, EXPECT1);
@@ -179,13 +192,13 @@ public class JoinerTest {
    */
   @Test
   public void testArrays() {
-    String result = Joiner.create().append((Object[]) ADDRESSES).toString();
+    String result = Joiner.create(new JoinerFormat()).append((Object[]) ADDRESSES).toString();
     assertEquals(result, EXPECT4A);
-    result = Joiner.create().skipNulls().append((Object[]) ADDRESSES).toString();
+    result = Joiner.create(new JoinerFormat()).skipNulls().append((Object[]) ADDRESSES).toString();
     assertEquals(result, EXPECT4B);
-    result = Joiner.create().append((Object[]) null).toString();
+    result = Joiner.create(new JoinerFormat()).append((Object[]) null).toString();
     assertEquals(result, INDICATOR);
-    result = Joiner.create().skipNulls().append((Object[]) null).toString();
+    result = Joiner.create(new JoinerFormat()).skipNulls().append((Object[]) null).toString();
     assertTrue(result.isEmpty());
   }
 
@@ -194,12 +207,12 @@ public class JoinerTest {
    */
   @Test
   public void testCollections() {
-    String result = Joiner.create().append((Collection<?>) null).toString();
+    String result = Joiner.create(new JoinerFormat()).append((Collection<?>) null).toString();
     assertEquals(result, INDICATOR);
-    result = Joiner.create().skipNulls().append((Collection<?>) null).toString();
+    result = Joiner.create(new JoinerFormat()).skipNulls().append((Collection<?>) null).toString();
     assertEquals(result, EMPTY);
     final List<Address> list = Arrays.asList(ADDRESSES);
-    result = Joiner.create().append(ADDR_NAME, list).toString();
+    result = Joiner.create(new JoinerFormat()).append(ADDR_NAME, list).toString();
     assertEquals(result, EXPECT4C);
   }
 
@@ -213,13 +226,13 @@ public class JoinerTest {
     map.put(ALABAMA, ADDRESSES[1]);
     map.put(null, ADDRESSES[0]);
     map.put("XX", null);
-    String result = Joiner.create().append(map).toString();
+    String result = Joiner.create(new JoinerFormat().skipNulls()).append(map).toString();
     assertEquals(result, EXPECT18A);
-    result = Joiner.create().append(null, map).toString();
+    result = Joiner.create(new JoinerFormat()).append(null, map).toString();
     assertEquals(result, EXPECT18A);
-    result = Joiner.create().append(ADDR_NAME, map).toString();
+    result = Joiner.create(new JoinerFormat()).append(ADDR_NAME, map).toString();
     assertEquals(result, EXPECT18B);
-    result = Joiner.create().skipNulls().append(null, map).toString();
+    result = Joiner.create(new JoinerFormat()).skipNulls().append(null, map).toString();
     assertEquals(result, EXPECT18C);
   }
 
@@ -237,7 +250,7 @@ public class JoinerTest {
     widget = new Widget(true, 'x', (byte) 0, (short) 0, 0, 0L, null, null, null, null, null, null);
     result = widget.toString();
     assertEquals(result, EXPECT10);
-    result = Joiner.create().append(null, new Integer(ZIP1)).toString();
+    result = Joiner.create(new JoinerFormat()).append(null, new Integer(ZIP1)).toString();
     assertEquals(result, ZIP1);
   }
 
@@ -246,7 +259,7 @@ public class JoinerTest {
    */
   @Test
   public void testReusable() {
-    final Joiner joiner = Joiner.create().reusable();
+    final Joiner joiner = Joiner.create(new JoinerFormat()).reusable();
     final String result = joiner.append(person).toString();
     assertEquals(result, EXPECT3);
     final StringBuilder builder = joiner.getBuilder();
@@ -258,7 +271,7 @@ public class JoinerTest {
    */
   @Test
   public void testWithQuotedStrings() {
-    final Joiner joiner = Joiner.create().withQuotedStrings();
+    final Joiner joiner = Joiner.create(new JoinerFormat()).withQuotedStrings();
     final String result = joiner.append(person).toString();
     assertTrue(result.startsWith(EXPECT5));
   }
@@ -268,7 +281,7 @@ public class JoinerTest {
    */
   @Test
   public void testWithSeparator() {
-    final Joiner joiner = Joiner.create().withSeparator(SEPARATOR2);
+    final Joiner joiner = Joiner.create(new JoinerFormat()).withSeparator(SEPARATOR2);
     final String result = joiner.append(ADDRESSES[0]).toString();
     assertEquals(result, EXPECT6);
   }
@@ -278,9 +291,9 @@ public class JoinerTest {
    */
   @Test
   public void testWithNullIndicator() {
-    Joiner joiner = Joiner.create().withNullIndicator(null);
+    Joiner joiner = Joiner.create(new JoinerFormat()).withNullIndicator(null);
     assertTrue(joiner.getNullIndicator().isEmpty());
-    joiner = Joiner.create().withNullIndicator(INDICATOR2);
+    joiner = Joiner.create(new JoinerFormat()).withNullIndicator(INDICATOR2);
     assertEquals(joiner.getNullIndicator(), INDICATOR2);
     final Person nobody = new Person(null, null, 0);
     final String result = joiner.append(nobody).toString();
@@ -293,14 +306,14 @@ public class JoinerTest {
   @Test
   public void testSkipNulls() {
     final Person nobody = new Person(null, null, 0);
-    String result = Joiner.create().skipNulls().append(nobody).toString();
+    String result = Joiner.create(new JoinerFormat()).skipNulls().append(nobody).toString();
     assertTrue(result.startsWith(EXPECT8));
     final Widget widget = new Widget(true, 'x', (byte) 0, (short) 0, 0, 0L, null, null, null, null, null, null);
-    result = Joiner.create().skipNulls().append(widget).toString();
+    result = Joiner.create(new JoinerFormat()).skipNulls().append(widget).toString();
     assertEquals(result, EXPECT11);
-    result = Joiner.create().append(FIELD_NAME, (Object) null).toString();
+    result = Joiner.create(new JoinerFormat()).append(FIELD_NAME, (Object) null).toString();
     assertEquals(result, EXPECT14);
-    result = Joiner.create().skipNulls().append(FIELD_NAME, (Object) null).toString();
+    result = Joiner.create(new JoinerFormat()).skipNulls().append(FIELD_NAME, (Object) null).toString();
     assertEquals(result, EMPTY);
   }
 
@@ -309,9 +322,13 @@ public class JoinerTest {
    */
   @Test
   public void testFieldNames() {
-    Joiner joiner = Joiner.create().appendField(FIELD_NAME, LAST_NAME);
-    assertEquals(joiner.toString(), EXPECT12);
-    joiner = Joiner.create().withFieldNames(false).appendField(FIELD_NAME, LAST_NAME);
+    JoinerFormat format = JoinerFormat.create().withFieldNames(true);
+    Joiner joiner = Joiner.create(format).appendField(FIELD_NAME, LAST_NAME);
+    assertEquals(joiner.toString(), EXPECT12A);
+    format.withQuotedFieldNames();
+    joiner = Joiner.create(format).appendField(FIELD_NAME, LAST_NAME);
+    assertEquals(joiner.toString(), EXPECT12B);
+    joiner = Joiner.create(new JoinerFormat()).appendField(FIELD_NAME, LAST_NAME);
     assertEquals(joiner.toString(), LAST_NAME);
   }
 
@@ -330,7 +347,7 @@ public class JoinerTest {
    */
   @Test
   public void testAppendRaw() {
-    assertEquals(Joiner.create().appendRaw(null).appendRaw(LAST_NAME).toString(), LAST_NAME);
+    assertEquals(Joiner.create(new JoinerFormat()).appendRaw(null).appendRaw(LAST_NAME).toString(), LAST_NAME);
   }
 
   /**
@@ -338,7 +355,7 @@ public class JoinerTest {
    */
   @Test
   public void testTracker() {
-    final Joiner joiner = Joiner.create();
+    final Joiner joiner = Joiner.create(new JoinerFormat());
     final Joiner.Tracker tracker = joiner.getTracker();
     tracker.setLevel(0);
     tracker.pop();
@@ -347,6 +364,31 @@ public class JoinerTest {
     tracker.push(null);
     assertEquals(tracker.getLevel(), Long.SIZE - 1);
     
+  }
+
+  /**
+   * Test string processors.
+   */
+  @Test
+  public void testProcessors() {
+    JoinerFormat format = JoinerFormat.create().withProcessor(UPPER_CASE_STRING);
+    String result = Joiner.create(new JoinerFormat()).withFormat(format).append(INPUT19A).toString();
+    assertEquals(result, EXPECT19A);
+    format = JoinerFormat.create().withProcessor(LOWER_CASE_STRING);
+    result = Joiner.create(new JoinerFormat()).withFormat(format).append(INPUT19A).toString();
+    assertEquals(result, EXPECT19B);
+    format = JoinerFormat.create().withProcessor(ESCAPE_JAVA_STRING);
+    result = Joiner.create(new JoinerFormat()).withFormat(format).append(INPUT19B).toString();
+    assertEquals(result, EXPECT19C);
+    format = JoinerFormat.create().withProcessor(UPPER_CASE_STRING).withProcessor(ESCAPE_JAVA_STRING);
+    result = Joiner.create(new JoinerFormat()).withFormat(format).append(INPUT19B).toString();
+    assertEquals(result, EXPECT19D);
+  }
+
+  @Test
+  public void testFormatExemplars() {
+    String result = Joiner.create(1024, JoinerFormat.JSON_FORMAT).append(ADDRESSES).toString();
+    assertEquals(result, EXPECT20);
   }
 
   /**
@@ -377,10 +419,10 @@ public class JoinerTest {
      */
     @Override
     protected Joiner doJoin(final Joiner joiner) {
-      joiner.append(street)
-      	    .append(city)
-      	    .append(state)
-      	    .append(postalCode);
+      joiner.append(STREET_FIELD, street)
+      	    .append(CITY_FIELD, city)
+      	    .append(STATE_FIELD,state)
+      	    .append(POSTAL_CODE_FIELD, postalCode);
       return joiner;
     }
   }

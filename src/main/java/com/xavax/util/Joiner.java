@@ -16,22 +16,13 @@ import java.util.Map;
  */
 @SuppressWarnings("PMD.ExcessivePublicCount")
 public class Joiner {
-  private final static int DEFAULT_INITIAL_CAPACITY = 64;
-  private final static int MAX_LEVEL = Long.SIZE - 1;
 
-  private boolean quoteStrings;
   private boolean reusable;
-  private boolean skipNulls;
-  private boolean withFieldNames = true;
   private int depth;
   private int maxDepth;
-  private String defaultSeparator = COMMA_SEPARATOR;
-  private String itemSeparator = COMMA_SEPARATOR;
-  private String nameSeparator = COLON_SEPARATOR;
-  private String nullIndicator = NULL_INDICATOR;
-  private String prefix = EMPTY_STRING;
-  private String suffix = EMPTY_STRING;
-  private final Tracker tracker = new Tracker();
+  private JoinerFormat format;
+
+  private final Tracker tracker;
 
   // Joiner is a transient object so this warning is not relevant.
   @SuppressWarnings("PMD.AvoidStringBufferField")
@@ -41,15 +32,36 @@ public class Joiner {
    * Construct a joiner with the default initial capacity.
    */
   public Joiner() {
-    this(DEFAULT_INITIAL_CAPACITY);
+    this(JoinerFormat.DEBUG_FORMAT);
   }
 
   /**
    * Construct a joiner with the specified initial capacity.
    *
-   * @param initialCapacity the initial capacity.
+   * @param initialCapacity  the initial capacity of the Joiner.
    */
   public Joiner(final int initialCapacity) {
+    this(initialCapacity, JoinerFormat.DEBUG_FORMAT);
+  }
+
+  /**
+   * Construct a joiner with the specified format.
+   *
+   * @param format  the joiner format.
+   */
+  public Joiner(final JoinerFormat format) {
+    this(format.getDefaultCapacity(), format);
+  }
+
+  /**
+   * Construct a joiner with the specified initial capacity and format.
+   *
+   * @param initialCapacity the initial capacity.
+   * @param format  the joiner format.
+   */
+  public Joiner(final int initialCapacity, final JoinerFormat format) {
+    this.format = format;
+    tracker = new Tracker(this);
     builder = new StringBuilder(initialCapacity);
     depth = 1;
   }
@@ -74,6 +86,27 @@ public class Joiner {
   }
 
   /**
+   * Create a joiner with the specified format.
+   *
+   * @param format  the joiner format.
+   * @return a new Joiner.
+   */
+  public static Joiner create(final JoinerFormat format) {
+    return new Joiner(format);
+  }
+
+  /**
+   * Create a joiner with the specified initial capacity and format.
+   *
+   * @param initialCapacity the initial capacity.
+   * @param format  the joiner format.
+   * @return a new Joiner.
+   */
+  public static Joiner create(final int initialCapacity, final JoinerFormat format) {
+    return new Joiner(initialCapacity, format);
+  }
+
+  /**
    * Make this joiner reusable. After calling toString, the internal
    * string builder will be reset to empty.
    *
@@ -85,12 +118,31 @@ public class Joiner {
   }
 
   /**
+   * Sets the format for this joiner.
+   *
+   * @param format  the new format.
+   * @return this Joiner.
+   */
+  public Joiner withFormat(final JoinerFormat format) {
+    this.format = format;
+    return this;
+  }
+
+  /**
+   * Returns the format for this joiner.
+   *
+   * @return the format for this joiner.
+   */
+  public JoinerFormat getFormat() {
+    return format;
+  }
+  /**
    * Sets the skipNulls flag to true.
    *
    * @return this Joiner.
    */
   public Joiner skipNulls() {
-    skipNulls = true;
+    format.skipNulls(true);
     return this;
   }
 
@@ -101,7 +153,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public final Joiner withNullIndicator(final String nullIndicator) {
-    this.nullIndicator = nullIndicator == null ? EMPTY_STRING : nullIndicator;
+    this.format.withNullIndicator(nullIndicator);
     return this;
   }
 
@@ -112,7 +164,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner withQuotedStrings() {
-    this.quoteStrings = true;
+    this.format.withQuotedStrings();
     return this;
   }
 
@@ -123,8 +175,8 @@ public class Joiner {
    * @return this Joiner.
    */
   public final Joiner withSeparator(final String separator) {
-    defaultSeparator = separator == null ? EMPTY_STRING : separator;
-    tracker.setSeparator(defaultSeparator);
+    format.withSeparator(separator);
+    tracker.setSeparator(separator);
     return this;
   }
 
@@ -133,7 +185,7 @@ public class Joiner {
    * @return the default separator.
    */
   public String getSeparator() {
-    return defaultSeparator;
+    return format.getSeparator();
   }
 
   /**
@@ -144,7 +196,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public final Joiner withItemSeparator(final String separator) {
-    this.itemSeparator = separator == null ? EMPTY_STRING : separator;
+    format.withItemSeparator(separator);
     return this;
   }
 
@@ -153,7 +205,7 @@ public class Joiner {
    * @return the item separator.
    */
   public String getItemSeparator() {
-    return itemSeparator;
+    return format.getItemSeparator();
   }
 
   /**
@@ -168,7 +220,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public final Joiner withFieldNameSeparator(final String separator) {
-    this.nameSeparator = separator == null ? COLON_SEPARATOR : separator;
+    format.withFieldNameSeparator(separator);
     return this;
   }
 
@@ -177,7 +229,7 @@ public class Joiner {
    * @return the field name separator.
    */
   public String getFieldNameSeparator() {
-    return nameSeparator;
+    return format.getFieldNameSeparator();
   }
 
   /**
@@ -189,7 +241,7 @@ public class Joiner {
    * @return this joiner.
    */
   public Joiner withFieldNames(final boolean withFieldNames) {
-    this.withFieldNames = withFieldNames;
+    format.withFieldNames(withFieldNames);
     return this;
   }
 
@@ -198,7 +250,7 @@ public class Joiner {
    * @return true if field name are enabled.
    */
   public boolean hasFieldNames() {
-    return withFieldNames;
+    return format.hasFieldNames();
   }
 
   /**
@@ -230,7 +282,7 @@ public class Joiner {
    * @return  this Joiner.
    */
   public final Joiner withPrefix(final String prefix) {
-    this.prefix = prefix == null ? EMPTY_STRING : prefix;
+    format.withPrefix(prefix);
     return this;
   }
 
@@ -239,7 +291,7 @@ public class Joiner {
    * @return the prefix
    */
   public String getPrefix() {
-    return prefix;
+    return format.getPrefix();
   }
 
   /**
@@ -251,7 +303,7 @@ public class Joiner {
    * @return  this Joiner.
    */
   public final Joiner withSuffix(final String suffix) {
-    this.suffix = suffix == null ? EMPTY_STRING : suffix;
+    format.withSuffix(suffix);
     return this;
   }
 
@@ -260,7 +312,7 @@ public class Joiner {
    * @return the suffix
    */
   public String getSuffix() {
-    return suffix;
+    return format.getSuffix();
   }
 
   /**
@@ -270,7 +322,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public String join(final Object... objects) {
-    builder.append(prefix);
+    builder.append(format.getPrefix());
     tracker.clearFlag();;
     for ( final Object object : objects ) {
       if ( check(null, object) ) {
@@ -279,7 +331,7 @@ public class Joiner {
 	tracker.setFlag();
       }
     }
-    builder.append(suffix);
+    builder.append(format.getSuffix());
     return toString();
   }
 
@@ -527,13 +579,13 @@ public class Joiner {
   public Joiner append(final String name, final String string) {
     if ( check(name, string) ) {
       beginField(name);
-      if ( quoteStrings ) {
+      if ( format.hasQuotedStrings() ) {
 	builder.append('"')
-	       .append(string)
+	       .append(process(string))
 	       .append('"');
       }
       else {
-	builder.append(string);
+	builder.append(process(string));
       }
       tracker.setFlag();
     }
@@ -617,7 +669,7 @@ public class Joiner {
     if ( check(name, objects) ) {
       beginArray(name);
       for ( final Object object : objects ) {
-	appendItem(null, object);
+	 appendItem(null, object);
       }
       endArray();
     }
@@ -675,7 +727,7 @@ public class Joiner {
       for ( final Map.Entry<?,?> entry : map.entrySet() ) {
 	final Object key = entry.getKey();
 	final Object value = entry.getValue();
-	final String entryName = key == null ? nullIndicator : key.toString();
+	final String entryName = key == null ? format.getNullIndicator() : key.toString();
 	if ( check(entryName, value) ) {
 	  appendItem(entryName, value);
 	}
@@ -695,10 +747,37 @@ public class Joiner {
     if ( check(name, object) ) {
       tracker.addSeparator();
       beginObject(name);
-      append(object);
+      if ( object instanceof String ) {
+	final String output = process((String) object);
+	final boolean quoteStrings = format.hasQuotedStrings();
+	if ( quoteStrings ) {
+	  builder.append('"');
+	}
+	builder.append(output);
+	if ( quoteStrings ) {
+	  builder.append('"');
+	}
+      }
+      else {
+	append(object);
+      }
       endObject();
       tracker.setFlag();
     }
+  }
+
+  /**
+   * Process a string using each string processor in the processors list.
+   *
+   * @param input  the input string.
+   * @return a processed string.
+   */
+  String process(final String input) {
+    String output = input;
+    for ( final StringProcessor processor : format.getProcessors() ) {
+      output = processor.process(format, output, null);
+    }
+    return output;
   }
 
   /**
@@ -814,7 +893,7 @@ public class Joiner {
    * @return the null indicator string.
    */
   public String getNullIndicator() {
-    return this.nullIndicator; 
+    return format.getNullIndicator(); 
   }
 
   /**
@@ -826,9 +905,16 @@ public class Joiner {
    */
   private Joiner beginField(final String name) {
     tracker.addSeparator();
-    if ( withFieldNames && name != null ) {
-      builder.append(name)
-             .append(nameSeparator);
+    if ( format.hasFieldNames() && name != null ) {
+      final boolean quotedFieldNames = format.hasQuotedFieldNames();
+      if ( quotedFieldNames ) {
+	builder.append('"');
+      }
+      builder.append(name);
+      if ( quotedFieldNames ) {
+	builder.append('"');
+      }
+      builder.append(format.getFieldNameSeparator());
       tracker.clearFlag();
     }
     return this;
@@ -843,7 +929,7 @@ public class Joiner {
   private Joiner beginEntity(final char beginChar) {
     tracker.addSeparator();
     builder.append(beginChar);
-    tracker.push(itemSeparator);
+    tracker.push(format.getItemSeparator());
     return this;
   }
 
@@ -865,10 +951,10 @@ public class Joiner {
   private boolean check(final String name, final Object object) {
     boolean result = true;
     if ( object == null ) {
-      if ( !skipNulls ) {
+      if ( !format.hasSkipNulls() ) {
 	tracker.addSeparator();
 	beginField(name);
-	builder.append(nullIndicator);
+	builder.append(format.getNullIndicator());
 	tracker.setFlag();
       }
       result = false;
@@ -888,19 +974,23 @@ public class Joiner {
    * Tracker keeps track of the levels of nested items and
    * whether we currently need a separator at each level.
    */
-  class Tracker {
+  static class Tracker {
+    private final static int MAX_LEVEL = Long.SIZE - 1;
 
     private int level;
     private long flags;
     private String[] stack = new String[MAX_LEVEL + 1];
+    private final Joiner parent;
 
     /**
      * Construct a Tracker with the specified separator.
      *
      * @param separator  the string to use as a separator.
      */
-    public Tracker() {
-      stack[0] = defaultSeparator;
+    @SuppressWarnings("PMD.AccessorMethodGeneration")
+    public Tracker(final Joiner parent) {
+      this.parent = parent;
+      stack[0] = parent.getFormat().getSeparator();
     }
 
     /**
@@ -908,9 +998,10 @@ public class Joiner {
      *
      * @param separator  the new separator.
      */
+    @SuppressWarnings("PMD.AccessorMethodGeneration")
     public void push(final String separator) {
       if ( level < MAX_LEVEL ) {
-	stack[++level] = separator == null ? defaultSeparator : separator;
+	stack[++level] = separator == null ? parent.getFormat().getSeparator() : separator;
 	clearFlag();
       }
     }
@@ -930,7 +1021,7 @@ public class Joiner {
      */
     public void addSeparator() {
       if ( isSet() ) {
-	builder.append(stack[level]);
+	parent.appendRaw(stack[level]);
 	clearFlag();
       }
     }
