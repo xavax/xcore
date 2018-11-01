@@ -19,7 +19,8 @@ public class JoinerFormat {
   public final static JoinerFormat DEBUG_FORMAT = new JoinerFormat()
       .withFieldNames(true).withQuotedStrings().disableModificationa();
   public final static JoinerFormat JSON_FORMAT = new JoinerFormat()
-      .withFieldNames(true).withQuotedStrings().withQuotedFieldNames().disableModificationa();
+      .withFieldNames(true).withQuotedStrings().withQuotedFieldNames()
+      .withNullIndicator("null").disableModificationa();
   private boolean quoteFieldNames;
   private boolean quoteStrings;
   private boolean skipNulls;
