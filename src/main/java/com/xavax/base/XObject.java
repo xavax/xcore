@@ -405,8 +405,8 @@ public class XObject {
   private void format(final StringBuilder builder, final String method,
                       final String message)
   {
-    builder.append(method == null ? XLogger.UNKNOWN : method);
-    builder.append(": ");
+    builder.append(method == null ? XLogger.UNKNOWN : method)
+    	   .append(": ");
     if ( message != null ) {
       builder.append(message);
     }
