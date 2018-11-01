@@ -579,15 +579,27 @@ public class Joiner {
   public Joiner append(final String name, final String string) {
     if ( check(name, string) ) {
       beginField(name);
-      if ( format.hasQuotedStrings() ) {
-	builder.append('"')
-	       .append(process(string))
-	       .append('"');
-      }
-      else {
-	builder.append(process(string));
-      }
+      appendString(string);
       tracker.setFlag();
+    }
+    return this;
+  }
+
+  /**
+   * Append a string, optionally enclosed in quotes, and processed
+   * by the list of string processors.
+   *
+   * @param input  the input string.
+   * @return this Joiner.
+   */
+  public Joiner appendString(final String input) {
+    if ( format.hasQuotedStrings() ) {
+	builder.append('"')
+	       .append(process(input))
+	       .append('"');
+    }
+    else {
+	builder.append(process(input));
     }
     return this;
   }
@@ -622,7 +634,9 @@ public class Joiner {
     if ( maxDepth == 0 || depth <= maxDepth ) {
       ++depth;
       tracker.push(null);
+      beginObject(null);
       object.join(this);
+      endObject();
       tracker.pop();
       --depth;
     }
@@ -669,7 +683,7 @@ public class Joiner {
     if ( check(name, objects) ) {
       beginArray(name);
       for ( final Object object : objects ) {
-	 appendItem(null, object);
+	appendItem(object);
       }
       endArray();
     }
@@ -697,11 +711,32 @@ public class Joiner {
     if ( check(name, collection) ) {
       beginCollection(name);
       for ( final Object object : collection ) {
-	appendItem(null, object);
+	appendItem(object);
       }
       endCollection();
     }
     return this;
+  }
+
+  /**
+   * Append an item from an array or collection.
+   *
+   * @param object  the item to append.
+   */
+  public void appendItem(final Object object) {
+    if ( check(null, object) ) {
+      tracker.addSeparator();
+      if ( object instanceof String ) {
+	appendString((String) object);
+      }
+      else if ( object instanceof Joinable ) {
+	nest((Joinable) object);
+      }
+      else {
+	builder.append(object.toString());
+      }
+      tracker.setFlag();
+    }
   }
 
   /**
@@ -725,12 +760,11 @@ public class Joiner {
     if ( check(name, map) ) {
       beginCollection(name);
       for ( final Map.Entry<?,?> entry : map.entrySet() ) {
-	final Object key = entry.getKey();
-	final Object value = entry.getValue();
-	final String entryName = key == null ? format.getNullIndicator() : key.toString();
-	if ( check(entryName, value) ) {
-	  appendItem(entryName, value);
-	}
+	tracker.addSeparator();
+	appendKey(entry.getKey());
+	builder.append(format.getFieldNameSeparator());
+	appendValue(entry.getValue());
+	tracker.setFlag();
       }
       endCollection();
     }
@@ -738,31 +772,39 @@ public class Joiner {
   }
 
   /**
-   * Append an item from an array or collection.
+   * Append the map entry key.
    *
-   * @param name    the name for this item (only used for Maps).
-   * @param object  the item to append.
+   * @param key  the key.
    */
-  public void appendItem(final String name, final Object object) {
-    if ( check(name, object) ) {
-      tracker.addSeparator();
-      beginObject(name);
-      if ( object instanceof String ) {
-	final String output = process((String) object);
-	final boolean quoteStrings = format.hasQuotedStrings();
-	if ( quoteStrings ) {
-	  builder.append('"');
-	}
-	builder.append(output);
-	if ( quoteStrings ) {
-	  builder.append('"');
-	}
-      }
-      else {
-	append(object);
-      }
-      endObject();
-      tracker.setFlag();
+  void appendKey(final Object key) {
+    if ( key == null ) {
+      builder.append(format.getNullIndicator());
+    }
+    else if ( key instanceof String ) {
+      appendString((String) key);
+    }
+    else {
+      builder.append(key.toString());
+    }
+  }
+
+  /**
+   * Append a map entry value.
+   *
+   * @param object  the value to append.
+   */
+  public void appendValue(final Object object) {
+    if ( object == null ) {
+      builder.append(format.getNullIndicator());
+    }
+    else if ( object instanceof String ) {
+      appendString((String) object);
+    }
+    else if ( object instanceof Joinable ) {
+      nest((Joinable) object);
+    }
+    else {
+      builder.append(object.toString());
     }
   }
 
