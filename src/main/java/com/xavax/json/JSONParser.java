@@ -35,6 +35,7 @@ public class JSONParser {
     ACCUMULATE_EXPONENT
   };
 
+  private final static char NULL_CHARACTER = (char) 0;
   private final static int DEFAULT_BUFFER_SIZE = 64;
 
   private final static char[] EMPTY_ARRAY = new char[] {};
@@ -139,7 +140,7 @@ public class JSONParser {
     final JSON json = new JSON();
     boolean flag = false;
     try {
-      if ( expect('{', true) ) {
+      if ( expect('{', NULL_CHARACTER, true) ) {
 	flag = true;
 	parseItems(json);
       }
@@ -165,7 +166,7 @@ public class JSONParser {
     level = 0;
     final JSONArray list = new JSONArray();
     try {
-      if ( expect('[', true) ) {
+      if ( expect('[', NULL_CHARACTER, true) ) {
 	parseArrayItems(list);
       }
       if ( level != 0 ) {
@@ -207,10 +208,12 @@ public class JSONParser {
     boolean result = false;
     final String key = parseKey();
     if ( key == null || key.equals("") ) {
-      expected("identifier", peek());
+      // expected("identifier", peek());
+      expect(',', '}', true);
+      pushback();
     }
     else {
-      if ( expect(':', true) ) {
+      if ( expect(':', NULL_CHARACTER, true) ) {
 	final Object value = parseValue();
 	map.put(key, value);
 	result = true;
@@ -226,34 +229,59 @@ public class JSONParser {
     String key = null;
     final char input = next(true);
     if ( input == '"' || input == '\'' ) {
-      key = parseIdentifier();
-      expect(input, false);
+      key = parseIdentifier(true, input);
     }
     else {
       pushback();
-      key = parseIdentifier();
+      key = parseIdentifier(false, input);
     }
     return key;
   }
 
-  private String parseIdentifier() {
+  private boolean checkIdentifier(final char input, final boolean first) {
+    return first && Character.isLetter(input)
+	   || !first && Character.isLetterOrDigit(input)
+	   || input == '_' || input == '$';
+  }
+
+  private String parseIdentifier(final boolean mustMatch, final char opening) {
     final StringBuilder builder = new StringBuilder();
+    final int mark = cursor;
     char input = next(false);
-    if ( Character.isLetter(input) || input == '_' ) {
+    if ( checkIdentifier(input, true) ) {
       builder.append(input);
       while ( hasNext() ) {
 	input = next(false);
-	if ( Character.isLetterOrDigit(input) || input == '_' ) {
+	if ( checkIdentifier(input, false) ) {
 	  builder.append(input);
 	}
 	else {
-	  pushback();
+	  if ( mustMatch ) {
+	    if ( input != opening ) {
+	      skipToNextItem(true);
+	      invalidIdentifier(mark);
+	    }
+	  }
+	  else {
+	    pushback();
+	  }
 	  break;
 	}
       }
     }
     else {
-      pushback();
+      if ( input == ',' || input == '}' ) {
+	expected("identifier", input);
+	pushback();
+      }
+      else if ( input  == ':' ) {
+	expected("identifier", input);
+	skipToNextItem(true);
+      }
+      else {
+	invalidIdentifier(mark);
+	skipToNextItem(true);
+      }
     }
     return builder.toString();
   }
@@ -534,14 +562,14 @@ public class JSONParser {
     return result;
   }
 
-  private boolean expect(final char expected, final boolean skipWhitespace) {
+  private boolean expect(final char expected1, final char expected2, final boolean skipWhitespace) {
     boolean result = false;
     final char input = next(skipWhitespace);
-    if ( input == expected ) {
+    if ( input == expected1 || expected2 != 0 && input == expected2 ) {
       result = true;
     }
     else {
-      expected(expected, input);
+      expected(expected1, input);
       pushback();
     }
     return result;
@@ -629,6 +657,10 @@ public class JSONParser {
     addError("expected [" + expected + "] but received [" + received + "]");
   }
 
+  private void invalidIdentifier(final int mark) {
+    invalid(mark, "identifier");
+  }
+
   private void invalidNumber(final int mark) {
     invalid(mark, "number");
   }
@@ -638,8 +670,8 @@ public class JSONParser {
   }
 
   private void invalid(final int mark, final String detail) {
-    addError(mark, "invalid " + detail + " [" +
-	lineBuffer.substring(mark, cursor) + "]");
+    final String rejected = lineBuffer == null ? "" : lineBuffer.substring(mark, cursor);
+    addError(mark, "invalid " + detail + " [" + rejected + "]");
   }
 
   private void addError(final String msg) {
