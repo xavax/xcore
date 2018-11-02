@@ -45,6 +45,7 @@ public class JSONParser {
   private final static char[] RETURN_ARRAY = new char[] { CRETURN };
   private final static char[] TAB_ARRAY = new char[] { TAB };
 
+  private boolean allowCompoundIdentifiers = false;
   private boolean ignoreCase;
   private int cursor;
   private int length;
@@ -241,6 +242,7 @@ public class JSONParser {
   private boolean checkIdentifier(final char input, final boolean first) {
     return first && Character.isLetter(input)
 	   || !first && Character.isLetterOrDigit(input)
+	   || !first && input == '.' && allowCompoundIdentifiers
 	   || input == '_' || input == '$';
   }
 
@@ -724,6 +726,26 @@ public class JSONParser {
    */
   public boolean isValid() {
     return errors == null;
+  }
+
+  /**
+   * Returns true if compound identifiers should be allowed. Compound
+   * identifiers are of the form "id.name". This is not compliant with
+   * the JSON specification but commonly used in MongoDB code.
+   *
+   * @return true if compound identifiers should be allowed.
+   */
+  public boolean allowCompoundIdentifiers() {
+    return this.allowCompoundIdentifiers;
+  }
+
+  /**
+   * Set the allowCompoundIdentifiers flag.
+   *
+   * @param allowCompoundIdentifiers  if true, allow compound identifiers.
+   */
+  public void allowCompoundIdentifiers(final boolean allowCompoundIdentifiers) {
+    this.allowCompoundIdentifiers = allowCompoundIdentifiers;
   }
 
   /**

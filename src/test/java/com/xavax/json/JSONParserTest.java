@@ -86,6 +86,7 @@ public class JSONParserTest {
   private final static String INPUT12A = "foo: 1.2345, bar: -1, baz: 1.2e03, abc: 'abc' }";
   private final static String INPUT12B = "{ foo: 1.2345, bar: -1, baz: 1.2e03, abc: 'abc'";
   private final static String INPUT12C = "{ inner: { foo: [ 'abc', 'def' }";
+  private final static String INPUT13  = "[{$match: {results: {$exists: true}}},{$sort: {'_id.requested_at': -1}},{$limit: 1},{$unwind: {path: \"$results\",includeArrayIndex: \"index\"}},{$group: {_id: {requested_at: '$_id.requested_at',hostname: '$results.appliance_hostname',result: '$results.result'},count: {$sum: 1}}}]";
 
   private JSONParser parser;
 
@@ -275,6 +276,10 @@ public class JSONParserTest {
     assertNotNull(result2);
     assertTrue(parser.isValid());
     assertEquals(result2.getString("name"), "Charlotte");
+    parser.allowCompoundIdentifiers(true);
+    final JSONArray result3 = parser.parseArray(INPUT13);
+    assertNotNull(result3);
+    assertTrue(parser.isValid());
   }
 
   /**
