@@ -48,6 +48,7 @@ public class JSONParser {
   private boolean abortOnError;
   private boolean allowCompoundIdentifiers;
   private boolean ignoreCase;
+  private boolean quiet = true;
   private int cursor;
   private int length;
   private int level;
@@ -706,7 +707,9 @@ public class JSONParser {
       errors = CollectionFactory.arrayList();
     }
     errors.add(msg);
-    System.out.println(msg);
+    if ( !quiet ) {
+      System.out.println(msg);
+    }
     if ( abortOnError ) {
       throw new ParserException();
     }
@@ -797,6 +800,26 @@ public class JSONParser {
    */
   public JSONParser ignoreCase(final boolean ignoreCase) {
     this.ignoreCase = ignoreCase;
+    return this;
+  }
+
+  /**
+   * Returns true if console messages should be inhibited.
+   *
+   * @return true if console messages should be inhibited.
+   */
+  public boolean quiet() {
+    return quiet;
+  }
+
+  /**
+   * Sets the quiet flag.
+   *
+   * @param quiet  true if console messages should be inhibited.
+   * @return this parser.
+   */
+  public JSONParser quiet(final boolean quiet) {
+    this.quiet = quiet;
     return this;
   }
 

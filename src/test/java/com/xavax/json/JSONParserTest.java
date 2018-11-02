@@ -95,7 +95,7 @@ public class JSONParserTest {
    */
   @BeforeMethod
   public void setUp() {
-    parser = new JSONParser();
+    parser = new JSONParser().quiet(false);
   }
 
   /**
