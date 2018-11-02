@@ -168,6 +168,22 @@ public class JSONParserTest {
   }
 
   /**
+   * Test aborting on first error.
+   */
+  @Test
+  public void testAbortOnError() {
+    JSON result = parser.parse(INPUT2J);
+    assertNotNull(result);
+    assertTrue(!parser.isValid());
+    assertEquals(parser.getErrors().size(), 3);
+    parser.abortOnError(true);
+    result = parser.parse(INPUT2J);
+    assertNotNull(result);
+    assertTrue(!parser.isValid());
+    assertEquals(parser.getErrors().size(), 1);
+  }
+
+  /**
    * Test parsing identifiers.
    */
   @Test

@@ -20,8 +20,8 @@ import static com.xavax.util.Constants.*;
  * JSONParser is a parser for strings in JSON format.
  */
 @SuppressWarnings({ "PMD.CyclomaticComplexity",
-    	            "PMD.ModifiedCyclomaticComplexity",
-    	            "PMD.StdCyclomaticComplexity" })
+    		    "PMD.ModifiedCyclomaticComplexity",
+    		    "PMD.StdCyclomaticComplexity" })
 public class JSONParser {
   /**
    * ScannerState enumerates the possible states of the input scanner.
@@ -45,7 +45,8 @@ public class JSONParser {
   private final static char[] RETURN_ARRAY = new char[] { CRETURN };
   private final static char[] TAB_ARRAY = new char[] { TAB };
 
-  private boolean allowCompoundIdentifiers = false;
+  private boolean abortOnError;
+  private boolean allowCompoundIdentifiers;
   private boolean ignoreCase;
   private int cursor;
   private int length;
@@ -150,7 +151,10 @@ public class JSONParser {
       final String msg = "unexpected end of input";
       addError(msg);
     }
-    if ( flag && hasNext() ) {
+    catch (ParserException e) {
+      // Ignore Exception.
+    }
+    if ( flag && !abortOnError && hasNext() ) {
       addError("unexpected characters after closing brace");
     }
     return json;
@@ -178,7 +182,10 @@ public class JSONParser {
       final String msg = "unexpected end of input";
       addError(msg);
     }
-    if ( hasNext() ) {
+    catch (ParserException e) {
+      // Ignore Exception.
+    }
+    if ( !abortOnError && hasNext() ) {
       addError("unexpected characters after closing brace");
     }
     return list;
@@ -288,6 +295,7 @@ public class JSONParser {
     return builder.toString();
   }
 
+  @SuppressWarnings("PMD.NcssCount")
   private Object parseValue() {
     Object result = null;
     if ( hasNext() ) {
@@ -379,7 +387,7 @@ public class JSONParser {
     }
   }
 
-  @SuppressWarnings("PMD.NPathComplexity")
+  @SuppressWarnings({ "PMD.NPathComplexity", "PMD.NcssCount" })
   private Object parseNumber() {
     boolean done = false;
     boolean isDouble = false;
@@ -624,9 +632,9 @@ public class JSONParser {
     return result;
   }
 
-  private char peek() {
-    return cursor < array.length ? array[cursor] : 0;
-  }
+//  private char peek() {
+//    return cursor < array.length ? array[cursor] : 0;
+//  }
 
   private void pushback() {
     --cursor;
@@ -699,6 +707,9 @@ public class JSONParser {
     }
     errors.add(msg);
     System.out.println(msg);
+    if ( abortOnError ) {
+      throw new ParserException();
+    }
   }
 
   /**
@@ -729,6 +740,25 @@ public class JSONParser {
   }
 
   /**
+   * Returns true if parsing should be aborted after the first error.
+   *
+   * @return true if parsing should be aborted after the first error.
+   */
+  public boolean abortOnError() {
+    return this.abortOnError;
+  }
+
+  /**
+   * Set the abortOnError flag.
+   *
+   * @param abortOnError  if true, abort parsing on first error.
+   */
+  public JSONParser abortOnError(final boolean abortOnError) {
+    this.abortOnError = abortOnError;
+    return this;
+  }
+
+  /**
    * Returns true if compound identifiers should be allowed. Compound
    * identifiers are of the form "id.name". This is not compliant with
    * the JSON specification but commonly used in MongoDB code.
@@ -743,9 +773,11 @@ public class JSONParser {
    * Set the allowCompoundIdentifiers flag.
    *
    * @param allowCompoundIdentifiers  if true, allow compound identifiers.
+   * @return this parser.
    */
-  public void allowCompoundIdentifiers(final boolean allowCompoundIdentifiers) {
+  public JSONParser allowCompoundIdentifiers(final boolean allowCompoundIdentifiers) {
     this.allowCompoundIdentifiers = allowCompoundIdentifiers;
+    return this;
   }
 
   /**
@@ -761,9 +793,11 @@ public class JSONParser {
    * Set the ignoreCase flag.
    *
    * @param ignoreCase  if true, ignore case while parsing.
+   * @return this parser.
    */
-  public void ignoreCase(final boolean ignoreCase) {
+  public JSONParser ignoreCase(final boolean ignoreCase) {
     this.ignoreCase = ignoreCase;
+    return this;
   }
 
   /**
@@ -779,5 +813,9 @@ public class JSONParser {
     public UnexpectedEndOfInputException() {
       super("UnexpectedEndOfInput");
     }
+  }
+
+  public static class ParserException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
   }
 }
