@@ -23,6 +23,23 @@ import static com.xavax.util.Constants.*;
     	            "PMD.ModifiedCyclomaticComplexity",
     	            "PMD.StdCyclomaticComplexity" })
 public class JSONParser {
+  private final static String EMPTY = "";
+  private final static String ERROR_FORMAT = "%s: error at line %d position %d - %s";
+  private final static String EXPECTED_FORMAT1 = "expected [%c] but received [%c]";
+  private final static String EXPECTED_FORMAT2 = "expected [%c] or [%c] but received [%c]";
+  private final static String EXPECTED_FORMAT3 = "expected [%s] but received [%s]";
+  private final static String HEX_DIGIT = "hex-digit";
+  private final static String INVALID_INPUT_FORMAT = "invalid %s [%s]";
+  private final static String JSON = "JSON";
+  private final static String LEADING_ZERO = "leading zero";
+  private final static String NUMBER = "number";
+  private final static String TRUE_FALSE_OR_NULL = "true, false, or null";
+  private final static String UNEXPECTED_CHARACTERS_AFTER_CLOSING_BRACE = "unexpected characters after closing brace";
+  private final static String UNEXPECTED_END_OF_INPUT = "unexpected end of input";
+  private final static String UNICODE_ESCAPE_SEQUENCE = "Unicode escape sequence";
+  private final static String UNMATCHED_BRACES_OR_BRACKETS = "unmatched braces or brackets";
+  private final static String VALUE = "value";
+
   /**
    * ScannerState enumerates the possible states of the input scanner.
    */
@@ -145,11 +162,11 @@ public class JSONParser {
       }
     }
     catch (UnexpectedEndOfInputException e) {
-      final String msg = "unexpected end of input";
+      final String msg = UNEXPECTED_END_OF_INPUT;
       addError(msg);
     }
     if ( flag && hasNext() ) {
-      addError("unexpected characters after closing brace");
+      addError(UNEXPECTED_CHARACTERS_AFTER_CLOSING_BRACE);
     }
     return json;
   }
@@ -169,15 +186,15 @@ public class JSONParser {
 	parseArrayItems(list);
       }
       if ( level != 0 ) {
-	addError("unmatched braces or brackets");
+	addError(UNMATCHED_BRACES_OR_BRACKETS);
       }
     }
     catch (UnexpectedEndOfInputException e) {
-      final String msg = "unexpected end of input";
+      final String msg = UNEXPECTED_END_OF_INPUT;
       addError(msg);
     }
     if ( hasNext() ) {
-      addError("unexpected characters after closing brace");
+      addError(UNEXPECTED_CHARACTERS_AFTER_CLOSING_BRACE);
     }
     return list;
   }
@@ -277,7 +294,7 @@ public class JSONParser {
       case '}':
       case ',':
 	pushback();
-	expected("value", input);
+	expected(VALUE, input);
 	break;
       case '[':
 	final JSONArray list = new JSONArray();
@@ -319,11 +336,11 @@ public class JSONParser {
 	    result = Boolean.FALSE;
 	  }
 	  else {
-	    expected("true, false, or null", word);
+	    expected(TRUE_FALSE_OR_NULL, word);
 	  }
 	}
 	else {
-	  expected("value", input);
+	  expected(VALUE, input);
 	}
 	break;
       }
@@ -404,7 +421,7 @@ public class JSONParser {
 	}
 	else if ( Character.isDigit(input) ) {
 	  if ( leadingZero ) {
-	    invalid(mark, "leading zero");
+	    invalid(mark, LEADING_ZERO);
 	  }
 	}
 	else {
@@ -451,7 +468,7 @@ public class JSONParser {
   }
 
   private void unexpectedNumericInput(final int mark, final char input) {
-    if ( Character.isWhitespace(input) || input == ',' || input == '}' ) {
+    if ( Character.isWhitespace(input) || input == ',' || input == '}' || input == ']' ) {
       pushback();
     }
     else {
@@ -521,7 +538,7 @@ public class JSONParser {
 	--count;
       }
       else {
-	expected("hex-digit", input);
+	expected(HEX_DIGIT, input);
 	break;
       }
     }
@@ -614,11 +631,11 @@ public class JSONParser {
   }
 
   private void expected(final char expected, final char received) {
-    addError("expected [" + expected + "] but received [" + received + "]");
+    addError(String.format(EXPECTED_FORMAT1, expected, received));
   }
 
   private void expected(final char expected1, final char expected2, final char received) {
-    addError("expected [" + expected1 + "] or [" + expected2 + "] but received [" + received + "]");
+    addError(String.format(EXPECTED_FORMAT2, expected1, expected2, received));
   }
 
   private void expected(final String expected, final char received) {
@@ -626,20 +643,21 @@ public class JSONParser {
   }
 
   private void expected(final String expected, final String received) {
-    addError("expected [" + expected + "] but received [" + received + "]");
+    addError(String.format(EXPECTED_FORMAT3, expected, received));
   }
 
   private void invalidNumber(final int mark) {
-    invalid(mark, "number");
+    invalid(mark, NUMBER);
   }
 
   private void invalidUnicode(final int mark) {
-    invalid(mark, "Unicode escape sequence");
+    invalid(mark, UNICODE_ESCAPE_SEQUENCE);
   }
 
   private void invalid(final int mark, final String detail) {
-    addError(mark, "invalid " + detail + " [" +
-	lineBuffer.substring(mark, cursor) + "]");
+    String part = lineBuffer == null ? EMPTY : lineBuffer.substring(mark, cursor);
+    String msg = String.format(INVALID_INPUT_FORMAT, detail, part);
+    addError(mark, msg);
   }
 
   private void addError(final String msg) {
@@ -648,12 +666,13 @@ public class JSONParser {
 
   private void addError(final int mark, final String message) {
     final StringBuilder builder = new StringBuilder(DEFAULT_BUFFER_SIZE);
-    builder.append(source == null ? "JSON" : source)
-      	   .append(": error at line ").append(line)
-      	   .append(" position ").append(mark)
-      	   .append(" - ").append(message);
+
+    String intro = String.format(ERROR_FORMAT, source == null ? JSON : source,
+				 line, mark, message);
+    builder.append(intro);
     if ( lineBuffer != null ) {
-      builder.append(NEWLINE).append(lineBuffer).append(NEWLINE);
+      builder.append(NEWLINE)
+      	     .append(lineBuffer).append(NEWLINE);
       for ( int i = 0; i < mark ; ++i ) {
 	builder.append(SPACE);
       }
@@ -716,14 +735,15 @@ public class JSONParser {
    * EndOfInputException is thrown when we encounter an unexpected
    * end of input (end of file).
    */
-  public final class UnexpectedEndOfInputException extends RuntimeException {
+  public final static class UnexpectedEndOfInputException extends RuntimeException {
+    private static final String UNEXPECTED_END_OF_INPUT_CLASSNAME = "UnexpectedEndOfInput";
     public final static long serialVersionUID = 0;
 
     /**
      * Construct an EndOfInputException.
      */
     public UnexpectedEndOfInputException() {
-      super("UnexpectedEndOfInput");
+      super(UNEXPECTED_END_OF_INPUT_CLASSNAME);
     }
   }
 }
