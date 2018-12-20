@@ -266,6 +266,7 @@ public class JSONParserTest {
     jarray = parser.parseArray(INPUT9C);
     assertNotNull(jarray);
     assertEquals(jarray.size(), 3);
+    assertEquals(jarray.get(2), new Long(789));
   }
 
   /**
