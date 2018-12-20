@@ -78,6 +78,7 @@ public class JSONParserTest {
   private final static String INPUT8A  = "{ foo: { x: \"1\", y: \"2\" }, bar: { x: \"3\", y: \"4\" }, baz:{x:\"5\",y:\"6\"}}";
   private final static String INPUT9A  = "[" + CITY_ATL + "," + CITY_BHM + "," + CITY_CLT + "]";
   private final static String INPUT9B  = "{cities:" + INPUT9A + "}";
+  private final static String INPUT9C  = "[123, 456, 789]";
   private final static String INPUT10A = "{ foo: {}, bar: {}, baz: {}}";
   private final static String INPUT11A = "{ foo: [], bar: [], baz: []}";
   private final static String INPUT12A = "foo: 1.2345, bar: -1, baz: 1.2e03, abc: 'abc' }";
@@ -251,7 +252,7 @@ public class JSONParserTest {
     final JSON result = parser.parse(INPUT9B);
     assertNotNull(result);
     assertTrue(parser.isValid());
-    final JSONArray jarray = parser.parseArray(INPUT9A);
+    JSONArray jarray = parser.parseArray(INPUT9A);
     assertNotNull(jarray);
     assertEquals(jarray.size(), 3);
     final List<String> list = jarray.flatten();
@@ -262,6 +263,9 @@ public class JSONParserTest {
     assertNotNull(result2);
     assertTrue(parser.isValid());
     assertEquals(result2.getString("name"), "Charlotte");
+    jarray = parser.parseArray(INPUT9C);
+    assertNotNull(jarray);
+    assertEquals(jarray.size(), 3);
   }
 
   /**
