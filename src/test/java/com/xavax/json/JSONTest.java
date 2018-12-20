@@ -53,6 +53,36 @@ public class JSONTest {
 	  "{name:'Phil\\'s BBQ'}]}";
   private final static String INPUT4 =
       "{x: '100', tupie: '6.28', flag: 'true', z: 123}";
+  private final static String INPUT5 =
+      "{\"calendars\":[" +
+	  "{\"calendarID\":\"900000002\"," +
+	  	"\"calendarName\":\"My Business Calendar\"," +
+	  	"\"calendarUri\":{\"href\":\"/v1_0/O/A/calendarDetail/900000002\"}}," +
+	  "{\"calendarID\":\"900000000\"," +
+	  	"\"calendarName\":\"My Business Calendar\"," +
+	  	"\"calendarUri\":{\"href\":\"/v1_0/O/A/calendarDetail/900000000\"}}]}";
+  private final static String INPUT6 =
+      "{\"calendarDetail\":{" +
+	  "\"calendarConfiguration\":{" +
+	  	"\"timeNotationCode\":\"12h\"," +
+	  	"\"categories\":[" +
+	  		"{\"code\":\"B\",\"name\":\"Benefit\",\"colorCode\":\"FF0000\",\"eventTypes\":[" +
+	  			"{\"code\":\"BOE\",\"name\":\"Benefits Open Enrollment\",\"colorCode\":\"FF0000\"}]}," +
+	  		"{\"code\":\"H\",\"name\":\"Human Resource\",\"colorCode\":\"00FF00\",\"eventTypes\":[" +
+	  			"{\"code\":\"CH\",\"name\":\"Company Holiday\",\"colorCode\":\"00FF00\"}," +
+	  			"{\"code\":\"CE\",\"name\":\"Company Event\",\"colorCode\":\"00FF00\"}]}," +
+	  		"{\"code\":\"P\",\"name\":\"Payroll\",\"colorCode\":\"0000F1\",\"eventTypes\":[" +
+	  			"{\"code\":\"PS\",\"name\":\"Pay Schedule\",\"colorCode\":\"0000F1\"}]}," +
+	  		"{\"code\":\"R\",\"name\":\"Retirement\",\"colorCode\":\"FFAB00\",\"eventTypes\":[" +
+	  			"{\"code\":\"RPE\",\"name\":\"Retirement Plan Enrollment\",\"colorCode\":\"FFAB00\"}]}," +
+	  		"{\"code\":\"T\",\"name\":\"Time Management\",\"colorCode\":\"FFAAA2\",\"eventTypes\":[" +
+	  			"{\"code\":\"WS\",\"name\":\"Work Schedule\",\"colorCode\":\"FFAAA2\"}," +
+	  			"{\"code\":\"WK\",\"name\":\"Worked\",\"colorCode\":\"FFAAA3\"}," +
+	  			"{\"code\":\"PTO\",\"name\":\"Paid Time Off\",\"colorCode\":\"FFAAA4\"}," +
+	  			"{\"code\":\"BLK\",\"name\":\"Black Out\",\"colorCode\":\"FFAAA5\"}]}]}," +
+	  	"\"calendar\":{\"calendarID\":\"900000002\",\"calendarName\":\"My Business Calendar\"," +
+	  		"\"timePeriod\":{\"startDateTime\":\"2011-11-17\",\"endDateTime\":\"2011-12-17\"}}}}";
+
   private final static String JOHN = "John";
 
   private JSONParser parser;
@@ -183,8 +213,7 @@ public class JSONTest {
    */
   @Test
   public void testExample1() {
-    final String input = "{\"calendars\":[{\"calendarID\":\"900000002\",\"calendarName\":\"My Business Calendar\",\"calendarUri\":{\"href\":\"/v1_0/O/A/calendarDetail/900000002\"}},{\"calendarID\":\"900000000\",\"calendarName\":\"My Business Calendar\",\"calendarUri\":{\"href\":\"/v1_0/O/A/calendarDetail/900000000\"}}]}";
-    final JSON result = parser.parse(input);
+    final JSON result = parser.parse(INPUT5);
     assertTrue(parser.isValid());
     System.out.println(result.toString(JSON.Format.VERBOSE));
     final JSONPath calendarsPath = new JSONPath("calendars");
@@ -207,14 +236,13 @@ public class JSONTest {
    */
   @Test
   public void testExample2() {
-    final String input = "{\"calendarDetail\":{\"calendarConfiguration\":{\"timeNotationCode\":\"12h\",\"categories\":[{\"code\":\"B\",\"name\":\"Benefit\",\"colorCode\":\"FF0000\",\"eventTypes\":[{\"code\":\"BOE\",\"name\":\"Benefits Open Enrollment\",\"colorCode\":\"FF0000\"}]},{\"code\":\"H\",\"name\":\"Human Resource\",\"colorCode\":\"00FF00\",\"eventTypes\":[{\"code\":\"CH\",\"name\":\"Company Holiday\",\"colorCode\":\"00FF00\"},{\"code\":\"CE\",\"name\":\"Company Event\",\"colorCode\":\"00FF00\"}]},{\"code\":\"P\",\"name\":\"Payroll\",\"colorCode\":\"0000F1\",\"eventTypes\":[{\"code\":\"PS\",\"name\":\"Pay Schedule\",\"colorCode\":\"0000F1\"}]},{\"code\":\"R\",\"name\":\"Retirement\",\"colorCode\":\"FFAB00\",\"eventTypes\":[{\"code\":\"RPE\",\"name\":\"Retirement Plan Enrollment\",\"colorCode\":\"FFAB00\"}]},{\"code\":\"T\",\"name\":\"Time Management\",\"colorCode\":\"FFAAA2\",\"eventTypes\":[{\"code\":\"WS\",\"name\":\"Work Schedule\",\"colorCode\":\"FFAAA2\"},{\"code\":\"WK\",\"name\":\"Worked\",\"colorCode\":\"FFAAA3\"},{\"code\":\"PTO\",\"name\":\"Paid Time Off\",\"colorCode\":\"FFAAA4\"},{\"code\":\"BLK\",\"name\":\"Black Out\",\"colorCode\":\"FFAAA5\"}]}]},\"calendar\":{\"calendarID\":\"900000002\",\"calendarName\":\"My Business Calendar\",\"timePeriod\":{\"startDateTime\":\"2011-11-17\",\"endDateTime\":\"2011-12-17\"}}}}";
-    final JSON result = parser.parse(input);
+    final JSON result = parser.parse(INPUT6);
     assertTrue(parser.isValid());
     System.out.println(result.toString(JSON.Format.VERBOSE));
     final JSONPath eventIDs = new JSONPath(
 	"calendarDetail.calendarConfiguration.categories.eventTypes.code");
     final String code = result.getString(eventIDs, 4, 3);
     assertEquals(code, "BLK");
-    assertEquals(result.get(eventIDs), "BOE");
+    assertEquals(result.get(eventIDs, 0), "BOE");
   }
 }
