@@ -67,6 +67,9 @@ public class JSONParserTest {
   private final static String INPUT2J  = "{ foo: 1.2.345, bar: -1.-2, baz: 1.2e03e12, abc: 'abc' }";
   private final static String INPUT2K  = "{ t: True, f: FALSE, n: Null, no: nay }";
   private final static String INPUT3A  = "{ _foo: '123', 'bar': \"abc\", \"baz\": \"123\", foo_2: '123' }";
+  private final static String INPUT3B  = "{ $foo: 123 }";
+  private final static String INPUT3C  = "{ @foo: 123 }";
+  private final static String INPUT3D  = "{ : 123 }";
   private final static String INPUT4A  = "{ t: true, f: false, n: null }";
   private final static String INPUT5A  = "{ foo: 123, bar: -123, baz: 123 }";
   private final static String INPUT5B  = "{ fab: 1.2345, tupie: 6.28, rad: -0.987 }";
@@ -84,6 +87,8 @@ public class JSONParserTest {
   private final static String INPUT12A = "foo: 1.2345, bar: -1, baz: 1.2e03, abc: 'abc' }";
   private final static String INPUT12B = "{ foo: 1.2345, bar: -1, baz: 1.2e03, abc: 'abc'";
   private final static String INPUT12C = "{ inner: { foo: [ 'abc', 'def' }";
+  private final static String INPUT13  = "[{$match: {results: {$exists: true}}},{$sort: {'_id.requested_at': -1}},{$limit: 1},{$unwind: {path: \"$results\",includeArrayIndex: \"index\"}},{$group: {_id: {requested_at: '$_id.requested_at',hostname: '$results.appliance_hostname',result: '$results.result'},count: {$sum: 1}}}]";
+
   private JSONParser parser;
 
   /**
@@ -91,7 +96,7 @@ public class JSONParserTest {
    */
   @BeforeMethod
   public void setUp() {
-    parser = new JSONParser();
+    parser = new JSONParser().quiet(false);
   }
 
   /**
@@ -164,12 +169,37 @@ public class JSONParserTest {
   }
 
   /**
+   * Test aborting on first error.
+   */
+  @Test
+  public void testAbortOnError() {
+    JSON result = parser.parse(INPUT2J);
+    assertNotNull(result);
+    assertTrue(!parser.isValid());
+    assertEquals(parser.getErrors().size(), 3);
+    parser.abortOnError(true);
+    result = parser.parse(INPUT2J);
+    assertNotNull(result);
+    assertTrue(!parser.isValid());
+    assertEquals(parser.getErrors().size(), 1);
+  }
+
+  /**
    * Test parsing identifiers.
    */
   @Test
   public void testIdentifiers() {
-    final JSON result = parser.parse(INPUT3A);
+    JSON result = parser.parse(INPUT3A);
     assertTrue(parser.isValid());
+    assertNotNull(result);
+    result = parser.parse(INPUT3B);
+    assertTrue(parser.isValid());
+    assertNotNull(result);
+    result = parser.parse(INPUT3C);
+    assertFalse(parser.isValid());
+    assertNotNull(result);
+    result = parser.parse(INPUT3D);
+    assertFalse(parser.isValid());
     assertNotNull(result);
   }
 
@@ -267,6 +297,10 @@ public class JSONParserTest {
     assertNotNull(jarray);
     assertEquals(jarray.size(), 3);
     assertEquals(jarray.get(2), new Long(789));
+    parser.allowCompoundIdentifiers(true);
+    final JSONArray result3 = parser.parseArray(INPUT13);
+    assertNotNull(result3);
+    assertTrue(parser.isValid());
   }
 
   /**
