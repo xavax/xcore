@@ -213,7 +213,7 @@ public class PersistentClassTest {
 
     @PersistentField(name="lastName")
     @Mapping(channel="json", name="last")
-    @Mapping(channel="mongo", name="")
+    @Mapping(channel="mongo", name="last_name")
     String lastName;
 
     public String getFirstName() {
