@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class TimeMetric {
 
+  public final static long SCALE_BY_NANOSECONDS  = 1;
   public final static long SCALE_BY_MICROSECONDS = 1000;
   public final static long SCALE_BY_MILLISECONDS = 1000000;
 
@@ -31,7 +32,7 @@ public class TimeMetric {
    * Construct a TimeMetric object.
    */
   public TimeMetric() {
-    this(1);
+    this(SCALE_BY_NANOSECONDS);
   }
 
   /**
@@ -60,15 +61,17 @@ public class TimeMetric {
     if ( scaleFactor != 1 ) {
       elapsed /= scaleFactor;
     }
-    if ( elapsed < min ) {
-      min = elapsed;
+    synchronized ( this ) {
+      if ( elapsed < min ) {
+	min = elapsed;
+      }
+      if ( elapsed > max ) {
+	max = elapsed;
+      }
+      count.incrementAndGet();
+      totalTime.addAndGet(elapsed);
+      totalTimeSquared.addAndGet(elapsed * elapsed);
     }
-    if ( elapsed > max ) {
-      max = elapsed;
-    }
-    count.incrementAndGet();
-    totalTime.addAndGet(elapsed);
-    totalTimeSquared.addAndGet(elapsed * elapsed);
   }
 
   /**
@@ -95,11 +98,13 @@ public class TimeMetric {
    * Reset this metric.
    */
   public void reset() {
-    min = Long.MAX_VALUE;
-    max = 0;
-    count.set(0);
-    totalTime.set(0);
-    totalTimeSquared.set(0);
+    synchronized ( this ) {
+      min = Long.MAX_VALUE;
+      max = 0;
+      count.set(0);
+      totalTime.set(0);
+      totalTimeSquared.set(0);
+    }
   }
 
   /**
@@ -108,7 +113,11 @@ public class TimeMetric {
    * @return  a snapshot of the results for this metric.
    */
   public Result result() {
-    return new Result(this);
+    Result result = null;
+    synchronized ( this ) {
+      result = new Result(this);
+    }
+    return result;
   }
 
   /**
@@ -117,8 +126,7 @@ public class TimeMetric {
    * @return a string representation of this result.
    */
   public String toString() {
-    final Result result = new Result(this);
-    return result.toString();
+    return result().toString();
   }
 
   /**
