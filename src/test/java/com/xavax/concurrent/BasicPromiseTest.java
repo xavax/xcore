@@ -1,12 +1,9 @@
 package com.xavax.concurrent;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.testng.annotations.Test;
+import org.testng.annotations.BeforeMethod;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.equalTo;
-
+import static org.testng.Assert.*;
 import static com.xavax.concurrent.DelayedWriter.delayedWrite;
 
 /**
@@ -16,7 +13,7 @@ import static com.xavax.concurrent.DelayedWriter.delayedWrite;
 public class BasicPromiseTest {
   private final static long TIMEOUT = 50000;
   private final static long SLEEP_TIME = 20;
-  private final static String EXPECTED = "name: Test1, ready: false, result: <null>, sentinel: ";
+  private final static String EXPECTED = "name: \"Test1\", ready: false, result: <null>, sentinel: ";
   private final static String NAME1 = "Test1";
   private final static String NAME2 = "Test12";
   private final static String RESULT = "Test Results";
@@ -27,7 +24,7 @@ public class BasicPromiseTest {
   /**
    * @throws java.lang.Exception
    */
-  @Before
+  @BeforeMethod
   public void setUp() throws Exception {
     promise1 = new BasicPromise<>(NAME1);
     promise2 = new BasicPromise<>(NAME2, TIMEOUT);
@@ -39,9 +36,9 @@ public class BasicPromiseTest {
    */
   @Test
   public void testIsReady() {
-    assertThat(promise1.isReady(), is(false));
+    assertFalse(promise1.isReady());
     promise1.set(RESULT);
-    assertThat(promise1.isReady(), is(true));
+    assertTrue(promise1.isReady());
   }
 
   /**
@@ -50,8 +47,8 @@ public class BasicPromiseTest {
    */
   @Test
   public void testGetName() {
-    assertThat(promise1.getName(), is(equalTo(NAME1)));
-    assertThat(promise2.getName(), is(equalTo(NAME2)));
+    assertEquals(promise1.getName(), NAME1);
+    assertEquals(promise2.getName(), NAME2);
   }
 
   /**
@@ -61,7 +58,7 @@ public class BasicPromiseTest {
   @Test
   public void testToString() {
     final String value = promise1.toString();
-    assertThat(value.contains(EXPECTED), is(true));
+    assertTrue(value.contains(EXPECTED));
   }
 
   /**
@@ -72,8 +69,8 @@ public class BasicPromiseTest {
   public void testGet() {
     delayedWrite(SLEEP_TIME, promise1, RESULT);
     delayedWrite(SLEEP_TIME, promise2, RESULT);
-    assertThat(promise1.get(), is(equalTo(RESULT)));
-    assertThat(promise2.get(), is(equalTo(RESULT)));
+    assertEquals(promise1.get(), RESULT);
+    assertEquals(promise2.get(), RESULT);
   }
 
   /**
@@ -81,7 +78,7 @@ public class BasicPromiseTest {
    */
   @Test
   public void testGetWithTimeout() {
-    assertThat(promise2.get(), is(equalTo(null)));
+    assertNull(promise2.get());
   }
 
   /**
@@ -101,6 +98,6 @@ public class BasicPromiseTest {
     Thread.sleep(SLEEP_TIME);
     thread.interrupt();
     Thread.sleep(SLEEP_TIME);
-    assertThat(promise1.wasInterrupted(), is(true));
+    assertTrue(promise1.wasInterrupted());
   }
 }

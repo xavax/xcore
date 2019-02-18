@@ -19,9 +19,10 @@ import static com.xavax.util.Constants.*;
 /**
  * JSONParser is a parser for strings in JSON format.
  */
-@SuppressWarnings({ "PMD.CyclomaticComplexity",
-    	            "PMD.ModifiedCyclomaticComplexity",
-    	            "PMD.StdCyclomaticComplexity" })
+@SuppressWarnings({
+  "PMD.CyclomaticComplexity",
+  "PMD.ModifiedCyclomaticComplexity",
+  "PMD.StdCyclomaticComplexity" })
 public class JSONParser {
   private final static String EMPTY = "";
   private final static String ERROR_FORMAT = "%s: error at line %d position %d - %s";
@@ -34,10 +35,10 @@ public class JSONParser {
   private final static String LEADING_ZERO = "leading zero";
   private final static String NUMBER = "number";
   private final static String TRUE_FALSE_OR_NULL = "true, false, or null";
-  private final static String UNEXPECTED_CHARACTERS_AFTER_CLOSING_BRACE = "unexpected characters after closing brace";
+  private final static String UNEXPECTED_CHARACTERS = "unexpected characters after closing brace";
   private final static String UNEXPECTED_END_OF_INPUT = "unexpected end of input";
   private final static String UNICODE_ESCAPE_SEQUENCE = "Unicode escape sequence";
-  private final static String UNMATCHED_BRACES_OR_BRACKETS = "unmatched braces or brackets";
+  private final static String UNMATCHED_BRACES_BRACKETS = "unmatched braces or brackets";
   private final static String VALUE = "value";
 
   /**
@@ -166,7 +167,7 @@ public class JSONParser {
       addError(msg);
     }
     if ( flag && hasNext() ) {
-      addError(UNEXPECTED_CHARACTERS_AFTER_CLOSING_BRACE);
+      addError(UNEXPECTED_CHARACTERS);
     }
     return json;
   }
@@ -186,7 +187,7 @@ public class JSONParser {
 	parseArrayItems(list);
       }
       if ( level != 0 ) {
-	addError(UNMATCHED_BRACES_OR_BRACKETS);
+	addError(UNMATCHED_BRACES_BRACKETS);
       }
     }
     catch (UnexpectedEndOfInputException e) {
@@ -194,7 +195,7 @@ public class JSONParser {
       addError(msg);
     }
     if ( hasNext() ) {
-      addError(UNEXPECTED_CHARACTERS_AFTER_CLOSING_BRACE);
+      addError(UNEXPECTED_CHARACTERS);
     }
     return list;
   }
@@ -275,6 +276,7 @@ public class JSONParser {
     return builder.toString();
   }
 
+  @SuppressWarnings("PMD.NcssCount")
   private Object parseValue() {
     Object result = null;
     if ( hasNext() ) {
@@ -366,7 +368,7 @@ public class JSONParser {
     }
   }
 
-  @SuppressWarnings("PMD.NPathComplexity")
+  @SuppressWarnings({ "PMD.NPathComplexity", "PMD.NcssCount" })
   private Object parseNumber() {
     boolean done = false;
     boolean isDouble = false;
@@ -655,8 +657,8 @@ public class JSONParser {
   }
 
   private void invalid(final int mark, final String detail) {
-    String part = lineBuffer == null ? EMPTY : lineBuffer.substring(mark, cursor);
-    String msg = String.format(INVALID_INPUT_FORMAT, detail, part);
+    final String part = lineBuffer == null ? EMPTY : lineBuffer.substring(mark, cursor);
+    final String msg = String.format(INVALID_INPUT_FORMAT, detail, part);
     addError(mark, msg);
   }
 
@@ -667,8 +669,8 @@ public class JSONParser {
   private void addError(final int mark, final String message) {
     final StringBuilder builder = new StringBuilder(DEFAULT_BUFFER_SIZE);
 
-    String intro = String.format(ERROR_FORMAT, source == null ? JSON : source,
-				 line, mark, message);
+    final String intro = String.format(ERROR_FORMAT, source == null ? JSON : source,
+				       line, mark, message);
     builder.append(intro);
     if ( lineBuffer != null ) {
       builder.append(NEWLINE)
@@ -736,14 +738,14 @@ public class JSONParser {
    * end of input (end of file).
    */
   public final static class UnexpectedEndOfInputException extends RuntimeException {
-    private static final String UNEXPECTED_END_OF_INPUT_CLASSNAME = "UnexpectedEndOfInput";
+    private static final String UNEXPECTED_EOI_CLASS = "UnexpectedEndOfInput";
     public final static long serialVersionUID = 0;
 
     /**
      * Construct an EndOfInputException.
      */
     public UnexpectedEndOfInputException() {
-      super(UNEXPECTED_END_OF_INPUT_CLASSNAME);
+      super(UNEXPECTED_EOI_CLASS);
     }
   }
 }

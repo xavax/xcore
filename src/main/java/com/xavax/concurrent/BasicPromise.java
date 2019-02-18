@@ -84,19 +84,21 @@ public class BasicPromise<T> extends AbstractJoinableObject implements Promise<T
     T rvalue = result;
     sentinel.lock();
     try {
-      if ( !ready ) {
+      boolean first = true;
+      while ( first && !ready ) {
 	if ( timeout == 0 ) {
 	  condition.await();
 	}
 	else {
 	  condition.awaitNanos(timeout);
 	}
+	first = false;
       }
       rvalue = result;
     }
     catch (InterruptedException e) {
       interrupted = true;
-      // GambitException.handle(e, INTERRUPTED_PROMISE, name);
+      // TODO: handle(e, INTERRUPTED_PROMISE, name);
     }
     finally {
       sentinel.unlock();
@@ -139,9 +141,9 @@ public class BasicPromise<T> extends AbstractJoinableObject implements Promise<T
   @Override
   protected Joiner doJoin(final Joiner joiner) {
     joiner.append(NAME, name)
-	.append(READY, ready)
-	.append(RESULT, result)
-	.append(SENTINEL, sentinel);
+	  .append(READY, ready)
+	  .append(RESULT, result)
+	  .append(SENTINEL, sentinel);
     return joiner;
   }
 

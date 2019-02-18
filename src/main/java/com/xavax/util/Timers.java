@@ -10,6 +10,7 @@ package com.xavax.util;
  * 
  * @author alvitar@xavax.com
  */
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class Timers {
 
   /**

@@ -12,6 +12,9 @@ import java.util.Map.Entry;
 
 import org.testng.annotations.Test;
 
+/**
+ * Test case for the mapping annotation classes.
+ */
 public class PersistentClassTest {
   private final static String ANNOTATION_FIELD_FORMAT = "%s=%s";
   private final static String ANNOTATION_FORMAT = "%s@%s(";
@@ -20,26 +23,29 @@ public class PersistentClassTest {
   private final static String FIELD_FORMAT = "  %s %s;\n";
   private final static String METHOD_FORMAT = "  %s %s();\n";
 
+  /**
+   * Test mapping annotations.
+   */
   @Test
   public void test() {
-    Employee employee1 = new HourlyEmployee();
+    final Employee employee1 = new HourlyEmployee();
     showAnnotations(employee1);
-    Employee employee2 = new SalaryEmployee();
+    final Employee employee2 = new SalaryEmployee();
     showAnnotations(employee2);
   }
 
-  public void showAnnotations(final Object object) {
+  void showAnnotations(final Object object) {
     final StringBuilder builder = new StringBuilder();
     showClassAnnotations(object.getClass(), builder);
-    Class<? extends Object> clazz = object.getClass();
+    final Class<? extends Object> clazz = object.getClass();
     builder.append(String.format(CLASS_FORMAT, clazz.getSimpleName()));
     showFields(clazz, builder);
     showMethods(clazz, builder);
-    builder.append("}");
+    builder.append('}');
     System.out.println(builder.toString());
   }
 
-  public void showClassAnnotations(final Class<?> clazz, final StringBuilder builder) {
+  void showClassAnnotations(final Class<?> clazz, final StringBuilder builder) {
     final LinkedHashMap<String, List<Annotation>> map = new LinkedHashMap<>();
     getClassAnnotations(map, clazz);
     for ( final Entry<String, List<Annotation>> entry : map.entrySet() ) {
@@ -73,7 +79,7 @@ public class PersistentClassTest {
     }
   }
 
-  public String formatValue(final Object value) {
+  String formatValue(final Object value) {
     String result = null;
     if ( value instanceof String ) {
       result = formatString((String) value);
@@ -87,12 +93,13 @@ public class PersistentClassTest {
     return result;
   }
 
-  public String formatString(final String input) {
+  String formatString(final String input) {
     return '"' + input + '"';
   }
 
-  public String formatArray(final Object[] array) {
-    StringBuilder builder = new StringBuilder("{ ");
+  @SuppressWarnings("PMD.UseVarargs")
+  String formatArray(final Object[] array) {
+    final StringBuilder builder = new StringBuilder("{ ");
     boolean first = true;
     for ( final Object item : array ) {
       if ( first ) {
@@ -107,9 +114,9 @@ public class PersistentClassTest {
     return builder.toString();
   }
 
-  public void getClassAnnotations(final Map<String, List<Annotation>> map,
+  void getClassAnnotations(final Map<String, List<Annotation>> map,
                                   final Class<?> clazz) {
-    Class<?> superClass = clazz.getSuperclass();
+    final Class<?> superClass = clazz.getSuperclass();
     if ( superClass != Object.class ) {
       getClassAnnotations(map, superClass);
     }
@@ -124,47 +131,47 @@ public class PersistentClassTest {
     }
   }
 
-  public void showFields(final Class<?> clazz, final StringBuilder builder) {
-    Class<?> superClass = clazz.getSuperclass();
+  void showFields(final Class<?> clazz, final StringBuilder builder) {
+    final Class<?> superClass = clazz.getSuperclass();
     if ( superClass != Object.class ) {
       showFields(superClass, builder);
     }
-    for ( Field field : clazz.getDeclaredFields() ) {
+    for ( final Field field : clazz.getDeclaredFields() ) {
       showAnnotations(field.getAnnotations(), builder, "  ");
       builder.append(String.format(FIELD_FORMAT,
 	  			   field.getType().getSimpleName(), field.getName()));
     }
   }
 
-  public void showMethods(final Class<?> clazz, final StringBuilder builder) {
-    Class<?> superClass = clazz.getSuperclass();
+  void showMethods(final Class<?> clazz, final StringBuilder builder) {
+    final Class<?> superClass = clazz.getSuperclass();
     if ( superClass != Object.class ) {
       showMethods(superClass, builder);
     }
-    for ( Method method : clazz.getDeclaredMethods() ) {
+    for ( final Method method : clazz.getDeclaredMethods() ) {
 	showAnnotations(method.getAnnotations(), builder, "  ");
 	final String typeName = method.getReturnType().getSimpleName();
 	builder.append(String.format(METHOD_FORMAT, typeName, method.getName()));
     }
   }
 
-  public void showAnnotations(final Annotation[] annotations, final StringBuilder builder, final String prefix) {
+  void showAnnotations(final Annotation[] annotations, final StringBuilder builder, final String prefix) {
     for ( final Annotation annotation : annotations ) {
       showAnnotation(annotation, builder, prefix);
     }
   }
 
-  public void showAnnotation(final Annotation annotation, final StringBuilder builder, final String prefix) {
-    Class<? extends Annotation> clazz = annotation.annotationType();
+  void showAnnotation(final Annotation annotation, final StringBuilder builder, final String prefix) {
+    final Class<? extends Annotation> clazz = annotation.annotationType();
     builder.append(String.format(ANNOTATION_FORMAT, prefix, clazz.getSimpleName()));
     boolean first = true;
     for ( final Method method : clazz.getDeclaredMethods() ) {
 	final String name = method.getName();
-      	Object value = getMethodValue(annotation, method);
+	final Object value = getMethodValue(annotation, method);
       	if ( value instanceof Annotation[] ) {
       	  builder.append("{\n");
       	  showAnnotations((Annotation[]) value, builder, prefix);
-      	  builder.append(prefix).append("}");
+      	  builder.append(prefix).append('}');
       	}
       	else {
       	  if ( first ) {
@@ -180,7 +187,7 @@ public class PersistentClassTest {
     builder.append(")\n");  
   }
 
-  public Object getMethodValue(final Annotation annotation, final Method method) {
+  Object getMethodValue(final Annotation annotation, final Method method) {
     Object value = "";
     try {
       value = method.invoke(annotation);
@@ -194,13 +201,19 @@ public class PersistentClassTest {
     return value;
   }
 
-  public enum EmployeeType {
+  /**
+   * EmployeeType defines all possible employee types.
+   */
+  enum EmployeeType {
     HOURLY,
     SALARY
   }
 
+  /**
+   * Employee is an abstract base class example using inheritance.
+   */
   @PersistentClass(name="Employee", variantField="employeeType", variantEnum="EmployeeType")
-  public static abstract class Employee {
+  static class Employee {
     @PersistentField(name="employeeType")
     @Mapping(channel="json", name="type")
     @Mapping(channel="mongo", name="employee_type")
@@ -215,6 +228,13 @@ public class PersistentClassTest {
     @Mapping(channel="json", name="last")
     @Mapping(channel="mongo", name="last_name")
     String lastName;
+
+    /**
+     * Construct an Employee.
+     */
+    protected Employee() {
+      // Protected constructor to prevent instantiation of this base class.
+    }
 
     public String getFirstName() {
       return firstName;
@@ -235,12 +255,18 @@ public class PersistentClassTest {
     }
   }
 
+  /**
+   * SalaryEmployee is an example using inheritance.
+   */
   @PersistentClass(name="SalaryEmployee", variant="SALARY")
-  public static class SalaryEmployee extends Employee {
+  static class SalaryEmployee extends Employee {
   }
 
+  /**
+   * HourlyEmployee is an example using inheritance.
+   */
   @PersistentClass(name="HourlyEmployee", variant="HOURLY")
-  public static class HourlyEmployee extends Employee {
+  static class HourlyEmployee extends Employee {
   }
 }
  
