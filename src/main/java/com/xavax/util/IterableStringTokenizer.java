@@ -98,7 +98,7 @@ public class IterableStringTokenizer implements Iterable<String> {
        * @return true if this iterator has more tokens.
        */
       @Override
-      @SuppressWarnings("PMD.CommentRequired")
+      @SuppressWarnings({"PMD.AccessorMethodGeneration", "PMD.CommentRequired"})
       public boolean hasNext() {
 	return tokenizer.hasMoreElements();
       }
@@ -108,6 +108,7 @@ public class IterableStringTokenizer implements Iterable<String> {
        *
        * @return the next token.
        */
+      @SuppressWarnings("PMD.AccessorMethodGeneration")
       public String next() {
 	return tokenizer.nextToken();
       }

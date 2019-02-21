@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * JoinerFormat encapsulates the formatting options for Joiner.
  */
-@SuppressWarnings("PMD.TooManyFields")
+@SuppressWarnings({ "PMD.TooManyFields", "PMD.TooManyMethods"})
 public class JoinerFormat {
   private final static int DEFAULT_INITIAL_CAPACITY = 64;
   public final static JoinerFormat DEBUG_FORMAT = new JoinerFormat()
@@ -109,7 +109,7 @@ public class JoinerFormat {
    * @param capacity  the new default initial capacity.
    * @return this JoinerFormat.
    */
-  public JoinerFormat setDefaultCapacity(final int capacity) {
+  public JoinerFormat withDefaultCapacity(final int capacity) {
     if ( writeEnabled ) {
       defaultCapacity = capacity;
     }

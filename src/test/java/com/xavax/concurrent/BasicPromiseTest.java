@@ -9,7 +9,7 @@ import static com.xavax.concurrent.DelayedWriter.delayedWrite;
 /**
  * Test cases for the BasicPromise class.
  */
-
+@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.SignatureDeclareThrowsException" })
 public class BasicPromiseTest {
   private final static long TIMEOUT = 50000;
   private final static long SLEEP_TIME = 20;
@@ -85,6 +85,7 @@ public class BasicPromiseTest {
    * Test interrupted promise.
    */
   @Test
+  @SuppressWarnings("PMD.AccessorMethodGeneration")
   public void testInterruptedPromise() throws Exception {
     final Thread thread = new Thread() {
       /**

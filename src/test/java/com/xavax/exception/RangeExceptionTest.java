@@ -19,7 +19,7 @@ public class RangeExceptionTest {
    * Test the getAttempted method.
    */
   @Test
-  public void getAttempted() {
+  public void testGetAttempted() {
     assertEquals(exception.getAttempted(), VALUE);
   }
 
@@ -27,7 +27,7 @@ public class RangeExceptionTest {
    * Test the getMaximum method.
    */
   @Test
-  public void getMaximum() {
+  public void testGetMaximum() {
     assertEquals(exception.getMaximum(), MAX);
   }
 
@@ -35,7 +35,7 @@ public class RangeExceptionTest {
    * Test the getMinimum method.
    */
   @Test
-  public void getMinimum() {
+  public void testGetMinimum() {
     assertEquals(exception.getMinimum(), MIN);
   }
 }

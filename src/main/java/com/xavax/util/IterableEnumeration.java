@@ -43,7 +43,7 @@ public class IterableEnumeration<T> implements Iterable<T> {
        * @return true if this iterator has more items.
        */
       @Override
-      @SuppressWarnings("PMD.CommentRequired")
+      @SuppressWarnings({"PMD.AccessorMethodGeneration", "PMD.CommentRequired"})
       public boolean hasNext() {
         return enumeration.hasMoreElements();
       }
@@ -53,6 +53,7 @@ public class IterableEnumeration<T> implements Iterable<T> {
        *
        * @return the next item.
        */
+      @SuppressWarnings("PMD.AccessorMethodGeneration")
       public T next() {
         return enumeration.nextElement();
       }

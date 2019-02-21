@@ -12,12 +12,12 @@ import org.testng.annotations.BeforeMethod;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static com.xavax.concurrent.ConcurrentBitSet.*;
+import static com.xavax.concurrent.ConcurrentBitSetConstants.*;
 
 /**
- * Test the ConcurrentBitSet.Page class.
+ * Test the BitSetPage class.
  */
-public class PageTest {
+public class BitSetPageTest {
   private final static String EXPECTED1 = "[01000000.00010000.00000100.00000001";
   private final static String EXPECTED2 = "[11111111.11111111.11111111.11111111.11111111.11111111.11111111.11111111.00000000";
   private final static String EXPECTED3 = "[00011111.11111111.11111111.11111111.11111111.11110000.00000000.00000000.00000000";
@@ -25,14 +25,14 @@ public class PageTest {
   private final static String EXPECTED5 = "[00000000.00000000.00000000.00000000.00000000.00000000.00000000.11111111.00000000";
   private final static String EXPECTED6 = "[11111111.00000000.00000000.00000000.00000000.00000000.00000000.11111111.00000000";
 
-  private Page page;
+  private BitSetPage page;
 
   /**
    * Set up performed before each test.
    */
   @BeforeMethod
   public void beforeMethod() {
-    page = new Page();
+    page = new BitSetPage();
   }
 
   /**
@@ -68,7 +68,7 @@ public class PageTest {
     page.set(0,63);
     String result = page.toString().substring(0, EXPECTED2.length());
     assertEquals(result, EXPECTED2);
-    page = new Page();
+    page = new BitSetPage();
     page.set(3,43);
     result = page.toString().substring(0, EXPECTED3.length());
     assertEquals(result, EXPECTED3);
@@ -147,7 +147,7 @@ public class PageTest {
    * @param index  the bit index.
    * @param state  the expected state.
    */
-  private void checkBits(final Page page, final int index, final boolean state) {
+  private void checkBits(final BitSetPage page, final int index, final boolean state) {
     for ( int i = 0; i < BITS_PER_PAGE; ++i ) {
       final boolean value = page.get(i);
       if ( i == index ) {

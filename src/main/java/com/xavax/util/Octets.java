@@ -10,6 +10,7 @@ package com.xavax.util;
  * Octets converts between long integers and strings containing 8
  * octets (byte values in hexadecimal) separated by colon delimiters.
  */
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class Octets {
 
   /**

@@ -21,10 +21,12 @@ import static com.xavax.util.Constants.*;
  */
 @SuppressWarnings({
   "PMD.CyclomaticComplexity",
+  "PMD.GodClass",
   "PMD.ModifiedCyclomaticComplexity",
-  "PMD.StdCyclomaticComplexity" })
+  "PMD.StdCyclomaticComplexity",
+  "PMD.TooManyMethods"
+})
 public class JSONParser {
-  private final static String EMPTY = "";
   private final static String ERROR_FORMAT = "%s: error at line %d position %d - %s";
   private final static String EXPECTED_FORMAT1 = "expected [%c] but received [%c]";
   private final static String EXPECTED_FORMAT2 = "expected [%c] or [%c] but received [%c]";
@@ -157,7 +159,7 @@ public class JSONParser {
     final JSON json = new JSON();
     boolean flag = false;
     try {
-      if ( expect('{', true) ) {
+      if ( expect(LEFT_BRACE, true) ) {
 	flag = true;
 	parseItems(json);
       }
@@ -183,7 +185,7 @@ public class JSONParser {
     level = 0;
     final JSONArray list = new JSONArray();
     try {
-      if ( expect('[', true) ) {
+      if ( expect(LEFT_BRACKET, true) ) {
 	parseArrayItems(list);
       }
       if ( level != 0 ) {
@@ -205,17 +207,17 @@ public class JSONParser {
     while ( hasNext() ) {
       if ( first ) {
 	first = false;
-	if ( scanFor('}') ) {
+	if ( scanFor(RIGHT_BRACE) ) {
 	  break;
 	}
       }
       parseItem(map);
       final char input = next(true);
-      if ( input == '}' ) {
+      if ( input == RIGHT_BRACE ) {
 	break;
       }
-      else if ( input != ',' ) {
-	expected(',', input);
+      else if ( input != COMMA ) {
+	expected(COMMA, input);
 	break;
       }
     }
@@ -224,11 +226,11 @@ public class JSONParser {
   private boolean parseItem(final JSON map) {
     boolean result = false;
     final String key = parseKey();
-    if ( key == null || key.equals("") ) {
+    if ( key == null || key.equals(EMPTY_STRING) ) {
       expected("identifier", peek());
     }
     else {
-      if ( expect(':', true) ) {
+      if ( expect(COLON, true) ) {
 	final Object value = parseValue();
 	map.put(key, value);
 	result = true;
@@ -243,7 +245,7 @@ public class JSONParser {
   private String parseKey() {
     String key = null;
     final char input = next(true);
-    if ( input == '"' || input == '\'' ) {
+    if ( input == DOUBLE_QUOTE || input == SINGLE_QUOTE ) {
       key = parseIdentifier();
       expect(input, false);
     }
@@ -257,11 +259,11 @@ public class JSONParser {
   private String parseIdentifier() {
     final StringBuilder builder = new StringBuilder();
     char input = next(false);
-    if ( Character.isLetter(input) || input == '_' ) {
+    if ( Character.isLetter(input) || input == UNDERSCORE ) {
       builder.append(input);
       while ( hasNext() ) {
 	input = next(false);
-	if ( Character.isLetterOrDigit(input) || input == '_' ) {
+	if ( Character.isLetterOrDigit(input) || input == UNDERSCORE ) {
 	  builder.append(input);
 	}
 	else {
@@ -282,31 +284,31 @@ public class JSONParser {
     if ( hasNext() ) {
       char input = next(true);
       switch ( input ) {
-      case '"':
-      case '\'':
+      case DOUBLE_QUOTE:
+      case SINGLE_QUOTE:
 	result = parseString(input);
 	break;
-      case '{':
+      case LEFT_BRACE:
 	final JSON map = new JSON();
 	++level;
 	parseItems(map);
 	--level;
 	result = map;
 	break;
-      case '}':
-      case ',':
+      case RIGHT_BRACE:
+      case COMMA:
 	pushback();
 	expected(VALUE, input);
 	break;
-      case '[':
+      case LEFT_BRACKET:
 	final JSONArray list = new JSONArray();
 	++level;
 	parseArrayItems(list);
 	--level;
 	result = list;
 	break;
-      case '-':
-      case '.':
+      case HYPHEN:
+      case PERIOD:
 	pushback();
 	result = parseNumber();
 	break;
@@ -352,17 +354,17 @@ public class JSONParser {
 
   private void parseArrayItems(final JSONArray list) {
     while ( hasNext() ) {
-      if ( scanFor(']') ) {
+      if ( scanFor(RIGHT_BRACKET) ) {
 	break;
       }
       final Object value = parseValue();
       list.add(value);
       final char input = next(true);
-      if ( input == ']' ) {
+      if ( input == RIGHT_BRACKET ) {
 	break;
       }
-      else if ( input != ',' ) {
-	expected(',', ']', input);
+      else if ( input != COMMA ) {
+	expected(COMMA, RIGHT_BRACKET, input);
 	break;
       }
     }
@@ -383,14 +385,14 @@ public class JSONParser {
       case ACCEPT_DIGIT_SIGN_RADIX:
 	if ( Character.isDigit(input) ) {
 	  state = ScannerState.ACCUMULATE_DIGITS;
-	  if ( input == '0' ) {
+	  if ( input == ZERO ) {
 	    leadingZero = true;
 	  }
 	}
-	else if ( input == '-' ) {
+	else if ( input == HYPHEN ) {
 	  state = ScannerState.ACCEPT_DIGIT_RADIX;
 	}
-	else if ( input == '.' ) {
+	else if ( input == PERIOD ) {
 	  state = ScannerState.ACCUMULATE_FRACTION;
 	}
 	else {
@@ -401,11 +403,11 @@ public class JSONParser {
       case ACCEPT_DIGIT_RADIX:
 	if ( Character.isDigit(input) ) {
 	  state = ScannerState.ACCUMULATE_DIGITS;
-	  if ( input == '0' ) {
+	  if ( input == ZERO ) {
 	    leadingZero = true;
 	  }
 	}
-	else if ( input == '.' ) {
+	else if ( input == PERIOD ) {
 	  state = ScannerState.ACCUMULATE_FRACTION;
 	}
 	else {
@@ -415,7 +417,7 @@ public class JSONParser {
 	break;
       case ACCUMULATE_DIGITS:
 	// Accumulating initial digits.
-	if ( input == '.' ) {
+	if ( input == PERIOD ) {
 	  state = ScannerState.ACCUMULATE_FRACTION;
 	}
 	else if ( input == 'e' || input == 'E' ) {
@@ -443,7 +445,7 @@ public class JSONParser {
 	break;
       case ACCEPT_EXPONENT_SIGN:
 	isDouble = true;
-	if ( input == '-' || input == '+' ) {
+	if ( input == HYPHEN || input == PLUS ) {
 	  state = ScannerState.ACCUMULATE_EXPONENT;
 	}
 	else if ( !Character.isDigit(input) ) {
@@ -470,7 +472,7 @@ public class JSONParser {
   }
 
   private void unexpectedNumericInput(final int mark, final char input) {
-    if ( Character.isWhitespace(input) || input == ',' || input == '}' || input == ']' ) {
+    if ( Character.isWhitespace(input) || input == COMMA || input == RIGHT_BRACE || input == RIGHT_BRACKET ) {
       pushback();
     }
     else {
@@ -513,7 +515,7 @@ public class JSONParser {
 	builder.append(chars);
 	escape = false;
       }
-      else if ( input == '\\' ) {
+      else if ( input == BACKSLASH ) {
 	escape = true;
       }
       else if ( input == sentinel ) {
@@ -579,6 +581,7 @@ public class JSONParser {
     return cursor < length || readNextLine();
   }
 
+  @SuppressWarnings("PMD.EmptyCatchBlock")
   private boolean readNextLine() {
     boolean result = false;
     try {
@@ -601,7 +604,7 @@ public class JSONParser {
   }
 
   private char next(final boolean skipWhitespace) {
-    char result = '\0';
+    char result = NULL_CHAR;
     do {
       if ( hasNext() ) {
 	result = array[cursor++];
@@ -624,8 +627,8 @@ public class JSONParser {
   private void skipToNextItem(final boolean skipWhitespace) {
     while ( hasNext() ) {
       final char input = next(false);
-      if ( !skipWhitespace && Character.isWhitespace(input) || input == ','
-	  || input == '}' ) {
+      if ( !skipWhitespace && Character.isWhitespace(input) || input == COMMA
+	  || input == RIGHT_BRACE ) {
 	pushback();
 	break;
       }
@@ -657,7 +660,7 @@ public class JSONParser {
   }
 
   private void invalid(final int mark, final String detail) {
-    final String part = lineBuffer == null ? EMPTY : lineBuffer.substring(mark, cursor);
+    final String part = lineBuffer == null ? EMPTY_STRING : lineBuffer.substring(mark, cursor);
     final String msg = String.format(INVALID_INPUT_FORMAT, detail, part);
     addError(mark, msg);
   }
@@ -666,6 +669,7 @@ public class JSONParser {
     addError(cursor - 1, msg);
   }
 
+  @SuppressWarnings("PMD.SystemPrintln")
   private void addError(final int mark, final String message) {
     final StringBuilder builder = new StringBuilder(DEFAULT_BUFFER_SIZE);
 

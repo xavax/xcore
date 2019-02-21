@@ -15,6 +15,7 @@ import static com.xavax.util.Constants.EMPTY_STRING;
 /**
  * Dates is a utility class for manipulating dates and timestamps.
  */
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class Dates {
   private final static String ISO_TIMESTAMP = "yyyy-MM-dd'T'HH:mm:ss.SSS";
   private final static String ISO_TIMESTAMP_ND = "yyyyMMdd'T'HHmmssSSS";

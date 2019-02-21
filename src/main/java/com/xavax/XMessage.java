@@ -41,6 +41,7 @@ public enum XMessage {
    *
    * @param args the message parameters.
    */
+  @SuppressWarnings("PMD.SystemPrintln")
   public void print(final Object... args) {
     System.out.println(format(args));
   }
@@ -50,6 +51,7 @@ public enum XMessage {
    *
    * @param args the message parameters.
    */
+  @SuppressWarnings("PMD.SystemPrintln")
   public void error(final Object... args) {
     System.err.println(format(args));
   }

@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  *
  * @author alvitar@xavax.com
  */
+@SuppressWarnings({ "PMD.ClassNamingConventions", "PMD.TooManyMethods" })
 public final class CollectionFactory {
 
   /**

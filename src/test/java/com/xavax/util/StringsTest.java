@@ -32,18 +32,18 @@ public class StringsTest {
    */
   @Test
   public void testStaticEquals() {
-    assertTrue(Strings.equals(null, null));
-    assertTrue(Strings.equals(EMPTY, EMPTY));
-    assertTrue(Strings.equals(ALPHARETTA, ALPHARETTA));
-    assertTrue(Strings.equals(BIRMINGHAM, BIRMINGHAM));
-    assertFalse(Strings.equals(null, EMPTY));
-    assertFalse(Strings.equals(EMPTY, null));
-    assertFalse(Strings.equals(null, ALPHARETTA));
-    assertFalse(Strings.equals(ALPHARETTA, null));
-    assertFalse(Strings.equals(EMPTY, ALPHARETTA));
-    assertFalse(Strings.equals(ALPHARETTA, EMPTY));
-    assertFalse(Strings.equals(ALPHARETTA, BIRMINGHAM));
-    assertFalse(Strings.equals(BIRMINGHAM, ALPHARETTA));
+    assertEquals((String) null, null);
+    assertEquals(EMPTY, EMPTY);
+    assertEquals(ALPHARETTA, ALPHARETTA);
+    assertEquals(BIRMINGHAM, BIRMINGHAM);
+    assertNotEquals(null, EMPTY);
+    assertNotEquals(EMPTY, null);
+    assertNotEquals(null, ALPHARETTA);
+    assertNotEquals(ALPHARETTA, null);
+    assertNotEquals(EMPTY, ALPHARETTA);
+    assertNotEquals(ALPHARETTA, EMPTY);
+    assertNotEquals(ALPHARETTA, BIRMINGHAM);
+    assertNotEquals(BIRMINGHAM, ALPHARETTA);
   }
 
   /**
@@ -103,7 +103,7 @@ public class StringsTest {
     assertEquals(packed[5], NAMES[3]);
     final String[] items = new String[] { ALPHARETTA, BIRMINGHAM, NAMES[0] };
     packed = Strings.pack(items);
-    assertTrue(items == packed);
+    assertSame(items, packed);
   }
 
   /**

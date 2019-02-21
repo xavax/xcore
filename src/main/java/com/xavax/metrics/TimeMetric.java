@@ -58,7 +58,7 @@ public class TimeMetric {
    */
   public void addTransaction(final long start, final long stop) {
     long elapsed = stop - start;
-    if ( scaleFactor != 1 ) {
+    if ( scaleFactor != SCALE_BY_NANOSECONDS ) {
       elapsed /= scaleFactor;
     }
     synchronized ( this ) {
@@ -146,6 +146,7 @@ public class TimeMetric {
      *
      * @param timeMetric  the TimeMetric object to be examined.
      */
+    @SuppressWarnings("PMD.AccessorMethodGeneration")
     public Result(final TimeMetric timeMetric) {
       this.min = timeMetric.min;
       this.max = timeMetric.max;

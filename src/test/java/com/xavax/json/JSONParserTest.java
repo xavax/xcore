@@ -20,6 +20,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for the JSON parser.
  */
+@SuppressWarnings({"PMD.AvoidFileStream", "PMD.TooManyMethods"})
 public class JSONParserTest {
 
   private final static int    BAZ_VALUE = 123;
@@ -110,36 +111,36 @@ public class JSONParserTest {
   @Test
   public void testErrors() {
     JSON result = parser.parse(INPUT2A);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
     result = parser.parse(INPUT2B);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
     assertEquals(result.getLong(BAZ).intValue(), BAZ_VALUE);
     result = parser.parse(INPUT2C);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
     result = parser.parse(INPUT2D);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
     result = parser.parse(INPUT2E);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
     result = parser.parse(INPUT2F);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
     result = parser.parse(INPUT2G);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
     assertEquals(result.getString(ABC), ABC);
     result = parser.parse(INPUT2H);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
     result = parser.parse(INPUT2I);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
     result = parser.parse(INPUT2J);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 3);
     final String abc = result.getString(ABC);
     assertEquals(abc, ABC);
@@ -159,7 +160,7 @@ public class JSONParserTest {
     final StringReader reader = new StringReader(INPUT2A);
     final JSONParser parser2 = new JSONParser(reader, SOURCE);
     result = parser2.parse();
-    assertTrue(!parser2.isValid());
+    assertFalse(parser2.isValid());
     assertEquals(parser2.getErrors().size(), 1);
   }
 
@@ -181,9 +182,9 @@ public class JSONParserTest {
     final JSON result = parser.parse(INPUT4A);
     assertTrue(parser.isValid());
     Boolean flag = result.getBoolean("t");
-    assertEquals(flag, Boolean.TRUE);
+    assertTrue(flag);
     flag = result.getBoolean("f");
-    assertEquals(flag, Boolean.FALSE);
+    assertFalse(flag);
     assertTrue(result.containsKey("n"));
     assertNull(result.get("n"));
   }
@@ -266,7 +267,7 @@ public class JSONParserTest {
     jarray = parser.parseArray(INPUT9C);
     assertNotNull(jarray);
     assertEquals(jarray.size(), 3);
-    assertEquals(jarray.get(2), new Long(789));
+    assertEquals(jarray.get(2), Long.valueOf(789));
   }
 
   /**

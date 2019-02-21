@@ -61,9 +61,8 @@ public class BasicPromise<T> extends AbstractJoinableObject implements Promise<T
    * @return true if the result of this promise is ready.
    */
   public boolean isReady() {
-    boolean readyFlag = false;
     sentinel.lock();
-    readyFlag = ready;
+    final boolean readyFlag = ready;
     sentinel.unlock();
     return readyFlag;
   }
@@ -146,5 +145,4 @@ public class BasicPromise<T> extends AbstractJoinableObject implements Promise<T
 	  .append(SENTINEL, sentinel);
     return joiner;
   }
-
 }

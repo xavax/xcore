@@ -5,6 +5,7 @@ package com.xavax.concurrent;
  *
  * @param <T>  the type of the promised result.
  */
+@SuppressWarnings("PMD.DoNotUseThreads")
 public class DelayedWriter<T> extends Thread {
   private final long delay;
   private final Promise<T> promise;

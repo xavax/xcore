@@ -10,8 +10,7 @@ import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 
 import static org.testng.Assert.*;
-import static com.xavax.concurrent.ConcurrentBitSet.*;
-import static com.xavax.util.Constants.*;
+import static com.xavax.concurrent.ConcurrentBitSetConstants.*;
 
 /**
  * Test the ConcurrentBitSet.Segment class.
@@ -21,14 +20,14 @@ public class SegmentTest {
   private final static int MAX_ENTRY_INDEX = 1 << (LOG2_DEFAULT_SEGMENT_SIZE - LOG2_BITS_PER_PAGE);
   private final static String EXPECTED = "pageCount: 0, map: [<null>, <null>,";
 
-  private Segment segment;
+  private BitMapSegment segment;
 
   /**
    * Set up performed before each test.
    */
   @BeforeMethod
-  public void setup() {
-    segment = new Segment(new ConcurrentBitSet(), LOG2_DEFAULT_SEGMENT_SIZE);
+  public void setUp() {
+    segment = new BitMapSegment(new ConcurrentBitSet(), LOG2_DEFAULT_SEGMENT_SIZE);
   }
 
   /**
@@ -39,7 +38,7 @@ public class SegmentTest {
     assertEquals(segment.pageCount(), 0);
     for ( int index = 0; index < MAX_ENTRY_INDEX; ++index ) {
       final int bitIndex = index << LOG2_BITS_PER_PAGE;
-      Page entry = segment.getPageContaining(bitIndex, false);
+      BitSetPage entry = segment.getPageContaining(bitIndex, false);
       assertNull(entry);
       assertEquals(segment.pageCount(), index);
       entry = segment.getPageContaining(bitIndex, true);

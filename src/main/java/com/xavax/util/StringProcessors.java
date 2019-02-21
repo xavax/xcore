@@ -5,12 +5,15 @@
 //
 package com.xavax.util;
 
-import org.apache.commons.text.StringEscapeUtils;;
+import java.util.Locale;
+
+import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * StringProcessors is a utility class that defines some common
  * string processors.
  */
+@SuppressWarnings("PMD.ClassNamingConventions")
 public class StringProcessors {
   public final static StringProcessor ESCAPE_HTML_STRING = new EscapeHtmlStringProcessor();
   public final static StringProcessor ESCAPE_JAVA_STRING = new EscapeJavaStringProcessor();
@@ -97,7 +100,7 @@ public class StringProcessors {
      */
     @Override
     public String process(final JoinerFormat format, final String input, final Object clientData) {
-      return input.toLowerCase();
+      return input.toLowerCase(Locale.getDefault());
     }
   }
 
@@ -116,7 +119,7 @@ public class StringProcessors {
      */
     @Override
     public String process(final JoinerFormat format, final String input, final Object clientData) {
-      return input.toUpperCase();
+      return input.toUpperCase(Locale.getDefault());
     }
   }
 

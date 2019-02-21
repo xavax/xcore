@@ -44,7 +44,7 @@ public class TimerTest {
     final Timer timer1 = new Timer();
     timer1.start();
     timer1.stop();
-    TimeMetric.Result result = timer1.getMetric().result();
+    final TimeMetric.Result result = timer1.getMetric().result();
     assertNotNull(result);
     assertEquals(result.count(), 1);
     assertEquals(result.min(), result.max());

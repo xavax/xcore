@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 /**
  * Test cases for the XLogger class.
  */
+@SuppressWarnings({"PMD.MoreThanOneLogger", "PMD.TooManyMethods"})
 public class XLoggerTest {
   private final static Logger LOGGER = Logger.getLogger(XLoggerTest.class);
 
@@ -60,7 +61,7 @@ public class XLoggerTest {
    * Common set up for all test cases.
    */
   @BeforeMethod
-  public void setup() {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
 
@@ -82,6 +83,11 @@ public class XLoggerTest {
   /**
    * Test the logger.
    */
+  @SuppressWarnings({
+    "PMD.AvoidInstantiatingObjectsInLoops",
+    "PMD.AvoidThrowingNullPointerException",
+    "PMD.SystemPrintln"
+  })
   public void baz() {
     final Date begin = new Date();
     for ( int n = 0; n < 1000; ++n ) {

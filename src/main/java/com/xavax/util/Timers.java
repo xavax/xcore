@@ -24,11 +24,12 @@ public final class Timers {
    * 
    * @param interval the amount of time in milliseconds to sleep.
    */
+  @SuppressWarnings("AvoidCatchingGenericException")
   public static void sleep(final long interval) {
     try {
       Thread.sleep(interval);
     }
-    catch (Exception e) {
+    catch (InterruptedException e) {
       // Ignore this exception.
     }
   }

@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 /**
  * Test case for the mapping annotation classes.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class PersistentClassTest {
   private final static String ANNOTATION_FIELD_FORMAT = "%s=%s";
   private final static String ANNOTATION_FORMAT = "%s@%s(";
@@ -34,6 +35,7 @@ public class PersistentClassTest {
     showAnnotations(employee2);
   }
 
+  @SuppressWarnings("PMD.SystemPrintln")
   void showAnnotations(final Object object) {
     final StringBuilder builder = new StringBuilder();
     showClassAnnotations(object.getClass(), builder);
@@ -45,9 +47,10 @@ public class PersistentClassTest {
     System.out.println(builder.toString());
   }
 
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   void showClassAnnotations(final Class<?> clazz, final StringBuilder builder) {
     final LinkedHashMap<String, List<Annotation>> map = new LinkedHashMap<>();
-    getClassAnnotations(map, clazz);
+    loadClassAnnotations(map, clazz);
     for ( final Entry<String, List<Annotation>> entry : map.entrySet() ) {
       builder.append(String.format(ANNOTATION_FORMAT, "", entry.getKey()));
       final Map<String, Object> parameters = new LinkedHashMap<>();
@@ -114,11 +117,12 @@ public class PersistentClassTest {
     return builder.toString();
   }
 
-  void getClassAnnotations(final Map<String, List<Annotation>> map,
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
+  void loadClassAnnotations(final Map<String, List<Annotation>> map,
                                   final Class<?> clazz) {
     final Class<?> superClass = clazz.getSuperclass();
     if ( superClass != Object.class ) {
-      getClassAnnotations(map, superClass);
+      loadClassAnnotations(map, superClass);
     }
     for ( final Annotation annotation : clazz.getDeclaredAnnotations() ) {
       final String name = annotation.annotationType().getSimpleName();
@@ -187,16 +191,13 @@ public class PersistentClassTest {
     builder.append(")\n");  
   }
 
+  @SuppressWarnings("PMD.EmptyCatchBlock")
   Object getMethodValue(final Annotation annotation, final Method method) {
     Object value = "";
     try {
       value = method.invoke(annotation);
     }
-    catch (IllegalAccessException e) {
-    }
-    catch (IllegalArgumentException e) {
-    }
-    catch (InvocationTargetException e) {
+    catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
     }
     return value;
   }

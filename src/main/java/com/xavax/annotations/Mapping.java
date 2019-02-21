@@ -16,7 +16,7 @@ import static com.xavax.util.Constants.EMPTY_STRING;
  */
 @Documented
 @Inherited
-@Repeatable(value = Mappings.class)
+@Repeatable(Mappings.class)
 @Retention(RUNTIME)
 @Target(FIELD)
 public @interface Mapping {

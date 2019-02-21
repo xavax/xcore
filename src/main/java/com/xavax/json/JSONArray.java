@@ -89,6 +89,7 @@ public final class JSONArray extends ArrayList<Object> {
    * @param array  the array of elements to add.
    * @return true if this array was modified.
    */
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public boolean addAll(final JSONArray array) {
     boolean result = false;
     for ( Object object : array ) {
@@ -165,6 +166,7 @@ public final class JSONArray extends ArrayList<Object> {
    * @param format       the format.
    * @param indentLevel  the initial indentation level.
    */
+  @SuppressWarnings("PMD.LinguisticNaming")
   public void toString(final StringBuilder builder, final Format format, final int indentLevel) {
     int level = indentLevel;
     final String indentation = format.indentation(level++);

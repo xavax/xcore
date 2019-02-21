@@ -18,5 +18,5 @@ public interface StringProcessor {
    * @param clientData  any additional client data (or null).
    * @return a processed string.
    */
-  public String process(final JoinerFormat format, final String input, final Object clientData);
+  String process(final JoinerFormat format, final String input, final Object clientData);
 }

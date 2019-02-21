@@ -14,7 +14,7 @@ import java.util.Map;
  * Joiner supports the efficient implementation of toString methods
  * for complex objects.
  */
-@SuppressWarnings("PMD.ExcessivePublicCount")
+@SuppressWarnings({"PMD.AvoidUsingShortType", "PMD.CyclomaticComplexity", "PMD.GodClass", "PMD.TooManyMethods"})
 public class Joiner {
 
   private boolean reusable;
@@ -323,7 +323,7 @@ public class Joiner {
    */
   public String join(final Object... objects) {
     builder.append(format.getPrefix());
-    tracker.clearFlag();;
+    tracker.clearFlag();
     for ( final Object object : objects ) {
       if ( check(null, object) ) {
 	tracker.addSeparator();

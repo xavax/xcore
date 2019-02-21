@@ -23,6 +23,7 @@ import static com.xavax.util.StringProcessors.*;
 /**
  * Test cases for the Joiner class nesting.
  */
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.SystemPrintln"})
 public class JoinerTest {
 
   private final static String HELLO = "hello";
@@ -43,7 +44,6 @@ public class JoinerTest {
   private final static String ZIP1 = "30303";
   private final static String ZIP2 = "35802";
   private final static String GADGET1 = "Gadget1";
-  private final static String FIELDNAME = "addresses";
 
   private final static String EXPECT1A =
       STREET1 + SEPARATOR + ATL + SEPARATOR + GEORGIA + SEPARATOR + ZIP1;
@@ -116,7 +116,7 @@ public class JoinerTest {
    * Common test set up.
    */
   @BeforeMethod
-  public void setup() {
+  public void setUp() {
     person = new Person(FIRST_NAME, LAST_NAME, 25);
     person.add(ADDRESSES[0]);
     person.add(ADDRESSES[1]);
@@ -187,7 +187,7 @@ public class JoinerTest {
     result = Joiner.create(new JoinerFormat()).append(gadget).toString();
     assertEquals(result, EXPECT13);
     result = Joiner.create(new JoinerFormat()).append(GADGET1, gadget).toString();
-    assertTrue(EXPECT17.equals(result));
+    assertEquals(EXPECT17, result);
     result = Joiner.create(new JoinerFormat()).append((Object) null).toString();
     assertEquals(result, INDICATOR);
     result = Joiner.create(new JoinerFormat()).append(FIELD_NAME, (Object) null).toString();
@@ -250,14 +250,14 @@ public class JoinerTest {
   public void testAppenders() {
     Widget widget =
 	new Widget(true, 'x', (byte) 0x7F, (short) 123, 456, 789L,
-	    	   false, 'z', new Byte((byte) 0x7F),
-	    	   new Short((short) 123), 456, 789L);
+	    	   false, 'z', Byte.valueOf((byte) 0x7F),
+	    	   Short.valueOf((short) 123), 456, 789L);
     String result = widget.toString();
     assertEquals(result, EXPECT9);
     widget = new Widget(true, 'x', (byte) 0, (short) 0, 0, 0L, null, null, null, null, null, null);
     result = widget.toString();
     assertEquals(result, EXPECT10);
-    result = Joiner.create(new JoinerFormat()).append(null, new Integer(ZIP1)).toString();
+    result = Joiner.create(new JoinerFormat()).append(null, Integer.valueOf(ZIP1)).toString();
     assertEquals(result, ZIP1);
   }
 
@@ -428,6 +428,7 @@ public class JoinerTest {
      * @return the joiner.
      */
     @Override
+    @SuppressWarnings("PMD.AccessorMethodGeneration")
     protected Joiner doJoin(final Joiner joiner) {
       joiner.append(STREET_FIELD, street)
       	    .append(CITY_FIELD, city)
@@ -485,6 +486,7 @@ public class JoinerTest {
   /**
    * A simple object for testing.
    */
+  @SuppressWarnings("PMD.AvoidUsingShortType")
   private static class Widget extends AbstractJoinableObject {
     private final boolean field0;
     private final char    field1;

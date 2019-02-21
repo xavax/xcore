@@ -37,7 +37,7 @@ public class XProductTest {
    * Test setup.
    */
   @BeforeMethod
-  public void setup() {
+  public void setUp() {
     product = new XProduct(NAME, MAJOR, MINOR, PATCH, 2001, 2027, TEMPLATE);
   }
 

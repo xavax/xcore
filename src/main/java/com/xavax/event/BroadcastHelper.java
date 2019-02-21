@@ -39,7 +39,7 @@ public class BroadcastHelper implements Broadcaster, Joinable {
    */
   public void attach(final int type, final Observer observer)
   {
-    final Integer key = new Integer(type);
+    final Integer key = Integer.valueOf(type);
     synchronized (this) {
       List<Observer> observers = observerMap.get(key);
       if ( observers == null ) {
@@ -58,7 +58,7 @@ public class BroadcastHelper implements Broadcaster, Joinable {
    */
   public void detach(final int type, final Observer observer)
   {
-    final Integer key = new Integer(type);
+    final Integer key = Integer.valueOf(type);
     synchronized ( this ) {
       final List<Observer> observers = observerMap.get(key);
       if ( observers != null ) {
@@ -75,7 +75,7 @@ public class BroadcastHelper implements Broadcaster, Joinable {
   public void broadcast(final Event event)
   {
     final int type = event.type();
-    final Integer key = new Integer(type);
+    final Integer key = Integer.valueOf(type);
     synchronized ( this ) {
       final List<Observer> observers = observerMap.get(key);
       if ( observers != null ) {

@@ -48,7 +48,7 @@ public class Timer {
    * start time to the current time.
    */
   public void stop() {
-    long stopTime = metric.currentTime();
+    final long stopTime = metric.currentTime();
     metric.addTransaction(startTime, stopTime);
     startTime = stopTime;
   }
