@@ -19,7 +19,7 @@ public class TimeMetricTest {
    * Test setup.
    */
   @BeforeMethod
-  public void setup() {
+  public void setUp() {
     metric = new TimeMetric();
   }
 

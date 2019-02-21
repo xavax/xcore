@@ -15,7 +15,7 @@ import com.xavax.util.AbstractJoinableObject;
 import com.xavax.util.Joinable;
 import com.xavax.util.Joiner;
 
-import static com.xavax.util.Constants.*;
+import static com.xavax.concurrent.ConcurrentBitSetConstants.*;
 
 /**
  * ConcurrentBitSet encapsulates and manages an extendable bit set. The size
@@ -39,26 +39,13 @@ import static com.xavax.util.Constants.*;
  * @author alvitar@xavax.com Phillip L Harbison
  */
 public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable {
-  final static int LOG2_BITS_PER_BYTE = 3;
-  final static int LOG2_BITS_PER_INT  = 5;
-  final static int LOG2_BITS_PER_LONG = 6;
-  final static int LOG2_BITS_PER_PAGE = 9;
-  final static int BITS_PER_INT = 1 << LOG2_BITS_PER_INT;
-  final static int BITS_PER_LONG = 1 << LOG2_BITS_PER_LONG;
-  final static int BITS_PER_PAGE = 1 << LOG2_BITS_PER_PAGE;
-  final static int BITSET_BUFFER_SIZE = 32768;
-
-  final static int LOG2_DEFAULT_SEGMENT_SIZE = 16;
-  final static int LOG2_MAX_SEGMENT_SIZE = BITS_PER_INT + LOG2_BITS_PER_PAGE;
-  final static long MAX_SEGMENT_SIZE = 1 << LOG2_MAX_SEGMENT_SIZE;
-  final static long DEFAULT_INITIAL_SIZE = 1 << 24;
 
   private int logSegmentSize;
   private int currentMapSize;
   private long segmentMask;
   // private long segmentSize;
   // private long maxBitIndex;
-  final private InternalMetrics metrics = new InternalMetrics();
+  final InternalMetrics metrics = new InternalMetrics();
   private ReentrantLock segmentMapLock;
   private SegmentMapEntry[] segmentMap;
 
@@ -111,6 +98,7 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
    * @param start  the starting map index.
    * @param end    the ending map index.
    */
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   private void initMap(SegmentMapEntry[] map, final int start, final int end) {
     for ( int i = start; i < end; ++i ) {
       final SegmentMapEntry entry = new SegmentMapEntry();
@@ -129,7 +117,7 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
       throw new RangeException(0, Long.MAX_VALUE, index);
     }
     metrics.incrementOperations();
-    final Segment segment = getSegment(index, false);
+    final BitMapSegment segment = getSegment(index, false);
     return segment != null && segment.get((int) (index & segmentMask));
   }
 
@@ -144,7 +132,7 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
       throw new RangeException(0, Long.MAX_VALUE, index);
     }
     metrics.incrementOperations();
-    final Segment segment = getSegment(index, value);
+    final BitMapSegment segment = getSegment(index, value);
     if ( segment != null ) {
       segment.set((int) (index & segmentMask), value);
     }
@@ -230,18 +218,18 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
    * @param require  true if a nonexistent segment should be created.
    * @return the segment containing the specified bit.
    */
-  Segment getSegment(final long index, final boolean require) {
+  BitMapSegment getSegment(final long index, final boolean require) {
     final int segmentIndex = (int) index >>> logSegmentSize;
     if ( segmentIndex > currentMapSize ) {
       resize(segmentIndex);
     }
     final SegmentMapEntry entry = segmentMap[segmentIndex];
-    Segment segment = entry.get();
+    BitMapSegment segment = entry.get();
     if ( segment == null && require ) {
       synchronized ( entry ) {
 	segment = entry.get();
 	if ( segment == null ) {
-	  segment = new Segment(this, logSegmentSize);
+	  segment = new BitMapSegment(this, logSegmentSize);
 	  entry.set(segment);
 	  metrics.segmentCreated();
 	}
@@ -313,15 +301,15 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
   static class SegmentMapEntry extends AbstractJoinableObject implements Joinable {
     final static int SEGMAP_BUFFER_SIZE = 8192;
 
-    private Segment segment;
+    private BitMapSegment segment;
 
     /**
      * Get the segment for this map entry.
      *
      * @return the segment.
      */
-    public Segment get() {
-      Segment result;
+    public BitMapSegment get() {
+      BitMapSegment result;
       synchronized (this) {
 	result = this.segment;
       }
@@ -333,7 +321,7 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
      *
      * @param segment the new segment for this map entry.
      */
-    public void set(final Segment segment) {
+    public void set(final BitMapSegment segment) {
       synchronized (this) {
 	this.segment = segment;
       }
@@ -362,460 +350,7 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
     }
   }
 
-  /**
-   * Segment encapsulates a fixed-size segment of the bit set. Segment sizes are
-   * always a power of 2 to simplify calculations.
-   */
-  static class Segment extends AbstractJoinableObject implements Joinable {
-    final static int BIT_INDEX_MASK = (1 << LOG2_BITS_PER_PAGE) - 1;
-    final static int SEGMENT_BUFFER_SIZE = 8192;
 
-    private int pageCount;
-    private final Page[] map;
-    private final ConcurrentBitSet parent;
-
-    /**
-     * Construct a segment with a bitmap of size 2 ^ logSize. The bitmap
-     * is stored in an array of Page objects. Each Page has a small array
-     * of longs that store BITS_PER_PAGE bits, so the array size is:
-     *   2 ^ (logSize - log2(BITS_PER_PAGE))
-     *
-     * @param parent  the parent of this segment.
-     * @param logSize log2 of the size of the bitmap.
-     */
-    public Segment(final ConcurrentBitSet parent, final int logSize) {
-      this.parent = parent;
-      final int size = 1 << (logSize - LOG2_BITS_PER_PAGE);
-      map = new Page[size];
-    }
-
-    /**
-     * Returns the value of the bit at the specified index in this segment.
-     * If the corresponding page does not exist, return false.
-     *
-     * @param index  the index of the desired bit in this segment.
-     * @return the value of the bit at the specified index.
-     */
-    public boolean get(final int index) {
-      boolean result = false;
-      final int bitIndex = index & BIT_INDEX_MASK;
-      final Page page = getPageContaining(index, false);
-      if ( page != null ) {
-	result = page.get(bitIndex);
-      }
-      return result;
-    }
-
-    /**
-     * Sets the bit at the specified into to the specified value. If the
-     * page does not exist, only create it if the specified value is true;
-     * otherwise, do nothing.
-     * 
-     * @param index  the index of the desired bit in this segment.
-     * @param value  the new value of the bit.
-     */
-    public void set(final int index, final boolean value) {
-      final int bitIndex = index & BIT_INDEX_MASK;
-      final Page page = getPageContaining(index, value);
-      if ( page != null ) {
-	page.set(bitIndex, value);
-      }
-    }
-
-    /**
-     * Sets a range of bits beginning with the bit at fromIndex and
-     * ending with the bit at toIndex (inclusive).
-     *
-     * @param fromIndex  index of the first bit to set.
-     * @param toIndex    index of the last bit to set.
-     */
-    public void set(final int fromIndex, final int toIndex) {
-      // assert(fromIndex >= 0 && toIndex > fromIndex);
-      int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-      final int lastPage = toIndex >>> LOG2_BITS_PER_PAGE;
-      int firstBit = fromIndex & BIT_INDEX_MASK;
-      final int lastBit = toIndex & BIT_INDEX_MASK;
-      final int end = BITS_PER_PAGE - 1;
-      for ( ; pageIndex <= lastPage; ++pageIndex ) {
-	final Page page = getPage(pageIndex, true);
-	if ( page != null ) {
-	  page.set(firstBit, pageIndex == lastPage ? lastBit : end);
-	}
-	firstBit = 0;
-      }
-    }
-
-    /**
-     * Clears a range of bits beginning with the bit at fromIndex and
-     * ending with the bit at toIndex (inclusive).
-     *
-     * @param fromIndex  index of the first bit to clear.
-     * @param toIndex    index of the last bit to clear.
-     */
-    public void clear(final int fromIndex, final int toIndex) {
-      // assert(fromIndex >= 0 && toIndex > fromIndex);
-      int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-      final int lastPage = toIndex >>> LOG2_BITS_PER_PAGE;
-      int firstBit = fromIndex & BIT_INDEX_MASK;
-      final int lastBit = toIndex & BIT_INDEX_MASK;
-      final int end = BITS_PER_PAGE - 1;
-      for ( ; pageIndex <= lastPage; ++pageIndex ) {
-	final Page page = getPage(pageIndex, false);
-	if ( page != null ) {
-	  page.clear(firstBit, pageIndex == lastPage ? lastBit : end);
-	}
-	firstBit = 0;
-      }
-    }
-
-    /**
-     * Finds the next set bit starting at fromIndex.
-     *
-     * @param fromIndex  the index of the bit to begin searching.
-     * @return the index of the next set bit, or -1 if not found.
-     */
-    public int nextSetBit(final int fromIndex) {
-      int result = -1;
-      int bitIndex = fromIndex & BIT_INDEX_MASK;
-      int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-      for ( ; pageIndex < map.length; ++pageIndex ) {
-	final Page page = map[pageIndex];
-	if ( page != null ) {
-	  final int index = page.nextSetBit(bitIndex);
-	  if ( index >= 0 ) {
-	    result = index;
-	    break;
-	  }
-	  bitIndex = 0;
-	}
-      }
-      if ( result >= 0 ) {
-	result += pageIndex << LOG2_BITS_PER_PAGE;
-      }
-      return result;
-    }
-
-    /**
-     * Finds the next clear bit starting at fromIndex.
-     *
-     * @param fromIndex  the index of the bit to begin searching.
-     * @return the index of the next clear bit, or -1 if not found.
-     */
-    public int nextClearBit(final int fromIndex) {
-      int result = -1;
-      int bitIndex = fromIndex & BIT_INDEX_MASK;
-      int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-      for ( ; pageIndex < map.length; ++pageIndex ) {
-	final Page page = map[pageIndex];
-	if ( page == null ) {
-	  result = 0;
-	  break;
-	}
-	else {
-	  final int index = page.nextClearBit(bitIndex);
-	  if ( index >= 0 ) {
-	    result = index;
-	    break;
-	  }
-	}
-	bitIndex = 0;
-      }
-      if ( result >= 0 ) {
-	result += pageIndex << LOG2_BITS_PER_PAGE;
-      }
-      return result;
-    }
-
-    /**
-     * Returns the number of pages in this segment.
-     * 
-     * @return the number of pages in this segment.
-     */
-    int pageCount() {
-      return pageCount;
-    }
-
-    /**
-     * Returns a string representation of this segment.
-     *
-     * @return a string representation of this segment.
-     */
-    @Override
-    public String toString() {
-      return doJoin(Joiner.create(SEGMENT_BUFFER_SIZE)).toString();
-    }
-
-    /**
-     * Join this object to the specified joiner.
-     *
-     * @param joiner  the joiner to use.
-     * @return the joiner.
-     */
-    @Override
-    public Joiner doJoin(final Joiner joiner) {
-      joiner.append("pageCount", pageCount)
-            .append("map", map);
-      return joiner;
-    }
-
-    /**
-     * Returns the page that contains the bit at a specified index. If
-     * the page does not exist and require is true, create the page and
-     * update the map.
-     *
-     * @param index    the index of the desired bit.
-     * @param require  true if a non-existent entry should be created.
-     * @return the page containing the specified bit, or null if no
-     *         such page exists and was not created.
-     */
-    Page getPageContaining(final int index, final boolean require) {
-      return getPage(index >>> LOG2_BITS_PER_PAGE, require);
-    }
-
-    /**
-     * Returns the page at the specified index in the page map. If the
-     * page does not exist and require is true, create the page.
-     *
-     * @param require   true if a missing page should be created.
-     * @param mapIndex  the index of the desired page.
-     * @return the page at the specified index.
-     */
-    Page getPage(final int mapIndex, final boolean require) {
-      Page page = map[mapIndex];
-      if ( page == null && require ) {
-	page = createPage(mapIndex);
-      }
-      return page;
-    }
-
-    /**
-     * Create a new page at the specified index in the page map.
-     *
-     * @param mapIndex  the index for the new page.
-     * @return a new page.
-     */
-    Page createPage(final int mapIndex) {
-      Page page = null;
-      synchronized ( map ) {
-        page = map[mapIndex];
-        if ( page == null ) {
-          page = new Page();
-          map[mapIndex] = page;
-          ++pageCount;
-          parent.metrics.pageCreated();
-        }
-      }
-      return page;
-    }
-  }
-
-  /**
-   * Page encapsulates a small array of longs used to represent a portion
-   * of a bit set.
-   */
-  static class Page extends AbstractJoinableObject implements Joinable {
-    final static int BIT_MAP_ARRAY_SIZE = 1 << (LOG2_BITS_PER_PAGE - LOG2_BITS_PER_BYTE);
-    final static int BIT_MAP_INDEX_MASK = (1 << LOG2_BITS_PER_BYTE) - 1;
-    final static int PAGE_BUFFER_SIZE = 8192;
-
-    private final static String[] NIBBLES = new String[] {
-        "0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111",
-        "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"
-    };
-
-    private final static short[] LEFT_MASKS = new short[] {
-      0xFF, 0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01
-    };
-
-    private final static short[] RIGHT_MASKS = new short[] {
-      0x80, 0xC0, 0xE0, 0xF0, 0xF8, 0xFC, 0xFE, 0xFF
-    };
-
-    private byte[] bits;
-
-    /**
-     * Construct a Page.
-     */
-    public Page() {
-      bits = new byte[BIT_MAP_ARRAY_SIZE];
-    }
-
-    /**
-     * Returns the value of the specified bit as a boolean.
-     *
-     * @param index  the index of a bit within the page.
-     * @return the value of the specified bit.
-     */
-    public boolean get(final int index) {
-      // assert(index >= 0 && index < BITS_PER_PAGE);
-      return (bits[index >>> LOG2_BITS_PER_BYTE] & (1 << (~index & BIT_MAP_INDEX_MASK))) != 0;
-    }
-
-    /**
-     * Sets the value of the specified bit.
-     *
-     * @param index  the index of a bit within the page.
-     * @param flag   the new value of the specified bit.
-     */
-    public void set(final int index, final boolean flag) {
-      // assert(index >= 0 && index < BITS_PER_PAGE);
-      final int byteIndex = index >>> LOG2_BITS_PER_BYTE;
-      final int mask = 1 << (~index & BIT_MAP_INDEX_MASK);
-      synchronized (this) {
-	final boolean current = (bits[byteIndex] & mask) != 0;
-	if ( flag != current ) {
-	  bits[byteIndex] ^= mask;
-	}
-      }
-    }
-
-    /**
-     * Sets a range of bits beginning with the bit at fromIndex and
-     * ending with the bit at toIndex (inclusive).
-     *
-     * @param fromIndex  index of the first bit to set.
-     * @param toIndex    index of the last bit to set.
-     */
-    public void set(final int fromIndex, final int toIndex) {
-      // assert(fromIndex >= 0 && toIndex > fromIndex);
-      final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
-      final int lastByte = toIndex >>> LOG2_BITS_PER_BYTE;
-      final int leftMask = LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK];
-      final int rightMask = RIGHT_MASKS[toIndex & BIT_MAP_INDEX_MASK];
-      synchronized ( this ) {
-	for ( int i = firstByte; i <= lastByte; ++i ) {
-	  if ( i == firstByte ) {
-	    bits[i] |= leftMask;
-	  }
-	  else if ( i == lastByte ) {
-	    bits[i] |= rightMask;
-	  }
-	  else {
-	    bits[i] = (byte) 0x0FF;
-	  }
-	}
-      }
-    }
-
-    /**
-     * Clears a range of bits beginning with the bit at fromIndex and
-     * ending with the bit at toIndex (inclusive).
-     *
-     * @param fromIndex  index of the first bit to clear.
-     * @param toIndex    index of the last bit to clear.
-     */
-    public void clear(final int fromIndex, final int toIndex) {
-      if ( fromIndex >= 0 && toIndex > fromIndex ) {
-	final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
-	final int lastByte = toIndex >>> LOG2_BITS_PER_BYTE;
-	final int leftMask = ~LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK] & 0x0FF;
-	final int rightMask = ~RIGHT_MASKS[toIndex & BIT_MAP_INDEX_MASK] & 0x0FF;
-    	synchronized (this) {
-    	  for ( int i = firstByte; i <= lastByte; ++i ) {
-    	    if ( i == firstByte ) {
-    	      bits[i] &= leftMask;
-    	    }
-    	    else if ( i == lastByte ) {
-    	      bits[i] &= rightMask;
-    	    }
-    	    else {
-    	      bits[i] = 0;
-    	    }
-    	  }
-    	}
-      }
-    }
-
-    /**
-     * Finds the next set bit starting at fromIndex.
-     *
-     * @param fromIndex  the index of the bit to begin searching.
-     * @return the index of the next set bit, or -1 if not found.
-     */
-    public int nextSetBit(final int fromIndex) {
-      boolean run = true;
-      int result = -1;
-      final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
-      final int leftMask = LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK];
-      for ( int i = firstByte; run && i < BIT_MAP_ARRAY_SIZE; ++i ) {
-	final int masked = (i == firstByte ? leftMask : 0xFF) & bits[i];
-	if ( masked != 0 ) {
-	  int mask = 0x80;
-	  for ( int j = 0; j < 8; ++j ) {
-	    if ( (mask & masked) != 0 ) {
-	      result = (i << LOG2_BITS_PER_BYTE) + j;
-	      run = false;
-	      break;
-	    }
-	    mask >>>= 1;
-	  }
-	}
-      }
-      return result;
-    }
-
-    /**
-     * Finds the next clear bit starting at fromIndex.
-     *
-     * @param fromIndex  the index of the bit to begin searching.
-     * @return the index of the next clear bit, or -1 if not found.
-     */
-    public int nextClearBit(final int fromIndex) {
-      boolean run = true;
-      int result = -1;
-      final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
-      final int leftMask = LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK];
-      for ( int i = firstByte; run && i < BIT_MAP_ARRAY_SIZE; ++i ) {
-	final int masked = (i == firstByte ? leftMask : 0xFF) & ~bits[i];
-	if ( masked != 0 ) {
-	  int mask = 0x80;
-	  for ( int j = 0; j < 8; ++j ) {
-	    if ( (mask & masked) != 0 ) {
-	      result = (i << LOG2_BITS_PER_BYTE) + j;
-	      run = false;
-	      break;
-	    }
-	    mask >>>= 1;
-	  }
-	}
-      }
-      return result;
-    }
-
-    /**
-     * Returns a string representation of this page.
-     *
-     * @return a string representation of this page.
-     */
-    @Override
-    public String toString() {
-      return doJoin(Joiner.create(PAGE_BUFFER_SIZE)).toString();
-    }
-
-    /**
-     * Join this object to the specified joiner.
-     *
-     * @param joiner  the joiner to use.
-     * @return the joiner.
-     */
-    @Override
-    public Joiner doJoin(final Joiner joiner) {
-      boolean first = true;
-      joiner.appendRaw(LEFT_BRACKET);
-      for ( final byte b : bits ) {
-	if ( first ) {
-	  first = false;
-	}
-	else {
-	  joiner.appendRaw(PERIOD);
-	}
-	joiner.appendRaw(NIBBLES[(b & 0xF0) >>> 4])
-	      .appendRaw(NIBBLES[b & 0x0F]);
-      }
-      joiner.appendRaw(RIGHT_BRACKET);
-      return joiner;
-    }
-  }
 
   /**
    * Metrics is a public snapshot of the internal metrics.

@@ -18,6 +18,7 @@ import static org.testng.Assert.*;
 /**
  * Test the JSON class.
  */
+@SuppressWarnings("PMD.SystemPrintln")
 public class JSONTest {
   private static final String COSMO = "Cosmo";
 
@@ -136,7 +137,7 @@ public class JSONTest {
     assertNotNull(result);
     JSONPath path = new JSONPath("baz.name.first");
     final String string = result.getString(path);
-    assertTrue(JOHN.equals(string));
+    assertEquals(JOHN, string);
     path = new JSONPath("baz.name");
     final JSON name = result.getJSON(path);
     assertTrue(name instanceof JSON);
@@ -203,7 +204,7 @@ public class JSONTest {
     final double tupie = json.getDouble("tupie");
     assertEquals(tupie, TUPIE);
     final boolean flag = json.getBoolean("flag");
-    assertEquals(flag, true);
+    assertTrue(flag);
     final String zvalue = json.getString("z");
     assertEquals(zvalue, "123");
   }

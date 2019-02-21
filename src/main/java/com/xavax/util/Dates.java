@@ -1,3 +1,8 @@
+//
+// Copyright 2015 by Xavax, Inc. All Rights Reserved.
+// Use of this software is allowed under the Xavax Open Software License.
+// http://www.xavax.com/xosl.html
+//
 package com.xavax.util;
 
 import java.text.SimpleDateFormat;
@@ -10,6 +15,7 @@ import static com.xavax.util.Constants.EMPTY_STRING;
 /**
  * Dates is a utility class for manipulating dates and timestamps.
  */
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class Dates {
   private final static String ISO_TIMESTAMP = "yyyy-MM-dd'T'HH:mm:ss.SSS";
   private final static String ISO_TIMESTAMP_ND = "yyyyMMdd'T'HHmmssSSS";

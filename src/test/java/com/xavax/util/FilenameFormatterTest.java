@@ -38,7 +38,7 @@ public class FilenameFormatterTest {
    * Setup before each test.
    */
   @BeforeMethod
-  public void setup() {
+  public void setUp() {
     final Calendar calendar = Calendar.getInstance();
     calendar.set(1959, 6, 19, 12, 34, 56);
     birthday = calendar.getTime();

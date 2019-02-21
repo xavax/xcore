@@ -18,6 +18,7 @@ import static com.xavax.util.Constants.*;
 /**
  * JSON represents a JSON object as nested hashmaps.
  */
+@SuppressWarnings({ "PMD.GodClass", "PMD.TooManyMethods" })
 public final class JSON extends HashMap<String, Object> {
 
   public final static long serialVersionUID = 0;
@@ -45,6 +46,7 @@ public final class JSON extends HashMap<String, Object> {
    *
    * @param json  the JSON to copy.
    */
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public JSON(final JSON json) {
     for ( final Map.Entry<String, Object> entry : json.entrySet() ) {
       Object object = entry.getValue();
@@ -471,6 +473,7 @@ public final class JSON extends HashMap<String, Object> {
    * @param json  the JSON to merge into this JSON.
    * @return this JSON.
    */
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public JSON merge(final JSON json) {
     for ( final Map.Entry<String, Object> entry : json.entrySet()) {
       final String key = entry.getKey();
@@ -535,6 +538,7 @@ public final class JSON extends HashMap<String, Object> {
    * @param format       the format.
    * @param indentLevel  the initial indentation level.
    */
+  @SuppressWarnings("PMD.LinguisticNaming")
   public void toString(final StringBuilder builder, final Format format,
                        final int indentLevel) {
     int level = indentLevel;

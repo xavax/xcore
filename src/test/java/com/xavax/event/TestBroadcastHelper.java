@@ -25,6 +25,7 @@ public class TestBroadcastHelper  {
   /**
    * Construct a TestBroadcastHelper.
    */
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   public TestBroadcastHelper() {
     for ( int i= 0; i < MAX_OBSERVERS; ++i ) {
       observers[i] = new SampleObserver(broadcaster, i);

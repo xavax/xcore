@@ -28,6 +28,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for CollectionFactory.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class CollectionFactoryTest {
   public final static int INITIAL_CAPACITY = 32;
 

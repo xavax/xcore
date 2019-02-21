@@ -1,3 +1,8 @@
+//
+// Copyright 2017 by Xavax, Inc. All Rights Reserved.
+// Use of this software is allowed under the Xavax Open Software License.
+// http://www.xavax.com/xosl.html
+//
 package com.xavax.util;
 
 import static org.testng.Assert.*;
@@ -8,6 +13,7 @@ import org.testng.annotations.Test;
 /**
  * Test cases for testing the Joiner nesting feature.
  */
+@SuppressWarnings("PMD.SystemPrintln")
 public class JoinerNestingTest {
 
   private final static String FORMAT = "depth: %d, tree: %s";
@@ -114,21 +120,21 @@ public class JoinerNestingTest {
   private final static String EXPECT_TREED = ROOT + LPAREN + EXPECT_NODE8C + RPAREN;
   private final static String EXPECT_TREEE = ROOT + LPAREN + EXPECT_NODE8D + RPAREN;
 
-  private final static TreeNode<Long> NODE1  = new TreeNode<>(new Long(1));
-  private final static TreeNode<Long> NODE3  = new TreeNode<>(new Long(3));
-  private final static TreeNode<Long> NODE2  = new TreeNode<>(new Long(2), NODE1, NODE3);
-  private final static TreeNode<Long> NODE5  = new TreeNode<>(new Long(5));
-  private final static TreeNode<Long> NODE7  = new TreeNode<>(new Long(7));
-  private final static TreeNode<Long> NODE6  = new TreeNode<>(new Long(6), NODE5, NODE7);
-  private final static TreeNode<Long> NODE4  = new TreeNode<>(new Long(4), NODE2, NODE6);
-  private final static TreeNode<Long> NODE9  = new TreeNode<>(new Long(9));
-  private final static TreeNode<Long> NODE11 = new TreeNode<>(new Long(11));
-  private final static TreeNode<Long> NODE10 = new TreeNode<>(new Long(10), NODE9, NODE11);
-  private final static TreeNode<Long> NODE13 = new TreeNode<>(new Long(13));
-  private final static TreeNode<Long> NODE15 = new TreeNode<>(new Long(15));
-  private final static TreeNode<Long> NODE14 = new TreeNode<>(new Long(14), NODE13, NODE15);
-  private final static TreeNode<Long> NODE12 = new TreeNode<>(new Long(12), NODE10, NODE14);
-  private final static TreeNode<Long> NODE8  = new TreeNode<>(new Long(8), NODE4, NODE12);
+  private final static TreeNode<Long> NODE1  = new TreeNode<>(Long.valueOf(1));
+  private final static TreeNode<Long> NODE3  = new TreeNode<>(Long.valueOf(3));
+  private final static TreeNode<Long> NODE2  = new TreeNode<>(Long.valueOf(2), NODE1, NODE3);
+  private final static TreeNode<Long> NODE5  = new TreeNode<>(Long.valueOf(5));
+  private final static TreeNode<Long> NODE7  = new TreeNode<>(Long.valueOf(7));
+  private final static TreeNode<Long> NODE6  = new TreeNode<>(Long.valueOf(6), NODE5, NODE7);
+  private final static TreeNode<Long> NODE4  = new TreeNode<>(Long.valueOf(4), NODE2, NODE6);
+  private final static TreeNode<Long> NODE9  = new TreeNode<>(Long.valueOf(9));
+  private final static TreeNode<Long> NODE11 = new TreeNode<>(Long.valueOf(11));
+  private final static TreeNode<Long> NODE10 = new TreeNode<>(Long.valueOf(10), NODE9, NODE11);
+  private final static TreeNode<Long> NODE13 = new TreeNode<>(Long.valueOf(13));
+  private final static TreeNode<Long> NODE15 = new TreeNode<>(Long.valueOf(15));
+  private final static TreeNode<Long> NODE14 = new TreeNode<>(Long.valueOf(14), NODE13, NODE15);
+  private final static TreeNode<Long> NODE12 = new TreeNode<>(Long.valueOf(12), NODE10, NODE14);
+  private final static TreeNode<Long> NODE8  = new TreeNode<>(Long.valueOf(8), NODE4, NODE12);
   private final static Tree<Long> TREE = new Tree<>(NODE8);
 
   /**

@@ -18,17 +18,18 @@ public class EventQueueTest {
    * Common test setup.
    */
   @BeforeMethod
-  public void setup() {
+  public void setUp() {
     queue = new EventQueue();
   }
 
   /**
    * Add some test events to the queue.
    */
+  @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
   private void addEvents() {
     TimeEvent event = null;
     for ( int type = 0; type < MAX_EVENT_TYPES; ++type ) {
-      final Integer info = new Integer(type);
+      final Integer info = Integer.valueOf(type);
       for ( int count = 0; count < MAX_EVENTS; ++count ) {
 	event = new TimeEvent(type, info);
 	queue.enqueue(event);

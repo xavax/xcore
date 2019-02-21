@@ -18,6 +18,7 @@ import static org.testng.Assert.*;
 /**
  * Test cases for ConcurrentBitSet.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class ConcurrentBitSetTest {
   private final static long TINY_BIT_SET_SIZE = 1 << 10;
   private final static long SMALL_BIT_SET_SIZE = 1 << 20;
@@ -137,6 +138,7 @@ public class ConcurrentBitSetTest {
     showMetrics();
   }
 
+  @SuppressWarnings("PMD.SystemPrintln")
   private void showMetrics() {
     System.out.println("metrics: " + bitSet.getMetrics().toString());
   }

@@ -13,6 +13,7 @@ import com.xavax.util.Joiner;
  * TimeEvent extends BasicEvent by adding a timestamp as well as a
  * general purpose "info" field that can store any object.
  */
+@SuppressWarnings("PMD.DataClass")
 public class TimeEvent extends BasicEvent {
 
   protected long timestamp;

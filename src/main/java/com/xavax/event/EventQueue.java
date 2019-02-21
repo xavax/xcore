@@ -99,13 +99,17 @@ public class EventQueue {
     final Integer key = type;
     ConcurrentLinkedQueue<Event> queue = queueMap.get(key);
     if ( queue == null && create ) {
-      mapLock.lock();
-      queue = queueMap.get(key);
-      if ( queue == null ) {
-	queue = CollectionFactory.concurrentLinkedQueue();
-	queueMap.put(key, queue);
+      try {
+	mapLock.lock();
+	queue = queueMap.get(key);
+	if ( queue == null ) {
+	  queue = CollectionFactory.concurrentLinkedQueue();
+	  queueMap.put(key, queue);
+	}
       }
-      mapLock.unlock();
+      finally {
+	mapLock.unlock();
+      }
     }
     return queue;
   }

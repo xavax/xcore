@@ -14,6 +14,7 @@ import static org.testng.Assert.*;
  * Test cases for the Octets utility class.
  */
 public class OctetsTest {
+  @SuppressWarnings("PMD.AvoidUsingHardCodedIP")
   final static String EXPECTED = "01:23:45:67:89:AB:CD:EF";
   final static String ESCAPED = "01%3A23%3A45%3A67%3A89%3AAB%3ACD%3AEF";
   final static long VALUE = 0x0123456789ABCDEFL;

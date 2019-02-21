@@ -18,6 +18,7 @@ import static com.xavax.util.Constants.*;
  *
  * @author alvitar@xavax.com
  */
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public final class XLogger {
   public final static int DEFAULT_LENGTH = 128;
   public final static int EXTRA_LENGTH = 64;

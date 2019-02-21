@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
  *
  * @author alvitar@xavax.com
  */
+@SuppressWarnings("PMD.AccessorMethodGeneration")
 public class XObjectTest extends XObject {
   private final static String FORMAT = "p1=[%s], p2=[%d] p3=[%f]";
   private final static String PARAM1 = "param1";
@@ -34,7 +35,7 @@ public class XObjectTest extends XObject {
    * Common set up for all test cases.
    */
   @BeforeMethod
-  public void setup() {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
 

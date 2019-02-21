@@ -19,11 +19,14 @@ import static com.xavax.util.Constants.*;
 /**
  * JSONParser is a parser for strings in JSON format.
  */
-@SuppressWarnings({ "PMD.CyclomaticComplexity",
-    	            "PMD.ModifiedCyclomaticComplexity",
-    	            "PMD.StdCyclomaticComplexity" })
+@SuppressWarnings({
+  "PMD.CyclomaticComplexity",
+  "PMD.GodClass",
+  "PMD.ModifiedCyclomaticComplexity",
+  "PMD.StdCyclomaticComplexity",
+  "PMD.TooManyMethods"
+})
 public class JSONParser {
-  private final static char ZERO = '0';
   private final static String ERROR_FORMAT = "%s: error at line %d position %d - %s";
   private final static String EXPECTED_FORMAT1 = "expected [%c] but received [%c]";
   private final static String EXPECTED_FORMAT2 = "expected [%c] or [%c] but received [%c]";
@@ -38,7 +41,7 @@ public class JSONParser {
   private final static String UNEXPECTED_CHARACTERS = "unexpected characters after closing brace";
   private final static String UNEXPECTED_END_OF_INPUT = "unexpected end of input";
   private final static String UNICODE_ESCAPE_SEQUENCE = "Unicode escape sequence";
-  private final static String UNMATCHED_BRACKETS = "unmatched braces or brackets";
+  private final static String UNMATCHED_BRACES_OR_BRACKETS = "unmatched braces or brackets";
   private final static String VALUE = "value";
 
   /**
@@ -194,7 +197,7 @@ public class JSONParser {
 	parseArrayItems(list);
       }
       if ( level != 0 ) {
-	addError(UNMATCHED_BRACKETS);
+	addError(UNMATCHED_BRACES_OR_BRACKETS);
       }
     }
     catch (UnexpectedEndOfInputException e) {
@@ -618,6 +621,7 @@ public class JSONParser {
     return cursor < length || readNextLine();
   }
 
+  @SuppressWarnings("PMD.EmptyCatchBlock")
   private boolean readNextLine() {
     boolean result = false;
     try {
@@ -705,6 +709,7 @@ public class JSONParser {
     addError(cursor - 1, msg);
   }
 
+  @SuppressWarnings("PMD.SystemPrintln")
   private void addError(final int mark, final String message) {
     final StringBuilder builder = new StringBuilder(DEFAULT_BUFFER_SIZE);
 
@@ -846,14 +851,14 @@ public class JSONParser {
    * end of input (end of file).
    */
   public final static class UnexpectedEndOfInputException extends RuntimeException {
-    private static final String CLASSNAME = "UnexpectedEndOfInput";
+    private static final String UNEXPECTED_EOI_CLASS = "UnexpectedEndOfInput";
     public final static long serialVersionUID = 0;
 
     /**
      * Construct an EndOfInputException.
      */
     public UnexpectedEndOfInputException() {
-      super(CLASSNAME);
+      super(UNEXPECTED_EOI_CLASS);
     }
   }
 

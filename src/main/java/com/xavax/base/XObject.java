@@ -18,6 +18,7 @@ import static com.xavax.util.Constants.*;
  * XObject (eXtended Object) is a base class for objects that
  * use a Logger to trace program flow.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class XObject {
 
   protected String prefix;
@@ -405,8 +406,8 @@ public class XObject {
   private void format(final StringBuilder builder, final String method,
                       final String message)
   {
-    builder.append(method == null ? XLogger.UNKNOWN : method);
-    builder.append(": ");
+    builder.append(method == null ? XLogger.UNKNOWN : method)
+    	   .append(": ");
     if ( message != null ) {
       builder.append(message);
     }

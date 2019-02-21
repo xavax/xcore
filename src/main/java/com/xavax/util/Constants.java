@@ -5,6 +5,7 @@ package com.xavax.util;
  */
 @SuppressWarnings("PMD.ClassNamingConventions")
 public final class Constants {
+  public final static char BACK_QUOTE = '`';
   public final static char BACKSLASH = '\\';
   public final static char BACKSPACE = '\b';
   public final static char CARET = '^';
@@ -14,6 +15,7 @@ public final class Constants {
   public final static char DOLLAR = '$';
   public final static char DOUBLE_QUOTE = '"';
   public final static char FORMFEED = '\f';
+  public final static char LEFT_ANGLE = '<';
   public final static char LEFT_BRACE = '{';
   public final static char LEFT_BRACKET = '[';
   public final static char LEFT_PAREN = '(';
@@ -22,13 +24,16 @@ public final class Constants {
   public final static char NULL_CHARACTER = '\0';
   public final static char PERIOD = '.';
   public final static char PLUS = '+';
-  public final static char SINGLE_QUOTE = '\'';
-  public final static char SPACE = ' ';
-  public final static char TAB = '\t';
+  public final static char RIGHT_ANGLE = '>';
   public final static char RIGHT_BRACE = '}';
   public final static char RIGHT_BRACKET = ']';
   public final static char RIGHT_PAREN = ')';
+  public final static char SINGLE_QUOTE = '\'';
+  public final static char SLASH = '/';
+  public final static char SPACE = ' ';
+  public final static char TAB = '\t';
   public final static char UNDERSCORE = '_';
+  public final static char ZERO = '0';
 
   public final static String ELLIPSIS = "...";
   public final static String EMPTY_STRING = "";

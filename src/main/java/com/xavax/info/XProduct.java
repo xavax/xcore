@@ -5,6 +5,8 @@
 //
 package com.xavax.info;
 
+import static com.xavax.util.Constants.*;
+
 /**
  * XProduct encapsulates information about a product including the product name,
  * version, and copyright statement. The copyright statement can be customized
@@ -48,10 +50,10 @@ public class XProduct {
     this.major = major;
     this.minor = minor;
     this.patch = patch;
-    this.version = null;
+    this.version = EMPTY_STRING;
     this.copyrightBegin = copyrightBegin;
     this.copyrightEnd = copyrightEnd;
-    this.copyright = null;
+    this.copyright = EMPTY_STRING;
     this.template = copyright == null ? DEFAULT_COPYRIGHT : copyright;
   }
 

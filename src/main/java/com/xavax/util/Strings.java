@@ -13,6 +13,7 @@ import static com.xavax.util.Constants.EMPTY_STRING;
 /**
  * Useful String utilities.
  */
+@SuppressWarnings("PMD.ClassNamingConventions")
 public final class Strings {
   private final static int DEFAULT_BUFFER_SIZE = 256;
   private final static StringComparator COMPARATOR = new StringComparator();
@@ -120,6 +121,7 @@ public final class Strings {
      * Returns true if string1 equals string2.
      */
     @Override
+    @SuppressWarnings("PMD.UselessParentheses")
     public int compare(final String string1, final String string2) {
       return string1 == null ? (string2 == null ? 0 : -1) : string1.compareTo(string2);
     }
