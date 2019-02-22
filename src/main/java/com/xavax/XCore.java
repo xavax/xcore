@@ -13,7 +13,7 @@ import com.xavax.info.XProduct;
  */
 public final class XCore extends XProduct {
   private final static XCore PRODUCT =
-      new XCore("XCore", 1, 1, 0, 2004, 2017, null);
+      new XCore("XCore", 1, 1, 3, 2004, 2019, null);
 
   /**
    * Construct an XCore.
