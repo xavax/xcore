@@ -43,4 +43,6 @@ public final class Constants {
   public final static String NULL_INDICATOR = "<null>";
   public final static String COLON_SEPARATOR = ": ";
   public final static String COMMA_SEPARATOR = ", ";
+
+  public final static Object[] EMPTY_ARGS = new Object[0];
 }

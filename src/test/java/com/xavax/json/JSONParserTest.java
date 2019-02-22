@@ -176,12 +176,12 @@ public class JSONParserTest {
   public void testAbortOnError() {
     JSON result = parser.parse(INPUT2J);
     assertNotNull(result);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 3);
     parser.abortOnError(true);
     result = parser.parse(INPUT2J);
     assertNotNull(result);
-    assertTrue(!parser.isValid());
+    assertFalse(parser.isValid());
     assertEquals(parser.getErrors().size(), 1);
   }
 
@@ -297,7 +297,7 @@ public class JSONParserTest {
     jarray = parser.parseArray(INPUT9C);
     assertNotNull(jarray);
     assertEquals(jarray.size(), 3);
-    assertEquals(jarray.get(2), new Long(789));
+    assertEquals(jarray.get(2), Long.valueOf(789));
     parser.allowCompoundIdentifiers(true);
     final JSONArray result3 = parser.parseArray(INPUT13);
     assertNotNull(result3);

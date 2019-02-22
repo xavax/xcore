@@ -6,12 +6,13 @@
 
 package com.xavax.exception;
 
+import static com.xavax.message.XMessage.OUT_OF_RANGE;
+
 /**
  * RangeException is thrown when an unsupported integer value is detected.
  */
-public class RangeException extends RuntimeException {
+public class RangeException extends XRuntimeException {
   private final static long serialVersionUID = 1L;
-  private final static String FORMAT = "value %d is not within the range %d and %d";
 
   private final long min;
   private final long max;
@@ -20,15 +21,15 @@ public class RangeException extends RuntimeException {
   /**
    * Construct a range exception.
    *
-   * @param min the minimum supported value.
-   * @param max the maximum supported value.
-   * @param attempted the attempted value that is out of range.
+   * @param min    the minimum supported value.
+   * @param max    the maximum supported value.
+   * @param value  the attempted value that is out of range.
    */
-  public RangeException(final long min, final long max, final long attempted) {
-    super(String.format(FORMAT, attempted, min, max));
+  public RangeException(final long min, final long max, final long value) {
+    super(OUT_OF_RANGE, value, min, max);
     this.min = min;
     this.max = max;
-    this.attempted = attempted;
+    this.attempted = value;
   }
 
   /**

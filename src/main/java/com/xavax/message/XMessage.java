@@ -1,10 +1,13 @@
-package com.xavax;
+package com.xavax.message;
 
 /**
  * Message catalog for XCore.
  */
 public enum XMessage {
-  TEST("test message.");
+  INVALID_MODIFICATION("Attempted to modify a read-only object of type %s."),
+  OUT_OF_RANGE("value %d is not within the range %d and %d"),
+  TEST("test message."),
+  UNEXPECTED_EXCEPTION("Unexpected exception: %s");
 
   private final String message;
 
