@@ -28,7 +28,7 @@ public class ConcurrentBitSetTest {
   private final static int RANDOM_BOUNDS = 4000000;
   private final static int RANDOM_COUNT = 1000000;
   private final static String EXPECTED =
-      "currentMapSize: 16, logSegmentSize: 16, segmentMap: [(segment: (pageCount: 2, map: [([11111111.";
+      "currentMapSize: 16, logSegmentSize: 16, segmentMap: [{segment: {{pageCount: 2, pages: [{[11111111.";
 
   private ConcurrentBitSet bitSet;
 

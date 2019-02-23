@@ -22,7 +22,7 @@ import static com.xavax.concurrent.ConcurrentBitSetConstants.*;
 public class SegmentMapEntryTest {
   private final static int DEFAULT_SIZE = LOG2_DEFAULT_SEGMENT_SIZE;
   private final static String EXPECTED1 = "segment: <null>";
-  private final static String EXPECTED2 = "segment: (pageCount: 0, map: [<null>,";
+  private final static String EXPECTED2 = "segment: {pageCount: 0, pages: [<null>,";
   private ConcurrentBitSet bitSet;
   private SegmentMapEntry entry;
 
@@ -40,12 +40,12 @@ public class SegmentMapEntryTest {
    */
   @Test
   public void testSet() {
-    BitMapSegment segment = entry.get();
+    BitSetSegment segment = entry.get();
     assertNull(segment);
     entry.set(null);
     segment = entry.get();
     assertNull(segment);
-    final BitMapSegment segment2 = new BitMapSegment(bitSet, DEFAULT_SIZE);
+    final BitSetSegment segment2 = new BitSetSegment(bitSet, DEFAULT_SIZE);
     entry.set(segment2);
     segment = entry.get();
     assertEquals(segment, segment2);
@@ -59,7 +59,7 @@ public class SegmentMapEntryTest {
   public void testToString() {
     String result = entry.toString();
     assertEquals(result, EXPECTED1);
-    final BitMapSegment segment = new BitMapSegment(bitSet, LOG2_DEFAULT_SEGMENT_SIZE);
+    final BitSetSegment segment = new BitSetSegment(bitSet, LOG2_DEFAULT_SEGMENT_SIZE);
     entry.set(segment);
     result = entry.toString();
     assertEquals(result.substring(0, EXPECTED2.length()), EXPECTED2);

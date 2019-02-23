@@ -11,12 +11,12 @@ import com.xavax.util.Joiner;
  * Segment encapsulates a fixed-size segment of the bit set. Segment sizes are
  * always a power of 2 to simplify calculations.
  */
-class BitMapSegment extends AbstractJoinableObject implements Joinable {
+class BitSetSegment extends AbstractJoinableObject implements Joinable {
   final static int BIT_INDEX_MASK = (1 << LOG2_BITS_PER_PAGE) - 1;
   final static int SEGMENT_BUFFER_SIZE = 8192;
 
   private int pageCount;
-  private final BitSetPage[] map;
+  private final BitSetPage[] pages;
   private final ConcurrentBitSet parent;
 
   /**
@@ -28,10 +28,10 @@ class BitMapSegment extends AbstractJoinableObject implements Joinable {
    * @param parent  the parent of this segment.
    * @param logSize log2 of the size of the bitmap.
    */
-  public BitMapSegment(final ConcurrentBitSet parent, final int logSize) {
+  public BitSetSegment(final ConcurrentBitSet parent, final int logSize) {
     this.parent = parent;
     final int size = 1 << (logSize - LOG2_BITS_PER_PAGE);
-    map = new BitSetPage[size];
+    pages = new BitSetPage[size];
   }
 
   /**
@@ -123,8 +123,8 @@ class BitMapSegment extends AbstractJoinableObject implements Joinable {
     int result = -1;
     int bitIndex = fromIndex & BIT_INDEX_MASK;
     int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-    for ( ; pageIndex < map.length; ++pageIndex ) {
-	final BitSetPage page = map[pageIndex];
+    for ( ; pageIndex < pages.length; ++pageIndex ) {
+	final BitSetPage page = pages[pageIndex];
 	if ( page != null ) {
 	  final int index = page.nextSetBit(bitIndex);
 	  if ( index >= 0 ) {
@@ -150,8 +150,8 @@ class BitMapSegment extends AbstractJoinableObject implements Joinable {
     int result = -1;
     int bitIndex = fromIndex & BIT_INDEX_MASK;
     int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-    for ( ; pageIndex < map.length; ++pageIndex ) {
-	final BitSetPage page = map[pageIndex];
+    for ( ; pageIndex < pages.length; ++pageIndex ) {
+	final BitSetPage page = pages[pageIndex];
 	if ( page == null ) {
 	  result = 0;
 	  break;
@@ -199,7 +199,7 @@ class BitMapSegment extends AbstractJoinableObject implements Joinable {
   @Override
   public Joiner doJoin(final Joiner joiner) {
     joiner.append("pageCount", pageCount)
-          .append("map", (Object) map);
+          .append("pages", (Object[]) pages);
     return joiner;
   }
 
@@ -226,7 +226,7 @@ class BitMapSegment extends AbstractJoinableObject implements Joinable {
    * @return the page at the specified index.
    */
   BitSetPage getPage(final int mapIndex, final boolean require) {
-    BitSetPage page = map[mapIndex];
+    BitSetPage page = pages[mapIndex];
     if ( page == null && require ) {
 	page = createPage(mapIndex);
     }
@@ -241,11 +241,11 @@ class BitMapSegment extends AbstractJoinableObject implements Joinable {
    */
   BitSetPage createPage(final int mapIndex) {
     BitSetPage page = null;
-    synchronized ( map ) {
-      page = map[mapIndex];
+    synchronized ( pages ) {
+      page = pages[mapIndex];
       if ( page == null ) {
         page = new BitSetPage();
-        map[mapIndex] = page;
+        pages[mapIndex] = page;
         ++pageCount;
         parent.metrics.pageCreated();
       }

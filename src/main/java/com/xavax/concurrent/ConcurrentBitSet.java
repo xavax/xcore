@@ -117,7 +117,7 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
       throw new RangeException(0, Long.MAX_VALUE, index);
     }
     metrics.incrementOperations();
-    final BitMapSegment segment = getSegment(index, false);
+    final BitSetSegment segment = getSegment(index, false);
     return segment != null && segment.get((int) (index & segmentMask));
   }
 
@@ -132,7 +132,7 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
       throw new RangeException(0, Long.MAX_VALUE, index);
     }
     metrics.incrementOperations();
-    final BitMapSegment segment = getSegment(index, value);
+    final BitSetSegment segment = getSegment(index, value);
     if ( segment != null ) {
       segment.set((int) (index & segmentMask), value);
     }
@@ -218,18 +218,18 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
    * @param require  true if a nonexistent segment should be created.
    * @return the segment containing the specified bit.
    */
-  BitMapSegment getSegment(final long index, final boolean require) {
+  BitSetSegment getSegment(final long index, final boolean require) {
     final int segmentIndex = (int) index >>> logSegmentSize;
     if ( segmentIndex > currentMapSize ) {
       resize(segmentIndex);
     }
     final SegmentMapEntry entry = segmentMap[segmentIndex];
-    BitMapSegment segment = entry.get();
+    BitSetSegment segment = entry.get();
     if ( segment == null && require ) {
       synchronized ( entry ) {
 	segment = entry.get();
 	if ( segment == null ) {
-	  segment = new BitMapSegment(this, logSegmentSize);
+	  segment = new BitSetSegment(this, logSegmentSize);
 	  entry.set(segment);
 	  metrics.segmentCreated();
 	}
@@ -301,15 +301,15 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
   static class SegmentMapEntry extends AbstractJoinableObject implements Joinable {
     final static int SEGMAP_BUFFER_SIZE = 8192;
 
-    private BitMapSegment segment;
+    private BitSetSegment segment;
 
     /**
      * Get the segment for this map entry.
      *
      * @return the segment.
      */
-    public BitMapSegment get() {
-      BitMapSegment result;
+    public BitSetSegment get() {
+      BitSetSegment result;
       synchronized (this) {
 	result = this.segment;
       }
@@ -321,7 +321,7 @@ public class ConcurrentBitSet extends AbstractJoinableObject implements Joinable
      *
      * @param segment the new segment for this map entry.
      */
-    public void set(final BitMapSegment segment) {
+    public void set(final BitSetSegment segment) {
       synchronized (this) {
 	this.segment = segment;
       }

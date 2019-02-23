@@ -543,9 +543,9 @@ public class Joiner {
     if ( maxDepth == 0 || depth <= maxDepth ) {
       ++depth;
       tracker.push(null);
-      beginObject(null);
+      // beginObject(null);
       object.join(this);
-      endObject();
+      // endObject();
       tracker.pop();
       --depth;
     }

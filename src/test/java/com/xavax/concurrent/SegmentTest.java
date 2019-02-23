@@ -18,16 +18,16 @@ import static com.xavax.concurrent.ConcurrentBitSetConstants.*;
 public class SegmentTest {
   private final static int MAX_BIT_INDEX = 1 << LOG2_DEFAULT_SEGMENT_SIZE;
   private final static int MAX_ENTRY_INDEX = 1 << (LOG2_DEFAULT_SEGMENT_SIZE - LOG2_BITS_PER_PAGE);
-  private final static String EXPECTED = "pageCount: 0, map: [<null>, <null>,";
+  private final static String EXPECTED = "pageCount: 0, pages: [<null>, <null>,";
 
-  private BitMapSegment segment;
+  private BitSetSegment segment;
 
   /**
    * Set up performed before each test.
    */
   @BeforeMethod
   public void setUp() {
-    segment = new BitMapSegment(new ConcurrentBitSet(), LOG2_DEFAULT_SEGMENT_SIZE);
+    segment = new BitSetSegment(new ConcurrentBitSet(), LOG2_DEFAULT_SEGMENT_SIZE);
   }
 
   /**
