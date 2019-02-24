@@ -54,10 +54,10 @@ public class JoinerTest {
       STATE_FIELD + SEPARATOR3 + GEORGIA + SEPARATOR +
       POSTAL_CODE_FIELD + SEPARATOR3 + ZIP1;
   private final static String EXPECT1C =
-      STREET_FIELD + SEPARATOR3 + QUOTE + STREET1 + QUOTE + SEPARATOR +
+      LBRACE + STREET_FIELD + SEPARATOR3 + QUOTE + STREET1 + QUOTE + SEPARATOR +
       CITY_FIELD + SEPARATOR3 + QUOTE + ATL + QUOTE + SEPARATOR +
       STATE_FIELD + SEPARATOR3 + QUOTE + GEORGIA + QUOTE + SEPARATOR +
-      POSTAL_CODE_FIELD + SEPARATOR3 + QUOTE + ZIP1 + QUOTE;
+      POSTAL_CODE_FIELD + SEPARATOR3 + QUOTE + ZIP1 + QUOTE + RBRACE;
   private final static String EXPECT1D =
       QUOTE + STREET_FIELD + QUOTE + SEPARATOR3 + QUOTE + STREET1 + QUOTE + SEPARATOR +
       QUOTE + CITY_FIELD + QUOTE + SEPARATOR3 + QUOTE + ATL + QUOTE + SEPARATOR +
@@ -93,9 +93,9 @@ public class JoinerTest {
       SEPARATOR + 0 + SEPARATOR + LBRACE + RBRACE + RBRACE;
   private final static String EXPECT8 = LBRACE + "0" + SEPARATOR + LBRACE + RBRACE + RBRACE;
   private final static String EXPECT9 =
-      "true, x, 127, 123, 456, 789, false, z, 127, 123, 456, 789";
+      "{true, x, 127, 123, 456, 789, false, z, 127, 123, 456, 789}";
   private final static String EXPECT10 =
-      "true, x, 0, 0, 0, 0, <null>, <null>, <null>, <null>, <null>, <null>";
+      "{true, x, 0, 0, 0, 0, <null>, <null>, <null>, <null>, <null>, <null>}";
   private final static String EXPECT11 = "{true, x, 0, 0, 0, 0}";
   private final static String EXPECT12A = FIELD_NAME + SEPARATOR3 + LAST_NAME;
   private final static String EXPECT12B = QUOTE + FIELD_NAME + QUOTE + SEPARATOR3 + LAST_NAME;

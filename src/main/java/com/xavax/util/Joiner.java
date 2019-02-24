@@ -543,9 +543,7 @@ public class Joiner {
     if ( maxDepth == 0 || depth <= maxDepth ) {
       ++depth;
       tracker.push(null);
-      // beginObject(null);
       object.join(this);
-      // endObject();
       tracker.pop();
       --depth;
     }
@@ -635,15 +633,7 @@ public class Joiner {
   public void appendItem(final Object object) {
     if ( check(null, object) ) {
       tracker.addSeparator();
-      if ( object instanceof String ) {
-	appendString((String) object);
-      }
-      else if ( object instanceof Joinable ) {
-	nest((Joinable) object);
-      }
-      else {
-	builder.append(object.toString());
-      }
+      appendValue(object);
       tracker.setFlag();
     }
   }
@@ -698,7 +688,9 @@ public class Joiner {
   }
 
   /**
-   * Append a map entry value.
+   * Append an array or list item or a map entry value. If the
+   * value is null, display the null indicator. Depending on the
+   * type of the value, wrap it as an object.
    *
    * @param object  the value to append.
    */
@@ -706,14 +698,30 @@ public class Joiner {
     if ( object == null ) {
       builder.append(format.getNullIndicator());
     }
-    else if ( object instanceof String ) {
-      appendString((String) object);
+    else if ( object instanceof String
+	  || object instanceof Boolean
+	  || object instanceof Number ) {
+	// Do not wrap Boolean, Number, and String.
+	appendString(object.toString());
     }
     else if ( object instanceof Joinable ) {
-      nest((Joinable) object);
+	// Joinable objects should wrap themselves.
+	nest((Joinable) object);
+    }
+    else if ( object instanceof Object[] ) {
+      append((Object[]) object);
+    }
+    else if ( object instanceof Collection<?> ) {
+      append((Collection<?>) object);
+    }
+    else if ( object instanceof Map<?,?> ) {
+      append((Map<?,?>) object);
     }
     else {
-      builder.append(object.toString());
+	// Wrap these unknown objects.
+	builder.append(format.getObjectOpenCharacter())
+	       .append(object.toString())
+	       .append(format.getObjectCloseCharacter());
     }
   }
 

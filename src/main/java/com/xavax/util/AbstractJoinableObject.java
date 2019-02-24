@@ -18,8 +18,7 @@ abstract public class AbstractJoinableObject implements Joinable {
    */
   @Override
   public String toString() {
-    final Joiner joiner = Joiner.create(DEFAULT_BUFFER_SIZE).beginObject(null);
-    return doJoin(joiner).endObject().toString();
+    return join(null).toString();
   }
 
   /**
@@ -30,7 +29,8 @@ abstract public class AbstractJoinableObject implements Joinable {
    */
   @Override
   public Joiner join(final Joiner joiner) {
-    return doJoin(joiner == null ? new Joiner(DEFAULT_BUFFER_SIZE) : joiner);
+    return doJoin((joiner == null ? new Joiner(DEFAULT_BUFFER_SIZE) : joiner)
+	.beginObject(null)).endObject();
   }
 
   /**
