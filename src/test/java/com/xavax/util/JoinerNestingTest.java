@@ -64,78 +64,64 @@ public class JoinerNestingTest {
       LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
   private final static String EDGE_NODE =
       LBRACE + VALUE_ELLIPSIS + SEPARATOR + NO_CHILDREN;
-
+  private final static String SUPPRESSED_NODE =
+      LBRACE + VALUE_ELLIPSIS + SEPARATOR + NODE_ELLIPSIS + RBRACE;
 
   private final static String EXPECT_NODE1A =
       LBRACE + VALUE + V01 + SEPARATOR + NO_CHILDREN;
-  private final static String EXPECT_NODE1B = EDGE_NODE;
   private final static String EXPECT_NODE3A =
       LBRACE + VALUE + V03 + SEPARATOR +
       LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
-  private final static String EXPECT_NODE3B = EDGE_NODE;
   private final static String EXPECT_NODE2A = 
       LBRACE + VALUE + V02 + SEPARATOR +
       LEFT + EXPECT_NODE1A + SEPARATOR + RIGHT + EXPECT_NODE3A + RBRACE;
   private final static String EXPECT_NODE2B = 
-      LBRACE + VALUE_ELLIPSIS + SEPARATOR +
-      LEFT + EXPECT_NODE1B + SEPARATOR + RIGHT + EXPECT_NODE3B + RBRACE;
-  private final static String EXPECT_NODE2C =
-      LBRACE + VALUE + V02 + SEPARATOR + NODE_ELLIPSIS + RBRACE;
+      LBRACE + VALUE + V02 + SEPARATOR +
+      LEFT + EDGE_NODE + SEPARATOR + RIGHT + EDGE_NODE + RBRACE;
 
   private final static String EXPECT_NODE5A =
-      LBRACE + VALUE + V05 + SEPARATOR +
-      LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
-  private final static String EXPECT_NODE5B =
-      LBRACE + VALUE_ELLIPSIS + SEPARATOR +
-      LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
+      LBRACE + VALUE + V05 + SEPARATOR + NO_CHILDREN;
   private final static String EXPECT_NODE7A =
-      LBRACE + VALUE + V07 + SEPARATOR +
-      LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
-  private final static String EXPECT_NODE7B =
-      LBRACE + VALUE_ELLIPSIS + SEPARATOR +
-      LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
+      LBRACE + VALUE + V07 + SEPARATOR + NO_CHILDREN;
   private final static String EXPECT_NODE6A =
       LBRACE + VALUE + V06 + SEPARATOR +
       LEFT + EXPECT_NODE5A + SEPARATOR + RIGHT + EXPECT_NODE7A + RBRACE;
   private final static String EXPECT_NODE6B =
       LBRACE + VALUE + V06 + SEPARATOR +
-      LEFT + EXPECT_NODE5B + SEPARATOR + RIGHT + EXPECT_NODE7B + RBRACE;
-  private final static String EXPECT_NODE6C =
-      LBRACE + VALUE + V06 + SEPARATOR + NODE_ELLIPSIS + RBRACE;
-
+      LEFT + EDGE_NODE + SEPARATOR + RIGHT + EDGE_NODE + RBRACE;
+      
   private final static String EXPECT_NODE4A =
       LBRACE + VALUE + V04 + SEPARATOR +
       LEFT + EXPECT_NODE2A + SEPARATOR + RIGHT + EXPECT_NODE6A + RBRACE;
   private final static String EXPECT_NODE4B =
       LBRACE + VALUE + V04 + SEPARATOR +
-      LEFT + LBRACE + EXPECT_NODE2B + RBRACE + SEPARATOR +
-      RIGHT + LBRACE + EXPECT_NODE6B + RBRACE + RBRACE;
+      LEFT + EXPECT_NODE2B + SEPARATOR +
+      RIGHT + EXPECT_NODE6B + RBRACE;
   private final static String EXPECT_NODE4C =
-      LBRACE + VALUE + V04 + SEPARATOR + NODE_ELLIPSIS + RBRACE;
+      LBRACE + VALUE + V04 + SEPARATOR +
+      LEFT + SUPPRESSED_NODE + SEPARATOR + RIGHT + SUPPRESSED_NODE + RBRACE;
 
   private final static String EXPECT_NODE9A =
-      LBRACE + VALUE + V09 + SEPARATOR +
-      LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
+      LBRACE + VALUE + V09 + SEPARATOR + NO_CHILDREN;
   private final static String EXPECT_NODE11A =
-      LBRACE + VALUE + V11 + SEPARATOR +
-      LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
+      LBRACE + VALUE + V11 + SEPARATOR + NO_CHILDREN;
   private final static String EXPECT_NODE10A = 
       LBRACE + VALUE + V10 + SEPARATOR +
       LEFT + EXPECT_NODE9A + SEPARATOR + RIGHT + EXPECT_NODE11A + RBRACE;
   private final static String EXPECT_NODE10B =
-      LBRACE + VALUE + V10 + SEPARATOR + NODE_ELLIPSIS + RBRACE;
+      LBRACE + VALUE + V10 + SEPARATOR +
+      LEFT + EDGE_NODE + SEPARATOR + RIGHT + EDGE_NODE + RBRACE;
 
   private final static String EXPECT_NODE13A =
-      LBRACE + VALUE + V13 + SEPARATOR +
-      LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
+      LBRACE + VALUE + V13 + SEPARATOR + NO_CHILDREN;
   private final static String EXPECT_NODE15A =
-      LBRACE + VALUE + V15 + SEPARATOR +
-      LEFT + INDICATOR + SEPARATOR + RIGHT + INDICATOR + RBRACE;
+      LBRACE + VALUE + V15 + SEPARATOR + NO_CHILDREN;
   private final static String EXPECT_NODE14A = 
       LBRACE + VALUE + V14 + SEPARATOR +
       LEFT + EXPECT_NODE13A + SEPARATOR + RIGHT + EXPECT_NODE15A + RBRACE;
   private final static String EXPECT_NODE14B =
-      LBRACE + VALUE + V14 + SEPARATOR + NODE_ELLIPSIS + RBRACE;
+      LBRACE + VALUE + V14 + SEPARATOR +
+      LEFT + EDGE_NODE + SEPARATOR + RIGHT + EDGE_NODE + RBRACE;
 
   private final static String EXPECT_NODE12A =
       LBRACE + VALUE + V12 + SEPARATOR +
@@ -145,7 +131,8 @@ public class JoinerNestingTest {
       LEFT + EXPECT_NODE10B + SEPARATOR +
       RIGHT + EXPECT_NODE14B + RBRACE;
   private final static String EXPECT_NODE12C =
-      LBRACE + VALUE + V12 + SEPARATOR + NODE_ELLIPSIS + RBRACE;
+      LBRACE + VALUE + V12 + SEPARATOR +
+      LEFT + SUPPRESSED_NODE + SEPARATOR + RIGHT + SUPPRESSED_NODE + RBRACE;
 
   private final static String EXPECT_NODE8A =
       LBRACE + VALUE + V08 + SEPARATOR +
@@ -160,18 +147,16 @@ public class JoinerNestingTest {
       LEFT + EXPECT_NODE4C + SEPARATOR +
       RIGHT + EXPECT_NODE12C + RBRACE;
   private final static String EXPECT_NODE8D =
-      LBRACE + VALUE_ELLIPSIS + SEPARATOR +
-      LEFT + EXPECT_NODE4C + SEPARATOR +
-      RIGHT + EXPECT_NODE12C + RBRACE;
-  private final static String EXPECT_NODE8E =
-      VALUE + V08 + SEPARATOR + NODE_ELLIPSIS + RBRACE;
+      LBRACE + VALUE + V08 + SEPARATOR +
+      LEFT + SUPPRESSED_NODE + SEPARATOR + RIGHT + SUPPRESSED_NODE + RBRACE;
 
-  private final static String EXPECT_TREE  = LBRACE + ROOT + EXPECT_NODE8A + RBRACE;
-  private final static String EXPECT_TREEA = ROOT + EXPECT_NODE8A;
-  private final static String EXPECT_TREEB = ROOT + EXPECT_NODE8B;
-  private final static String EXPECT_TREEC = ROOT + EXPECT_NODE8C;
-  private final static String EXPECT_TREED = ROOT + EXPECT_NODE8D;
-  private final static String EXPECT_TREEE = ROOT + LBRACE + ELLIPSIS + RBRACE;
+  private final static String EXPECT_TREE   = LBRACE + ROOT + EXPECT_NODE8A + RBRACE;
+  private final static String EXPECT_TREE_A = ROOT + EXPECT_NODE8A;
+  private final static String EXPECT_TREE_B = ROOT + EXPECT_NODE8B;
+  private final static String EXPECT_TREE_C = ROOT + EXPECT_NODE8C;
+  private final static String EXPECT_TREE_D = ROOT + EXPECT_NODE8D;
+  private final static String EXPECT_TREE_E = ROOT + SUPPRESSED_NODE;
+  private final static String EXPECT_TREE_F = ROOT + LBRACE + ELLIPSIS + RBRACE;
 
   /**
    * Test max depth..
@@ -221,41 +206,48 @@ public class JoinerNestingTest {
 		   .append(TREE)
 		   .toString();
     System.out.println(String.format(FORMAT, 6, output));
-    assertEquals(output, EXPECT_TREEA);
+    assertEquals(output, EXPECT_TREE_A);
 
     output = Joiner.create()
 	   	   .withMaxDepth(5)
 	   	   .append(TREE)
 	   	   .toString();
     System.out.println(String.format(FORMAT, 5, output));
-    assertEquals(output, EXPECT_TREEB); 
+    assertEquals(output, EXPECT_TREE_B); 
  
     output = Joiner.create()
-	   	   .withMaxDepth(3)
+	   	   .withMaxDepth(4)
 	   	   .append(TREE)
 	   	   .toString();
+    System.out.println(String.format(FORMAT, 4, output));
+    assertEquals(output, EXPECT_TREE_C);
+
+    output = Joiner.create()
+		   .withMaxDepth(3)
+		   .append(TREE)
+		   .toString();
     System.out.println(String.format(FORMAT, 3, output));
-    assertEquals(output, EXPECT_TREEC);
+    assertEquals(output, EXPECT_TREE_D);
 
     output = Joiner.create()
 		   .withMaxDepth(2)
 		   .append(TREE)
 		   .toString();
     System.out.println(String.format(FORMAT, 2, output));
-    assertEquals(output, EXPECT_TREED);
+    assertEquals(output, EXPECT_TREE_E);
 
     output = Joiner.create()
-		   .withMaxDepth(1)
-		   .append(TREE)
-		   .toString();
+	   .withMaxDepth(1)
+	   .append(TREE)
+	   .toString();
     System.out.println(String.format(FORMAT, 1, output));
-    assertEquals(output, EXPECT_TREEE);
+    assertEquals(output, EXPECT_TREE_F);
 
-    output = Joiner.create()
+output = Joiner.create()
 		   .append(TREE)
 		   .toString();
     System.out.println(String.format(FORMAT, 0, output));
-    assertEquals(output, EXPECT_TREEA); 
+    assertEquals(output, EXPECT_TREE_A); 
   }
 
   /**
