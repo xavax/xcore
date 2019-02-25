@@ -11,9 +11,10 @@ public class RangeExceptionTest {
   private final static int MIN = 1;
   private final static int MAX = 10;
   private final static int VALUE = 11;
+  private final static String NAME = "param";
 
   private final RangeException exception =
-      new RangeException(MIN, MAX, VALUE);
+      new RangeException(MIN, MAX, VALUE, NAME);
 
   /**
    * Test the getAttempted method.
@@ -37,5 +38,13 @@ public class RangeExceptionTest {
   @Test
   public void testGetMinimum() {
     assertEquals(exception.getMinimum(), MIN);
+  }
+
+  /**
+   * Test the getName method.
+   */
+  @Test
+  public void testGetName() {
+    assertEquals(exception.getName(), NAME);
   }
 }

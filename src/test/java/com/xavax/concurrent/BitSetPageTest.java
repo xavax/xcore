@@ -12,12 +12,16 @@ import org.testng.annotations.BeforeMethod;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static com.xavax.concurrent.Constants.*;
 
 /**
  * Test the BitSetPage class.
  */
 public class BitSetPageTest {
+  private final static int BITS_PER_PAGE = 1024;
+  private final static int LOG2_PAGE_SIZE = 10; 
+  private final static int LOG2_SEGMENT_SIZE = 18;
+  private final static long BIT_SET_SIZE = 1 << 20;
+
   private final static String EXPECTED1 = "[01000000.00010000.00000100.00000001";
   private final static String EXPECTED2 = "[11111111.11111111.11111111.11111111.11111111.11111111.11111111.11111111.00000000";
   private final static String EXPECTED3 = "[00011111.11111111.11111111.11111111.11111111.11110000.00000000.00000000.00000000";
@@ -26,13 +30,14 @@ public class BitSetPageTest {
   private final static String EXPECTED6 = "[11111111.00000000.00000000.00000000.00000000.00000000.00000000.11111111.00000000";
 
   private BitSetPage page;
-
+  private ConcurrentBitSet bitSet;
   /**
    * Set up performed before each test.
    */
   @BeforeMethod
   public void beforeMethod() {
-    page = new BitSetPage();
+    bitSet = new ConcurrentBitSet(BIT_SET_SIZE, LOG2_SEGMENT_SIZE, LOG2_PAGE_SIZE);
+    page = new BitSetPage(bitSet);
   }
 
   /**
@@ -68,7 +73,7 @@ public class BitSetPageTest {
     page.set(0,63);
     String result = page.toString().substring(0, EXPECTED2.length());
     assertEquals(result, EXPECTED2);
-    page = new BitSetPage();
+    page = new BitSetPage(null);
     page.set(3,43);
     result = page.toString().substring(0, EXPECTED3.length());
     assertEquals(result, EXPECTED3);

@@ -12,17 +12,16 @@ import org.testng.annotations.BeforeMethod;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-import static com.xavax.concurrent.Constants.*;
-
 /**
  * Test the ConcurrentBitSet.SegmentMapEntry class.
  */
 public class SegmentMapEntryTest {
-  private final static int DEFAULT_SIZE = LOG2_DEFAULT_SEGMENT_SIZE;
+  final static int LOG2_DEFAULT_SEGMENT_SIZE = 10;
+
   private final static String EXPECTED1 = "segment: <null>";
   private final static String EXPECTED2 = "segment: {pageCount: 0, pages: [<null>,";
   private ConcurrentBitSet bitSet;
-  private SegmentMapEntry entry;
+  private SegmentMapEntry<BitSetPage> entry;
 
   /**
    * Set up performed before each test.
@@ -30,7 +29,7 @@ public class SegmentMapEntryTest {
   @BeforeMethod
   public void setUp() {
     bitSet = new ConcurrentBitSet();
-    entry = new SegmentMapEntry();
+    entry = new SegmentMapEntry<>();
   }
 
   /**
@@ -38,14 +37,14 @@ public class SegmentMapEntryTest {
    */
   @Test
   public void testSet() {
-    BitSetSegment segment = entry.get();
+    BitSetSegment segment = (BitSetSegment) entry.get();
     assertNull(segment);
     entry.set(null);
-    segment = entry.get();
+    segment = (BitSetSegment) entry.get();
     assertNull(segment);
-    final BitSetSegment segment2 = new BitSetSegment(bitSet, DEFAULT_SIZE);
+    final BitSetSegment segment2 = new BitSetSegment(bitSet);
     entry.set(segment2);
-    segment = entry.get();
+    segment = (BitSetSegment) entry.get();
     assertEquals(segment, segment2);
     entry.set(segment);
   }
@@ -57,7 +56,7 @@ public class SegmentMapEntryTest {
   public void testToString() {
     String result = entry.toString();
     assertEquals(result, EXPECTED1);
-    final BitSetSegment segment = new BitSetSegment(bitSet, LOG2_DEFAULT_SEGMENT_SIZE);
+    final BitSetSegment segment = new BitSetSegment(bitSet);
     entry.set(segment);
     result = entry.toString();
     assertEquals(result.substring(0, EXPECTED2.length()), EXPECTED2);

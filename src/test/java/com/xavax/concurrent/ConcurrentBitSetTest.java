@@ -23,6 +23,7 @@ public class ConcurrentBitSetTest {
   private final static long TINY_BIT_SET_SIZE = 1 << 10;
   private final static long SMALL_BIT_SET_SIZE = 1 << 20;
   private final static long LARGE_BIT_SET_SIZE = 1 << 32;
+  private final static int LOG2_PAGE_SIZE = 10; 
   private final static int LOG2_SEGMENT_SIZE = 18;
   private final static int INVALID_SEGMENT_SIZE = 99;
   private final static int RANDOM_BOUNDS = 4000000;
@@ -45,7 +46,7 @@ public class ConcurrentBitSetTest {
    */
   @Test
   public void testConstructors() {
-    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, LOG2_SEGMENT_SIZE);
+    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, LOG2_SEGMENT_SIZE, LOG2_PAGE_SIZE);
     assertNotNull(bitSet);
     bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE);
     assertNotNull(bitSet);
@@ -58,7 +59,7 @@ public class ConcurrentBitSetTest {
    */
   @Test(expectedExceptions = RangeException.class)
   public void testSegmentSizeTooLarge() {
-    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, INVALID_SEGMENT_SIZE);
+    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, INVALID_SEGMENT_SIZE, LOG2_PAGE_SIZE);
   }
 
   /**
@@ -66,7 +67,7 @@ public class ConcurrentBitSetTest {
    */
   @Test(expectedExceptions = RangeException.class)
   public void testSegmentSizeNegative() {
-    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, -1);
+    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, -1, LOG2_PAGE_SIZE);
   }
 
   /**
@@ -74,7 +75,7 @@ public class ConcurrentBitSetTest {
    */
   @Test(expectedExceptions = RangeException.class)
   public void testInitialSizeNegative() {
-    bitSet = new ConcurrentBitSet(-1, LOG2_SEGMENT_SIZE);
+    bitSet = new ConcurrentBitSet(-1, LOG2_SEGMENT_SIZE, LOG2_PAGE_SIZE);
   }
 
   /**

@@ -10,16 +10,14 @@ import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 
 import static org.testng.Assert.*;
-import static com.xavax.concurrent.Constants.*;
 
 /**
  * Test the ConcurrentBitSet.Segment class.
  */
 public class SegmentTest {
-  private final static int MAX_BIT_INDEX = 1 << LOG2_DEFAULT_SEGMENT_SIZE;
-  private final static int MAX_ENTRY_INDEX = 1 << (LOG2_DEFAULT_SEGMENT_SIZE - LOG2_BITS_PER_PAGE);
   private final static String EXPECTED = "pageCount: 0, pages: [<null>, <null>,";
 
+  private ConcurrentBitSet bitSet;
   private BitSetSegment segment;
 
   /**
@@ -27,7 +25,8 @@ public class SegmentTest {
    */
   @BeforeMethod
   public void setUp() {
-    segment = new BitSetSegment(new ConcurrentBitSet(), LOG2_DEFAULT_SEGMENT_SIZE);
+    bitSet = new ConcurrentBitSet();
+    segment = (BitSetSegment) bitSet.getSegment(0, true);
   }
 
   /**
@@ -36,8 +35,9 @@ public class SegmentTest {
   @Test
   public void testGetPage() {
     assertEquals(segment.pageCount(), 0);
-    for ( int index = 0; index < MAX_ENTRY_INDEX; ++index ) {
-      final int bitIndex = index << LOG2_BITS_PER_PAGE;
+    final int maxIndex = bitSet.getPageSize();
+    for ( int index = 0; index < maxIndex; ++index ) {
+      final int bitIndex = bitSet.indexToBitIndex(index);
       BitSetPage entry = segment.getPageContaining(bitIndex, false);
       assertNull(entry);
       assertEquals(segment.pageCount(), index);
@@ -56,7 +56,8 @@ public class SegmentTest {
   @Test
   public void testGetSet() {
     assertEquals(segment.pageCount(), 0);
-    for ( int index = 0; index < MAX_BIT_INDEX; ++index ) {
+    final int maxIndex = bitSet.getPageSize();
+    for ( int index = 0; index < maxIndex; ++index ) {
       assertFalse(segment.get(index));
       segment.set(index, false);
       assertFalse(segment.get(index));

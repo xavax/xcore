@@ -273,6 +273,15 @@ public abstract class AbstractPageableObject<T extends AbstractPage> extends Abs
   }
 
   /**
+   * Returns a snapshot of the performance metrics.
+   *
+   * @return a snapshot of the performance metrics.
+   */
+  public Metrics getMetrics() {
+    return new Metrics(metrics);
+  }
+
+  /**
    * Returns a string representation of this bit set. NOTE: This is mainly for
    * testing and not recommended for general use.
    *
