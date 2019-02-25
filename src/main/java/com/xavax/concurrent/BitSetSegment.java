@@ -1,23 +1,17 @@
+//
+// Copyright 2015, 2019 by Xavax, Inc. All Rights Reserved.
+// Use of this software is allowed under the Xavax Open Software License.
+// http://www.xavax.com/xosl.html
+//
+
 package com.xavax.concurrent;
-
-import static com.xavax.concurrent.ConcurrentBitSetConstants.BITS_PER_PAGE;
-import static com.xavax.concurrent.ConcurrentBitSetConstants.LOG2_BITS_PER_PAGE;
-
-import com.xavax.util.AbstractJoinableObject;
-import com.xavax.util.Joinable;
-import com.xavax.util.Joiner;
 
 /**
  * Segment encapsulates a fixed-size segment of the bit set. Segment sizes are
  * always a power of 2 to simplify calculations.
  */
-class BitSetSegment extends AbstractJoinableObject implements Joinable {
-  final static int BIT_INDEX_MASK = (1 << LOG2_BITS_PER_PAGE) - 1;
-  final static int SEGMENT_BUFFER_SIZE = 8192;
-
-  private int pageCount;
-  private final BitSetPage[] pages;
-  private final ConcurrentBitSet parent;
+class BitSetSegment extends AbstractSegment<BitSetPage> {
+  final long bitIndexMask;
 
   /**
    * Construct a segment with a bitmap of size 2 ^ logSize. The bitmap
@@ -26,12 +20,29 @@ class BitSetSegment extends AbstractJoinableObject implements Joinable {
    *   2 ^ (logSize - log2(BITS_PER_PAGE))
    *
    * @param parent  the parent of this segment.
-   * @param logSize log2 of the size of the bitmap.
    */
-  public BitSetSegment(final ConcurrentBitSet parent, final int logSize) {
-    this.parent = parent;
-    final int size = 1 << (logSize - LOG2_BITS_PER_PAGE);
-    pages = new BitSetPage[size];
+  public BitSetSegment(final ConcurrentBitSet parent) {
+    super(parent);
+    bitIndexMask = parent.getPageSize() - 1;
+  }
+
+  /**
+   * Create a new page to be added to the page map.
+   *
+   * @return a new page.
+   */
+  protected BitSetPage createPage() {
+    return new BitSetPage((ConcurrentBitSet) parent);
+  }
+
+  /**
+   * Create an array of pages.
+   *
+   * @param size  the size of the array.
+   * @return an array of pages.
+   */
+  protected BitSetPage[] createPageArray(final int size) {
+    return new BitSetPage[size];
   }
 
   /**
@@ -41,10 +52,11 @@ class BitSetSegment extends AbstractJoinableObject implements Joinable {
    * @param index  the index of the desired bit in this segment.
    * @return the value of the bit at the specified index.
    */
-  public boolean get(final int index) {
+  public boolean get(final long index) {
     boolean result = false;
-    final int bitIndex = index & BIT_INDEX_MASK;
-    final BitSetPage page = getPageContaining(index, false);
+    final int bitIndex = parent.indexToItemIndex(index);
+    final int pageIndex = parent.indexToPageIndex(index);
+    final BitSetPage page = getPage(pageIndex, false);
     if ( page != null ) {
 	result = page.get(bitIndex);
     }
@@ -60,7 +72,7 @@ class BitSetSegment extends AbstractJoinableObject implements Joinable {
    * @param value  the new value of the bit.
    */
   public void set(final int index, final boolean value) {
-    final int bitIndex = index & BIT_INDEX_MASK;
+    final int bitIndex = (int) (index & bitIndexMask);
     final BitSetPage page = getPageContaining(index, value);
     if ( page != null ) {
 	page.set(bitIndex, value);
@@ -76,11 +88,11 @@ class BitSetSegment extends AbstractJoinableObject implements Joinable {
    */
   public void set(final int fromIndex, final int toIndex) {
     // assert(fromIndex >= 0 && toIndex > fromIndex);
-    int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-    final int lastPage = toIndex >>> LOG2_BITS_PER_PAGE;
-    int firstBit = fromIndex & BIT_INDEX_MASK;
-    final int lastBit = toIndex & BIT_INDEX_MASK;
-    final int end = BITS_PER_PAGE - 1;
+    int pageIndex = parent.indexToPageIndex(fromIndex);
+    final int lastPage = parent.indexToPageIndex(toIndex);
+    int firstBit = (int)(fromIndex & bitIndexMask);
+    final int lastBit = (int)(toIndex & bitIndexMask);
+    final int end = parent.getPageSize() - 1;
     for ( ; pageIndex <= lastPage; ++pageIndex ) {
 	final BitSetPage page = getPage(pageIndex, true);
 	if ( page != null ) {
@@ -99,11 +111,11 @@ class BitSetSegment extends AbstractJoinableObject implements Joinable {
    */
   public void clear(final int fromIndex, final int toIndex) {
     // assert(fromIndex >= 0 && toIndex > fromIndex);
-    int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-    final int lastPage = toIndex >>> LOG2_BITS_PER_PAGE;
-    int firstBit = fromIndex & BIT_INDEX_MASK;
-    final int lastBit = toIndex & BIT_INDEX_MASK;
-    final int end = BITS_PER_PAGE - 1;
+    int pageIndex = parent.indexToPageIndex(fromIndex);
+    final int lastPage = parent.indexToPageIndex(toIndex);
+    int firstBit = (int)(fromIndex & bitIndexMask);
+    final int lastBit = (int)(toIndex & bitIndexMask);
+    final int end = parent.getPageSize() - 1;
     for ( ; pageIndex <= lastPage; ++pageIndex ) {
 	final BitSetPage page = getPage(pageIndex, false);
 	if ( page != null ) {
@@ -121,9 +133,9 @@ class BitSetSegment extends AbstractJoinableObject implements Joinable {
    */
   public int nextSetBit(final int fromIndex) {
     int result = -1;
-    int bitIndex = fromIndex & BIT_INDEX_MASK;
-    int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-    for ( ; pageIndex < pages.length; ++pageIndex ) {
+    int pageIndex = parent.indexToPageIndex(fromIndex);
+    int bitIndex = parent.indexToItemIndex(fromIndex);
+    for ( ; pageIndex < pageCount; ++pageIndex ) {
 	final BitSetPage page = pages[pageIndex];
 	if ( page != null ) {
 	  final int index = page.nextSetBit(bitIndex);
@@ -135,7 +147,7 @@ class BitSetSegment extends AbstractJoinableObject implements Joinable {
 	}
     }
     if ( result >= 0 ) {
-	result += pageIndex << LOG2_BITS_PER_PAGE;
+	result += pageIndex << parent.getLogPageSize();
     }
     return result;
   }
@@ -148,108 +160,26 @@ class BitSetSegment extends AbstractJoinableObject implements Joinable {
    */
   public int nextClearBit(final int fromIndex) {
     int result = -1;
-    int bitIndex = fromIndex & BIT_INDEX_MASK;
-    int pageIndex = fromIndex >>> LOG2_BITS_PER_PAGE;
-    for ( ; pageIndex < pages.length; ++pageIndex ) {
-	final BitSetPage page = pages[pageIndex];
-	if ( page == null ) {
-	  result = 0;
+    int pageIndex = parent.indexToPageIndex(fromIndex);
+    int bitIndex = parent.indexToItemIndex(fromIndex);
+    for ( ; pageIndex < pageCount; ++pageIndex ) {
+      final BitSetPage page = pages[pageIndex];
+      if ( page == null ) {
+	result = 0;
+	break;
+      }
+      else {
+	final int index = page.nextClearBit(bitIndex);
+	if ( index >= 0 ) {
+	  result = index;
 	  break;
 	}
-	else {
-	  final int index = page.nextClearBit(bitIndex);
-	  if ( index >= 0 ) {
-	    result = index;
-	    break;
-	  }
-	}
-	bitIndex = 0;
+      }
+      bitIndex = 0;
     }
     if ( result >= 0 ) {
-	result += pageIndex << LOG2_BITS_PER_PAGE;
+      result += pageIndex << parent.getLogPageSize();
     }
     return result;
-  }
-
-  /**
-   * Returns the number of pages in this segment.
-   * 
-   * @return the number of pages in this segment.
-   */
-  int pageCount() {
-    return pageCount;
-  }
-
-  /**
-   * Returns a string representation of this segment.
-   *
-   * @return a string representation of this segment.
-   */
-  @Override
-  public String toString() {
-    return doJoin(Joiner.create(SEGMENT_BUFFER_SIZE)).toString();
-  }
-
-  /**
-   * Join this object to the specified joiner.
-   *
-   * @param joiner  the joiner to use.
-   * @return the joiner.
-   */
-  @Override
-  public Joiner doJoin(final Joiner joiner) {
-    joiner.append("pageCount", pageCount)
-          .append("pages", (Object[]) pages);
-    return joiner;
-  }
-
-  /**
-   * Returns the page that contains the bit at a specified index. If
-   * the page does not exist and require is true, create the page and
-   * update the map.
-   *
-   * @param index    the index of the desired bit.
-   * @param require  true if a non-existent entry should be created.
-   * @return the page containing the specified bit, or null if no
-   *         such page exists and was not created.
-   */
-  BitSetPage getPageContaining(final int index, final boolean require) {
-    return getPage(index >>> LOG2_BITS_PER_PAGE, require);
-  }
-
-  /**
-   * Returns the page at the specified index in the page map. If the
-   * page does not exist and require is true, create the page.
-   *
-   * @param require   true if a missing page should be created.
-   * @param mapIndex  the index of the desired page.
-   * @return the page at the specified index.
-   */
-  BitSetPage getPage(final int mapIndex, final boolean require) {
-    BitSetPage page = pages[mapIndex];
-    if ( page == null && require ) {
-	page = createPage(mapIndex);
-    }
-    return page;
-  }
-
-  /**
-   * Create a new page at the specified index in the page map.
-   *
-   * @param mapIndex  the index for the new page.
-   * @return a new page.
-   */
-  BitSetPage createPage(final int mapIndex) {
-    BitSetPage page = null;
-    synchronized ( pages ) {
-      page = pages[mapIndex];
-      if ( page == null ) {
-        page = new BitSetPage();
-        pages[mapIndex] = page;
-        ++pageCount;
-        parent.metrics.pageCreated();
-      }
-    }
-    return page;
   }
 }

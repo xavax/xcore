@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 import org.testng.annotations.BeforeMethod;
 
 import static org.testng.Assert.*;
-import static com.xavax.concurrent.ConcurrentBitSetConstants.*;
+import static com.xavax.concurrent.Constants.*;
 
 /**
  * Test the ConcurrentBitSet.Segment class.

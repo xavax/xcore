@@ -17,6 +17,7 @@ public class RangeException extends XRuntimeException {
   private final long min;
   private final long max;
   private final long attempted;
+  private final String name;
 
   /**
    * Construct a range exception.
@@ -24,12 +25,14 @@ public class RangeException extends XRuntimeException {
    * @param min    the minimum supported value.
    * @param max    the maximum supported value.
    * @param value  the attempted value that is out of range.
+   * @param name   the name of the value that is out of range.
    */
-  public RangeException(final long min, final long max, final long value) {
-    super(OUT_OF_RANGE, value, min, max);
+  public RangeException(final long min, final long max, final long value, final String name) {
+    super(OUT_OF_RANGE, value, name, min, max);
     this.min = min;
     this.max = max;
     this.attempted = value;
+    this.name = name;
   }
 
   /**
@@ -57,5 +60,14 @@ public class RangeException extends XRuntimeException {
    */
   public long getAttempted() {
     return attempted;
+  }
+
+  /**
+   * Returns the name of the value that is out of range.
+   *
+   * @return the name of the value that is out of range.
+   */
+  public String getName() {
+    return name;
   }
 }

@@ -12,13 +12,11 @@ import org.testng.annotations.BeforeMethod;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-import static com.xavax.concurrent.ConcurrentBitSet.SegmentMapEntry;
-import static com.xavax.concurrent.ConcurrentBitSetConstants.*;
+import static com.xavax.concurrent.Constants.*;
 
 /**
  * Test the ConcurrentBitSet.SegmentMapEntry class.
  */
-@SuppressWarnings("PMD.TooManyStaticImports")
 public class SegmentMapEntryTest {
   private final static int DEFAULT_SIZE = LOG2_DEFAULT_SEGMENT_SIZE;
   private final static String EXPECTED1 = "segment: <null>";

@@ -12,7 +12,7 @@ import org.testng.annotations.BeforeMethod;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-import static com.xavax.concurrent.ConcurrentBitSetConstants.*;
+import static com.xavax.concurrent.Constants.*;
 
 /**
  * Test the BitSetPage class.

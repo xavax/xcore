@@ -1,18 +1,15 @@
 package com.xavax.concurrent;
 
-import com.xavax.util.AbstractJoinableObject;
-import com.xavax.util.Joinable;
 import com.xavax.util.Joiner;
 
-import static com.xavax.concurrent.ConcurrentBitSetConstants.*;
+import static com.xavax.concurrent.Constants.*;
 import static com.xavax.util.Constants.*;
 
 /**
- * Page encapsulates a small array of longs used to represent a portion
+ * BitSetPage encapsulates an array of bytes used to represent a portion
  * of a bit set.
  */
-class BitSetPage extends AbstractJoinableObject implements Joinable {
-  final static int BIT_MAP_ARRAY_SIZE = 1 << (LOG2_BITS_PER_PAGE - LOG2_BITS_PER_BYTE);
+class BitSetPage extends AbstractPage {
   final static int BIT_MAP_INDEX_MASK = (1 << LOG2_BITS_PER_BYTE) - 1;
   final static int PAGE_BUFFER_SIZE = 8192;
 
@@ -33,9 +30,12 @@ class BitSetPage extends AbstractJoinableObject implements Joinable {
 
   /**
    * Construct a Page.
+   *
+   * @param parent  the parent pageable object.
    */
-  public BitSetPage() {
-    bits = new byte[BIT_MAP_ARRAY_SIZE];
+  public BitSetPage(final ConcurrentBitSet parent) {
+    super(parent);
+    bits = new byte[parent.getPageSize() >> LOG2_BITS_PER_BYTE];
   }
 
   /**
@@ -135,7 +135,7 @@ class BitSetPage extends AbstractJoinableObject implements Joinable {
     int result = -1;
     final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
     final int leftMask = LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK];
-    for ( int i = firstByte; run && i < BIT_MAP_ARRAY_SIZE; ++i ) {
+    for ( int i = firstByte; run && i < bits.length; ++i ) {
 	final int masked = (i == firstByte ? leftMask : 0xFF) & bits[i];
 	if ( masked != 0 ) {
 	  int mask = 0x80;
@@ -163,7 +163,7 @@ class BitSetPage extends AbstractJoinableObject implements Joinable {
     int result = -1;
     final int firstByte = fromIndex >>> LOG2_BITS_PER_BYTE;
     final int leftMask = LEFT_MASKS[fromIndex & BIT_MAP_INDEX_MASK];
-    for ( int i = firstByte; run && i < BIT_MAP_ARRAY_SIZE; ++i ) {
+    for ( int i = firstByte; run && i < bits.length; ++i ) {
 	final int masked = (i == firstByte ? leftMask : 0xFF) & ~bits[i];
 	if ( masked != 0 ) {
 	  int mask = 0x80;

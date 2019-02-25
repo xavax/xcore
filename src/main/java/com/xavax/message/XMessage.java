@@ -5,7 +5,7 @@ package com.xavax.message;
  */
 public enum XMessage {
   INVALID_MODIFICATION("Attempted to modify a read-only object of type %s."),
-  OUT_OF_RANGE("value %d is not within the range %d and %d"),
+  OUT_OF_RANGE("value %d for %s is not within the range %d and %d"),
   TEST("test message."),
   UNEXPECTED_EXCEPTION("Unexpected exception: %s");
 
