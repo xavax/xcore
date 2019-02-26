@@ -31,6 +31,7 @@ public class BitSetPageTest {
 
   private BitSetPage page;
   private ConcurrentBitSet bitSet;
+
   /**
    * Set up performed before each test.
    */
@@ -73,7 +74,7 @@ public class BitSetPageTest {
     page.set(0,63);
     String result = page.toString().substring(0, EXPECTED2.length());
     assertEquals(result, EXPECTED2);
-    page = new BitSetPage(null);
+    page = new BitSetPage(bitSet);
     page.set(3,43);
     result = page.toString().substring(0, EXPECTED3.length());
     assertEquals(result, EXPECTED3);
