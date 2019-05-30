@@ -93,7 +93,7 @@ public class ConcurrentBitSetTest {
   /**
    * Test setting a small block of bits.
    */
-  @Test
+//  @Test
   public void testSmallSet() {
     testSet(SMALL_BIT_SET_SIZE);
   }
@@ -101,7 +101,7 @@ public class ConcurrentBitSetTest {
   /**
    * Test setting a very large block of bits.
    */
-  @Test
+//  @Test
   public void testLargeSet() {
     testSet(LARGE_BIT_SET_SIZE);
   }
@@ -124,7 +124,7 @@ public class ConcurrentBitSetTest {
   /**
    * Test setting random bits then verify that those bits were set.
    */
-  @Test
+//  @Test
   public void testRandomBits() {
     boolean[] data = new boolean[RANDOM_BOUNDS];
     final Random random = new Random();
@@ -147,7 +147,7 @@ public class ConcurrentBitSetTest {
   /**
    * Test the toString method.
    */
-  @Test
+//  @Test
   public void testToString() {
     testSet(TINY_BIT_SET_SIZE);
     final String result = bitSet.toString();

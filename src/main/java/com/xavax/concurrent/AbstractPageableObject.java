@@ -230,6 +230,8 @@ public abstract class AbstractPageableObject<T extends AbstractPage> extends Abs
 
   /**
    * Returns log2 of the page size.
+   *
+   * @return log2 of the page size.
    */
   public int getLogPageSize() {
     return logPageSize;

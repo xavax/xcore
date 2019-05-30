@@ -13,7 +13,7 @@ import com.xavax.util.AbstractJoinableObject;
 import com.xavax.util.Joiner;
 
 /**
- * BasicPromise<T> is a promise of a future value of type T.
+ * BasicPromise is a promise of a future value of type T.
  *
  * @param <T>  the class of object promised.
  */

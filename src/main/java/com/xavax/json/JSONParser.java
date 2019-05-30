@@ -778,6 +778,7 @@ public class JSONParser {
    * Set the abortOnError flag.
    *
    * @param abortOnError  if true, abort parsing on first error.
+   * @return this parser.
    */
   public JSONParser abortOnError(final boolean abortOnError) {
     this.abortOnError = abortOnError;

@@ -31,4 +31,14 @@ public interface Event {
    * @param source  the source of this event.
    */
   void source(Broadcaster source);
+
+  /**
+   * Returns true if an event matches this event,
+   * meaning the event type and any additional
+   * sub-types are the same.
+   *
+   * @param event  the event to match.
+   * @return true if the event matches this event.
+   */
+  boolean matches(final Event event);
 }

@@ -15,7 +15,7 @@ public class Tracker {
   /**
    * Construct a Tracker with the specified separator.
    *
-   * @param separator  the string to use as a separator.
+   * @param parent  the parent Joiner.
    */
   @SuppressWarnings("PMD.AccessorMethodGeneration")
   public Tracker(final Joiner parent) {

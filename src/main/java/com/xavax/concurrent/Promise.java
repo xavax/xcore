@@ -6,15 +6,17 @@
 package com.xavax.concurrent;
 
 /**
- * Promise<T> is an interface for a promise to return a result that
+ * Promise is an interface for a promise to return a result that
  * may not yet be calculated. On any attempt to access the result,
  * implementations of Promise wait until the result is available.
  *
- * param <T>  the type of the result.
+ * @param <T>  the type of the result.
  */
 public interface Promise<T> {
   /**
    * Returns the result of type T, waiting if necessary.
+   *
+   * @return the result of type T.
    */
   T get();
 

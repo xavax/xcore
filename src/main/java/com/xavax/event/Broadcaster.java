@@ -13,11 +13,21 @@ package com.xavax.event;
 public interface Broadcaster {
   /**
    * Attach an observer to this broadcaster's list of observers.
+   * Any event matching the type will be observed.
    *
-   * @param type  the event type to be observed.
+   * @param eventType  the event type to be observed.
+   * @param observer   the observer to be notified of events.
+   */
+  void attach(int eventType, Observer observer);
+
+  /**
+   * Attach an observer to this broadcaster's list of observers.
+   * Only events matching the exemplar will be observed.
+   *
+   * @param exemplar  the type of event to be observed.
    * @param observer  the observer to be notified of events.
    */
-  void attach(int type, Observer observer);
+  void attach(Event exemplar, Observer observer);
 
   /**
    * Broadcast an event to the observers of the event type.

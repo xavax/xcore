@@ -137,6 +137,7 @@ public class JoinerFormat {
   /**
    * Sets the skipNulls flag to true.
    *
+   * @param skipNulls  true if nulls should be skipped.
    * @return this JoinerFormat.
    */
   public JoinerFormat withSkipNulls(final boolean skipNulls) {
@@ -634,6 +635,8 @@ public class JoinerFormat {
    * There is no mechanism to enable modifications once this method
    * is called; however, a modifiable copy can be made using the
    * copy constructor or the from method.
+   *
+   * @return this JoinerFormat.
    */
   public JoinerFormat disableModifications() {
     writeEnabled = false;

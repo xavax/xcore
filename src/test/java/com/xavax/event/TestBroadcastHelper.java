@@ -5,6 +5,7 @@
 //
 package com.xavax.event;
 
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -18,9 +19,10 @@ public class TestBroadcastHelper  {
   private final static int MAX_TYPES = 5;
   private final static String EXPECT1 = "BroadcastHelper";
 
-  private final BroadcastHelper broadcaster = new BroadcastHelper();
-  private final BasicEvent[] events = new BasicEvent[5];
-  private final SampleObserver[] observers = new SampleObserver[5];
+  private BroadcastHelper broadcaster = new BroadcastHelper();
+  private final BasicEvent[] basicEvents = new BasicEvent[MAX_TYPES];
+  private final TestEvent[] testEvents = new TestEvent[MAX_TYPES];
+  private final SampleObserver[] observers = new SampleObserver[MAX_OBSERVERS];
 
   /**
    * Construct a TestBroadcastHelper.
@@ -29,18 +31,29 @@ public class TestBroadcastHelper  {
   public TestBroadcastHelper() {
     for ( int i= 0; i < MAX_OBSERVERS; ++i ) {
       observers[i] = new SampleObserver(broadcaster, i);
-      events[i] = new BasicEvent(i);
+    }
+    for ( int i= 0; i < MAX_TYPES; ++i ) {
+      basicEvents[i] = new BasicEvent(i);
+      testEvents[i] = new TestEvent(i, "Event" + i);
     }
   }
 
+  @BeforeTest
+  public void setUp() {
+    broadcaster = new BroadcastHelper();
+  }
+  
   /**
    * Test broadcast methods.
    */
   @Test
   public void testBroadcast()
   {
+    for ( int i = 0; i < MAX_OBSERVERS; ++i ) {
+      broadcaster.attach(i, observers[i]);
+    }
     for ( int i = 0; i < MAX_COUNT; ++i ) {
-      sendEvents();
+      sendBasicEvents();
     }
     checkObservers(MAX_COUNT);
     resetObservers();
@@ -54,19 +67,38 @@ public class TestBroadcastHelper  {
     for ( int i= 0; i < 5; ++i ) {
       broadcaster.detach(i, observers[i]);
     }
-    sendEvents();
+    sendBasicEvents();
     checkObservers(0);
-    for ( int i= 0; i < 5; ++i ) {
-      broadcaster.attach(i, observers[i]);
+  }
+
+  @Test
+  public void testExemplars() {
+    resetObservers();
+    for ( int i= 0; i < MAX_OBSERVERS; ++i ) {
+      broadcaster.attach(testEvents[i], observers[i]);
     }
     for ( int i = 0; i < MAX_COUNT; ++i ) {
-      sendEvents();
+      sendBasicEvents();
+    }
+    checkObservers(0);
+    for ( int i = 0; i < MAX_COUNT; ++i ) {
+      sendTestEvents();
     }
     checkObservers(MAX_COUNT);
     resetObservers();
-    broadcaster.detach(MAX_TYPES, observers[0]);
-    broadcaster.broadcast(broadcaster, MAX_TYPES);
+    for ( int i= 0; i < MAX_OBSERVERS; ++i ) {
+      broadcaster.detach(testEvents[i], observers[i]);
+    }
+    sendTestEvents();
     checkObservers(0);
+    resetObservers();
+    for ( int i= 0; i < MAX_OBSERVERS; ++i ) {
+      broadcaster.attach(testEvents[i], observers[i]);
+    }
+    for ( int i = 0; i < MAX_COUNT; ++i ) {
+      sendTestEvents();
+    }
+    checkObservers(MAX_COUNT);
   }
 
   /**
@@ -98,9 +130,37 @@ public class TestBroadcastHelper  {
   /**
    * Send all events.
    */
-  private void sendEvents() {
-    for ( final BasicEvent event : events ) {
+  private void sendBasicEvents() {
+    for ( final BasicEvent event : basicEvents ) {
 	broadcaster.broadcast(event);
+    }
+  }
+
+  /**
+   * Send all test events.
+   */
+  private void sendTestEvents() {
+    for ( final TestEvent event : testEvents ) {
+	broadcaster.broadcast(event);
+    }
+  }
+
+  public static class TestEvent extends BasicEvent {
+    private final String name;
+
+    public TestEvent(final int type, final String name) {
+      super(type);
+      this.name = name;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    @Override
+    public boolean matches(final Event event) {
+      return super.matches(event) && event instanceof TestEvent &&
+	  name != null && name.equals(((TestEvent) event).getName());
     }
   }
 }

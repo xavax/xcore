@@ -72,6 +72,18 @@ public class BasicEvent implements Event, Joinable {
   }
 
   /**
+   * Returns true if an event matches this event,
+   * meaning the event type and any additional
+   * sub-types are the same.
+   *
+   * @param event  the event to match.
+   * @return true if the event matches this event.
+   */
+  public boolean matches(final Event event) {
+    return this.type == event.type();
+  }
+
+  /**
    * Returns a string representation of this event.
    *
    * @return a string representation of this event.

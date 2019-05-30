@@ -12,6 +12,7 @@ public interface Finder<T extends AbstractPage> {
    * Apply this function to pages in a PageableObject.
    *
    * @param context  the page context.
+   * @param page     the page to examine.
    * @return true if a match was found.
    */
   boolean apply(PageContext<T> context, T page);

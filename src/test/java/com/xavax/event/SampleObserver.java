@@ -24,7 +24,6 @@ public class SampleObserver implements Observer {
   {
     this.type = type;
     count = 0;
-    source.attach(type, this);
   }
 
   /**
