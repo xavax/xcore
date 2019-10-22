@@ -88,8 +88,6 @@ public abstract class LoggingManager extends AbstractJoinableObject {
 
   }
 
-  // protected void set
-
   /**
    * Returns the native logger for an SLF4J logger.
    *

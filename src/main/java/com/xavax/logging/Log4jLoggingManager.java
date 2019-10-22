@@ -76,8 +76,4 @@ public final class Log4jLoggingManager extends LoggingManager {
     return result;
   }
 
-  // @Override
-  // public Level getLevel(final org.slf4j.Logger logger) {
-  // return getLevel(logger.getName());
-  // }
 }
