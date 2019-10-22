@@ -76,7 +76,7 @@ public abstract class LoggingManager extends AbstractJoinableObject {
    * @param loggerName  the logger name.
    * @return the logging level.
    */
-  protected <T, V> Level getLevel(final String loggerName) {
+  protected <T> Level getLevel(final String loggerName) {
     @SuppressWarnings("unchecked")
     final T nativeLogger =
     	(T) getNativeLogger(loggerName, getNativeLoggerClass());
@@ -84,9 +84,27 @@ public abstract class LoggingManager extends AbstractJoinableObject {
     return levelName == null ? Level.OFF : Level.valueOf(levelName);
   }
 
-  public void setLevel(final Logger logger, final Level level) {
-
+  /**
+   * Set the level for a logger.
+   *
+   * @param logger  the SLF4J logger.
+   * @param level   the level (com.xavax.logging.Level)
+   */
+  public <T>  void setLevel(final Logger logger, final Level level) {
+    @SuppressWarnings("unchecked")
+    final T nativeLogger =
+    	(T) getNativeLogger(logger.getName(), getNativeLoggerClass());
+    final String levelName = level.name();
+    setLevel(nativeLogger, levelName);
   }
+
+  /**
+   * Set the level for a logger.
+   *
+   * @param nativeLogger  the native logger.
+   * @param levelName     the level name.
+   */
+  protected abstract <T> void setLevel(final T nativeLogger, final String levelName);
 
   /**
    * Returns the native logger for an SLF4J logger.

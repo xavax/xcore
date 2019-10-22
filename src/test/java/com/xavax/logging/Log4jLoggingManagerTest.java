@@ -25,8 +25,8 @@ public class Log4jLoggingManagerTest {
   }
 
   @Test
-  public void test() {
-    logger.info("starting test");
+  public void testGetLevel() {
+    logger.info("starting testGetLevel");
     assertNotNull(manager);
     final Logger logger1 = LoggingManager.getLogger(getClass());
     assertNotNull(logger1);
@@ -35,16 +35,27 @@ public class Log4jLoggingManagerTest {
     assertEquals(logger1, logger2);
     Level level1 = manager.getLevel(logger1);
     assertNotNull(level1);
-    Level level2 = manager.getLevel(logger2);
-    assertNotNull(level2);
-    assertEquals(level1, level2);
-    manager.setLevel(logger1, Level.TRACE);
-    level1 = manager.getLevel(logger1);
-    assertNotNull(level1);
     assertEquals(level1, Level.TRACE);
-    level2 = manager.getLevel(logger2);
+    Level level2 = manager.getLevel(logger2);
     assertNotNull(level2);
     assertEquals(level1, level2);
   }
 
+  @Test
+  public void testSetLevel() {
+    logger.info("starting testSetLevel");
+    assertNotNull(manager);
+    final Logger logger1 = LoggingManager.getLogger(getClass());
+    assertNotNull(logger1);
+    Level level1 = manager.getLevel(logger1);
+    assertNotNull(level1);
+    manager.setLevel(logger1, Level.DEBUG);
+    level1 = manager.getLevel(logger1);
+    assertNotNull(level1);
+    assertEquals(level1, Level.DEBUG);
+    manager.setLevel(logger1, Level.INFO);
+    level1 = manager.getLevel(logger1);
+    assertNotNull(level1);
+    assertEquals(level1, Level.INFO);
+  }
 }

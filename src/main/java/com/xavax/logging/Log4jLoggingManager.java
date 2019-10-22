@@ -76,4 +76,18 @@ public final class Log4jLoggingManager extends LoggingManager {
     return result;
   }
 
+  /**
+   * Set the level for a logger.
+   *
+   * @param nativeLogger  the native logger.
+   * @param levelName     the level name.
+   */
+  @Override
+  protected <T> void setLevel(final T nativeLogger, final String levelName) {
+    org.apache.log4j.Level level = nameToLevelMap.get(levelName);
+    if ( nativeLogger instanceof Category ) {
+      Category category = (Category) nativeLogger;
+      category.setLevel(level);
+    }
+  }
 }
