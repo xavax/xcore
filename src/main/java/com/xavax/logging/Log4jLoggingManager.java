@@ -56,9 +56,10 @@ public final class Log4jLoggingManager extends LoggingManager {
   }
 
   /**
-   * Returns the logging level for the named logger.
+   * Returns the logging level for a native logger.
    *
-   * @param loggerName  the logger name.
+   * @param <T>     the native logger type.
+   * @param object  the native logger.
    * @return the logging level.
    */
   @Override
@@ -79,6 +80,7 @@ public final class Log4jLoggingManager extends LoggingManager {
   /**
    * Set the level for a logger.
    *
+   * @param <T>           the native logger type.
    * @param nativeLogger  the native logger.
    * @param levelName     the level name.
    */

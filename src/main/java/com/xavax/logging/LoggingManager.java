@@ -54,6 +54,7 @@ public abstract class LoggingManager extends AbstractJoinableObject {
   /**
    * Returns the level name for a native logger.
    *
+   * @param <T>           the native logger type.
    * @param nativeLogger  the native logger.
    * @return the level name for a native logger.
    */
@@ -65,7 +66,6 @@ public abstract class LoggingManager extends AbstractJoinableObject {
    * @param logger  the logger.
    * @return the logging level.
    */
-  // public abstract Level getLevel(final Logger logger);
   public Level getLevel(final Logger logger) {
     return getLevel(logger.getName());
   }
@@ -73,6 +73,7 @@ public abstract class LoggingManager extends AbstractJoinableObject {
   /**
    * Returns the logging level for the named logger.
    *
+   * @param <T>         the native logger type.
    * @param loggerName  the logger name.
    * @return the logging level.
    */
@@ -87,6 +88,7 @@ public abstract class LoggingManager extends AbstractJoinableObject {
   /**
    * Set the level for a logger.
    *
+   * @param <T>     the native logger type.
    * @param logger  the SLF4J logger.
    * @param level   the level (com.xavax.logging.Level)
    */
@@ -101,6 +103,7 @@ public abstract class LoggingManager extends AbstractJoinableObject {
   /**
    * Set the level for a logger.
    *
+   * @param <T>           the native logger type.
    * @param nativeLogger  the native logger.
    * @param levelName     the level name.
    */
@@ -109,6 +112,7 @@ public abstract class LoggingManager extends AbstractJoinableObject {
   /**
    * Returns the native logger for an SLF4J logger.
    *
+   * @param <T>                the native logger type.
    * @param loggerName         the logger name.
    * @param nativeLoggerClass  the native logger class.
    * @return the native logger.
@@ -122,6 +126,7 @@ public abstract class LoggingManager extends AbstractJoinableObject {
   /**
    * Returns the native logger for an SLF4J logger.
    *
+   * @param <T>                the native logger type.
    * @param logger             the SLF4J logger.
    * @param nativeLoggerClass  the native logger class.
    * @return the native logger.
@@ -159,7 +164,7 @@ public abstract class LoggingManager extends AbstractJoinableObject {
   /**
    * Sets the singleton instance.
    *
-   * @param manager the new manager.
+   * @param theManager the new manager.
    */
   protected void setInstance(final LoggingManager theManager) {
     if ( manager == null ) {
