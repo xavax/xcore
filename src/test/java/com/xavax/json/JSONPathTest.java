@@ -56,6 +56,30 @@ public class JSONPathTest {
   }
 
   /**
+   * Test the split methods.
+   */
+  @Test
+  public void testSplit() {
+    final JSONPath path1 = new JSONPath(EXPECT1);
+    assertEquals(6, path1.size());
+    JSONPath path2 = path1.slice(2, 4);
+    assertEquals(2, path2.size());
+    assertEquals("ghi", path2.get(0));
+    assertEquals("123", path2.get(1));
+    path2 = path1.slice(3);
+    assertEquals(3, path2.size());
+    assertEquals("123", path2.get(0));
+    assertEquals("456", path2.get(1));
+    assertEquals("789", path2.get(2));
+    path2 = path1.slice(1,1);
+    assertEquals(0, path2.size());
+    path2 = path1.slice(-1,2);
+    assertEquals(0, path2.size());
+    path2 = path1.slice(3, 999);
+    assertEquals(3, path2.size());
+  }
+
+  /**
    * Test the toString method.
    */
   @Test

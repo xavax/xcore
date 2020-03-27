@@ -75,6 +75,38 @@ public final class JSONPath extends ArrayList<String> implements Joinable {
   }
 
   /**
+   * Create a new path that is a slice of this path. The
+   * new path will contain elements start through end-1.
+   * 
+   * @param start  the starting element.
+   * @param end    the ending element.
+   * @return a new path that is a slice of this path.
+   */
+  public JSONPath slice(final int start, final int end) {
+    JSONPath result = new JSONPath();
+    int max = this.size();
+    max = end > max ? max : end;
+    if ( start >= 0 && start < max ) {
+      for ( int i = start; i < max; ++i ) {
+	result.add(get(i));
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Create a new path that is a slice of this path. The
+   * new path will contain elements start through the
+   * end of the list of elements.
+   * 
+   * @param start  the starting element.
+   * @return a new path that is a slice of this path.
+   */
+  public JSONPath slice(final int start) {
+    return slice(start, size());
+  }
+
+  /**
    * Returns a string representation of this path.
    *
    * @return a string representation of this path.
