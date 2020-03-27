@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Category;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import static org.apache.log4j.Level.*;
@@ -44,6 +45,16 @@ public final class Log4jLoggingManager extends LoggingManager {
   public Log4jLoggingManager() {
     super();
     setInstance(this);
+  }
+
+  /**
+   * Returns true if the specified logger exists.
+   *
+   * @param loggerName  the logger name.
+   * @return true if the specified logger exists.
+   */
+  public boolean exists(final String loggerName) {
+    return LogManager.exists(loggerName) != null;
   }
 
   /**

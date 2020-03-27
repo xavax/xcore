@@ -45,6 +45,14 @@ public abstract class LoggingManager extends AbstractJoinableObject {
   }
 
   /**
+   * Returns true if the specified logger exists.
+   *
+   * @param loggerName  the logger name.
+   * @return true if the specified logger exists.
+   */
+  public abstract boolean exists(final String loggerName);
+
+  /**
    * Returns the native logger class.
    *
    * @return the native logger class.
