@@ -12,6 +12,8 @@ import com.xavax.util.Joiner;
 /**
  * AbstractSegment is the base class for segments in a pageable object.
  * A segment consists of an array of pages that are created on demand.
+ *
+ * @param <T>  the type of pages in the segment.
  */
 public abstract class AbstractSegment<T extends AbstractPage> extends AbstractJoinableObject {
   final static int SEGMENT_BUFFER_SIZE = 8192;

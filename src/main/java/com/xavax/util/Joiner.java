@@ -24,9 +24,12 @@ import static com.xavax.util.JoinerFormats.DEBUG_FORMAT;
 })
 public class Joiner {
 
+  private boolean firstField;
+  private boolean withIndent;
   private boolean reusable;
   private int depth;
   private int maxDepth;
+  private Indentation indentation;
   private JoinerFormat format;
 
   private final Tracker tracker;
@@ -70,9 +73,13 @@ public class Joiner {
    */
   public Joiner(final int initialCapacity, final JoinerFormat format) {
     this.format = format;
-    tracker = new Tracker(this);
     builder = new StringBuilder(initialCapacity);
     depth = 1;
+    withIndent = format.withIndent();
+    if ( withIndent ) {
+      indentation = Indentation.getInstance(format.getIndentString());
+    }
+    tracker = new Tracker(this, indentation);
   }
 
   /**
@@ -542,9 +549,7 @@ public class Joiner {
   public Joiner nest(final Joinable object) {
     if ( maxDepth == 0 || depth <= maxDepth ) {
       ++depth;
-      tracker.push(null);
       object.join(this);
-      tracker.pop();
       --depth;
     }
     else {
@@ -719,9 +724,9 @@ public class Joiner {
     }
     else {
 	// Wrap these unknown objects.
-	builder.append(format.getObjectOpenCharacter())
+	builder.append(format.getObjectOpenString())
 	       .append(object.toString())
-	       .append(format.getObjectCloseCharacter());
+	       .append(format.getObjectCloseString());
     }
   }
 
@@ -747,7 +752,7 @@ public class Joiner {
    */
   public Joiner beginArray(final String name) {
     beginField(name);
-    return beginEntity(format.getArrayOpenCharacter());
+    return beginEntity(format.getArrayOpenString());
   }
 
   /**
@@ -756,7 +761,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner endArray() {
-    return endEntity(format.getArrayCloseCharacter());
+    return endEntity(format.getArrayCloseString());
   }
 
   /**
@@ -767,7 +772,7 @@ public class Joiner {
    */
   public Joiner beginCollection(final String name) {
     beginField(name);
-    return beginEntity(format.getListOpenCharacter());
+    return beginEntity(format.getListOpenString());
   }
 
   /**
@@ -776,7 +781,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner endCollection() {
-    return endEntity(format.getListCloseCharacter());
+    return endEntity(format.getListCloseString());
   }
 
   /**
@@ -787,7 +792,7 @@ public class Joiner {
    */
   public Joiner beginMap(final String name) {
     beginField(name);
-    return beginEntity(format.getMapOpenCharacter());
+    return beginEntity(format.getMapOpenString());
   }
 
   /**
@@ -796,7 +801,7 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner endMap() {
-    return endEntity(format.getMapCloseCharacter());
+    return endEntity(format.getMapCloseString());
   }
 
   /**
@@ -807,7 +812,7 @@ public class Joiner {
    */
   public Joiner beginObject(final String name) {
     beginField(name);
-    return beginEntity(format.getObjectOpenCharacter());
+    return beginEntity(format.getObjectOpenString());
   }
 
   /**
@@ -816,7 +821,87 @@ public class Joiner {
    * @return this Joiner.
    */
   public Joiner endObject() {
-    return endEntity(format.getObjectCloseCharacter());
+    return endEntity(format.getObjectCloseString());
+  }
+
+  /**
+   * Begin joining a field. Append the list separator if
+   * this is the first field.
+   *
+   * @param name  the field name (omit if null).
+   * @return this Joiner.
+   */
+  private Joiner beginField(final String name) {
+    if ( firstField ) {
+      firstField = false;
+      if ( withIndent ) {
+	tracker.indent();
+      }
+    }
+    tracker.addSeparator();
+    if ( format.hasFieldNames() && name != null ) {
+      final boolean quotedFieldNames = format.hasQuotedFieldNames();
+      if ( quotedFieldNames ) {
+	builder.append(format.getOpenQuoteCharacter());
+      }
+      builder.append(name);
+      if ( quotedFieldNames ) {
+	builder.append(format.getCloseQuoteCharacter());
+      }
+      builder.append(format.getFieldNameSeparator());
+      tracker.clearFlag();
+    }
+    return this;
+  }
+
+  /**
+   * Begin joining an object, array, or collection.
+   *
+   * @param beginString  the beginning String.
+   * @return this Joiner.
+   */
+  private Joiner beginEntity(final String beginString) {
+    tracker.addSeparator();
+    builder.append(beginString);
+    if ( withIndent ) {
+      builder.append(NEWLINE);
+    }
+    tracker.push(format.getItemSeparator());
+    firstField = true;
+    return this;
+  }
+
+  /**
+   * End joining an object, array, or collection.
+   * @param endString  the end string.
+   * @return
+   */
+  private Joiner endEntity(final String endString) {
+    tracker.pop();
+    if ( withIndent ) {
+      builder.append(NEWLINE)
+      	     .append(indentation.indent(tracker.getLevel()));
+    }
+    builder.append(endString);
+    return this;
+  }
+
+  /**
+   * Append the null indicator if we are not skipping nulls.
+   * Add a leading separator if needed.
+   */
+  private boolean check(final String name, final Object object) {
+    boolean result = true;
+    if ( object == null ) {
+      if ( !format.hasSkipNulls() ) {
+	tracker.addSeparator();
+	beginField(name);
+	builder.append(format.getNullIndicator());
+	tracker.setFlag();
+      }
+      result = false;
+    }
+    return result;
   }
 
   /**
@@ -873,72 +958,6 @@ public class Joiner {
    */
   public String getNullIndicator() {
     return format.getNullIndicator(); 
-  }
-
-  /**
-   * Begin joining a field. Append the list separator if
-   * this is the first field.
-   *
-   * @param name  the field name (omit if null).
-   * @return this Joiner.
-   */
-  private Joiner beginField(final String name) {
-    tracker.addSeparator();
-    if ( format.hasFieldNames() && name != null ) {
-      final boolean quotedFieldNames = format.hasQuotedFieldNames();
-      if ( quotedFieldNames ) {
-	builder.append(format.getOpenQuoteCharacter());
-      }
-      builder.append(name);
-      if ( quotedFieldNames ) {
-	builder.append(format.getCloseQuoteCharacter());
-      }
-      builder.append(format.getFieldNameSeparator());
-      tracker.clearFlag();
-    }
-    return this;
-  }
-
-  /**
-   * Begin joining an object, array, or collection.
-   *
-   * @param beginChar  the beginning character.
-   * @return this Joiner.
-   */
-  private Joiner beginEntity(final char beginChar) {
-    tracker.addSeparator();
-    builder.append(beginChar);
-    tracker.push(format.getItemSeparator());
-    return this;
-  }
-
-  /**
-   * End joining an object, array, or collection.
-   * @param endChar
-   * @return
-   */
-  private Joiner endEntity(final char endChar) {
-    builder.append(endChar);
-    tracker.pop();
-    return this;
-  }
-
-  /**
-   * Append the null indicator if we are not skipping nulls.
-   * Add a leading separator if needed.
-   */
-  private boolean check(final String name, final Object object) {
-    boolean result = true;
-    if ( object == null ) {
-      if ( !format.hasSkipNulls() ) {
-	tracker.addSeparator();
-	beginField(name);
-	builder.append(format.getNullIndicator());
-	tracker.setFlag();
-      }
-      result = false;
-    }
-    return result;
   }
 
   /**

@@ -5,12 +5,12 @@
 //
 package com.xavax.info;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.xavax.XCore;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test case for the XProduct class.
@@ -36,7 +36,7 @@ public class XProductTest {
   /**
    * Test setup.
    */
-  @BeforeMethod
+  @Before
   public void setUp() {
     product = new XProduct(NAME, MAJOR, MINOR, PATCH, 2001, 2027, TEMPLATE);
   }

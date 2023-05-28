@@ -199,7 +199,7 @@ class BitSetPage extends AbstractPage {
   @Override
   public Joiner doJoin(final Joiner joiner) {
     boolean first = true;
-    joiner.appendRaw(LEFT_BRACKET);
+    joiner.appendRaw(LEFT_BRACKET_STRING);
     for ( final byte b : bits ) {
 	if ( first ) {
 	  first = false;
@@ -210,7 +210,7 @@ class BitSetPage extends AbstractPage {
 	joiner.appendRaw(NIBBLES[(b & 0xF0) >>> 4])
 	      .appendRaw(NIBBLES[b & 0x0F]);
     }
-    joiner.appendRaw(RIGHT_BRACKET);
+    joiner.appendRaw(RIGHT_BRACKET_STRING);
     return joiner;
   }
 }

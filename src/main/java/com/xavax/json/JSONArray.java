@@ -171,7 +171,7 @@ public final class JSONArray extends ArrayList<Object> {
     int level = indentLevel;
     final String indentation = format.indentation(level++);
     final String innerIndentation = format.indentation(level);
-    builder.append(format.preOpenBrace).append(LEFT_BRACKET);
+    builder.append(format.preOpenBrace).append(LEFT_BRACKET_STRING);
     if ( size() > 0 ) {
       builder.append(format.postOpenBrace);
       boolean first = true;
@@ -187,6 +187,6 @@ public final class JSONArray extends ArrayList<Object> {
       }
       builder.append(format.preCloseBrace).append(indentation);
     }
-    builder.append(RIGHT_BRACKET).append(format.postCloseBrace);
+    builder.append(RIGHT_BRACKET_STRING).append(format.postCloseBrace);
   }
 }

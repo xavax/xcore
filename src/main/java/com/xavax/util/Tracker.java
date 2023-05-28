@@ -1,16 +1,21 @@
 package com.xavax.util;
 
+import static com.xavax.util.Constants.NEWLINE;
+
 /**
  * Tracker keeps track of the levels of nested items and
  * whether we currently need a separator at each level.
  */
-public class Tracker {
+public class Tracker extends AbstractJoinableObject {
   private final static int MAX_LEVEL = Long.SIZE - 1;
+
+  private final boolean withIndent;
+  private final Indentation indentation;
+  private final Joiner parent;
 
   private int level;
   private long flags;
-  private String[] stack = new String[MAX_LEVEL + 1];
-  private final Joiner parent;
+  private String[] stack;
 
   /**
    * Construct a Tracker with the specified separator.
@@ -18,8 +23,11 @@ public class Tracker {
    * @param parent  the parent Joiner.
    */
   @SuppressWarnings("PMD.AccessorMethodGeneration")
-  public Tracker(final Joiner parent) {
+  public Tracker(final Joiner parent, final Indentation indentation) {
     this.parent = parent;
+    this.withIndent = indentation != null;
+    this.indentation = indentation;
+    stack = new String[MAX_LEVEL + 1];
     stack[0] = parent.getFormat().getSeparator();
   }
 
@@ -53,7 +61,18 @@ public class Tracker {
     if ( isSet() ) {
 	parent.appendRaw(stack[level]);
 	clearFlag();
+	if ( withIndent ) {
+	  parent.appendRaw(NEWLINE);
+	  indent();
+	}
     }
+  }
+
+  /**
+   * Output the indentation for the current level.
+   */
+  public void indent() {
+    parent.appendRaw(indentation.indent(level));
   }
 
   /**
@@ -104,5 +123,18 @@ public class Tracker {
    */
   void setLevel(final int level) {
     this.level = level;
+  }
+
+  /**
+   * Output this object to the specified joiner.
+   *
+   * @param joiner  the joiner to use for output.
+   * @return this joiner.
+   */
+  @Override
+  protected Joiner doJoin(final Joiner joiner) {
+    joiner.append("level", level)
+    	  .append("flags", flags);
+    return joiner;
   }
 }

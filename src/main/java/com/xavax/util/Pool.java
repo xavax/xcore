@@ -1,12 +1,10 @@
 package com.xavax.util;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
-
-import com.xavax.util.AbstractJoinableObject;
-import com.xavax.util.Joiner;
 
 /**
  * PoolManager manages a pool of objects of type T. Idle objects
@@ -36,11 +34,12 @@ public class Pool<T> extends AbstractJoinableObject {
   private final Function<Pool<T>, T> DEFAULT_BUILDER = (pool) -> {
 	T object = null;
 	try {
-	  object = pool.type.cast(pool.type.newInstance());
+	  object = pool.type.cast(pool.type.getDeclaredConstructor().newInstance());
 	}
-	catch (InstantiationException | IllegalAccessException e) {
-	  System.out
-	      .println("Unexpected exception: " + e.getClass().getSimpleName());
+	catch (IllegalAccessException | IllegalArgumentException |
+	       InstantiationException | InvocationTargetException |
+	       NoSuchMethodException | SecurityException e) {
+	  System.out.println("Unexpected exception: " + e.getClass().getSimpleName());
 	  e.printStackTrace();
 	}
 	return object;

@@ -544,7 +544,7 @@ public final class JSON extends HashMap<String, Object> {
     int level = indentLevel;
     final String indentation = format.indentation(level++);
     final String innerIndentation = format.indentation(level);
-    builder.append(format.preOpenBrace).append(LEFT_BRACE);
+    builder.append(format.preOpenBrace).append(LEFT_BRACE_STRING);
     if ( entrySet().size() > 0 ) {
       builder.append(format.postOpenBrace);
       boolean first = true;
@@ -564,7 +564,7 @@ public final class JSON extends HashMap<String, Object> {
       }
       builder.append(format.preCloseBrace).append(indentation);
     }
-    builder.append(RIGHT_BRACE).append(format.postCloseBrace);
+    builder.append(RIGHT_BRACE_STRING).append(format.postCloseBrace);
   }
 
   /**

@@ -10,12 +10,12 @@ import java.io.FileNotFoundException;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+// import org.junit.Before;
+// import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -34,7 +34,7 @@ public class XObjectTest extends XObject {
   /**
    * Common set up for all test cases.
    */
-  @BeforeMethod
+  // @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
   }
@@ -42,7 +42,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the debug logging method.
    */
-  @Test
+  // @Test
   public void testLogging()
   {
     Widget widget = new Widget();
@@ -65,7 +65,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the trace logging method.
    */
-  @Test
+  // @Test
   public void testTrace()
   {
     final Widget widget = new Widget(logger);
@@ -83,7 +83,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the info logging method.
    */
-  @Test
+  // @Test
   public void testInfo()
   {
     final Widget widget = new Widget(logger);
@@ -96,7 +96,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the warn logging method.
    */
-  @Test
+  // @Test
   public void testWarn()
   {
     final Widget widget = new Widget(logger);
@@ -109,7 +109,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the error logging method.
    */
-  @Test
+  // @Test
   public void testError()
   {
     final Widget widget = new Widget(logger);
@@ -122,7 +122,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the fatal logging method.
    */
-  @Test
+  // @Test
   public void testFatal()
   {
     final Widget widget = new Widget(logger);

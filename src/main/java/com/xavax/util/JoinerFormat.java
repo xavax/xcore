@@ -23,27 +23,29 @@ public class JoinerFormat {
   private boolean quoteStrings;
   private boolean skipNulls;
   private boolean withFieldNames;
-  private boolean writeEnabled = true;
-  private char openQuoteCharacter   = DOUBLE_QUOTE;
-  private char closeQuoteCharacter  = DOUBLE_QUOTE;
-  private char arrayOpenCharacter   = LEFT_BRACKET;
-  private char arrayCloseCharacter  = RIGHT_BRACKET;
-  private char listOpenCharacter    = LEFT_BRACE;
-  private char listCloseCharacter   = RIGHT_BRACE;
-  private char mapOpenCharacter     = LEFT_BRACE;
-  private char mapCloseCharacter    = RIGHT_BRACE;
-  private char objectOpenCharacter  = LEFT_BRACE;
-  private char objectCloseCharacter = RIGHT_BRACE;
-  private int defaultCapacity       = DEFAULT_INITIAL_CAPACITY;
+  private boolean withIndent;
+  private boolean writeEnabled     = true;
+  private char openQuoteCharacter  = DOUBLE_QUOTE;
+  private char closeQuoteCharacter = DOUBLE_QUOTE;
+  private int defaultCapacity      = DEFAULT_INITIAL_CAPACITY;
   private int maxDepth;
-  private String defaultSeparator = COMMA_SEPARATOR;
-  private String fieldSeparator   = COMMA_SEPARATOR;
-  private String itemSeparator    = COMMA_SEPARATOR;
-  private String mapKeySeparator  = COLON_SEPARATOR;
-  private String nameSeparator    = COLON_SEPARATOR;
-  private String nullIndicator    = NULL_INDICATOR;
-  private String prefix = EMPTY_STRING;
-  private String suffix = EMPTY_STRING;
+  private String arrayCloseString  = RIGHT_BRACKET_STRING;
+  private String arrayOpenString   = LEFT_BRACKET_STRING;
+  private String defaultSeparator  = COMMA_SPACE;
+  private String fieldSeparator    = COMMA_SPACE;
+  private String indentString;
+  private String itemSeparator     = COMMA_SPACE;
+  private String listCloseString   = RIGHT_BRACE_STRING;
+  private String listOpenString    = LEFT_BRACE_STRING;
+  private String mapCloseString    = RIGHT_BRACE_STRING;
+  private String mapOpenString     = LEFT_BRACE_STRING;
+  private String mapKeySeparator   = COLON_SEPARATOR;
+  private String nameSeparator     = COLON_SEPARATOR;
+  private String nullIndicator     = NULL_INDICATOR;
+  private String objectCloseString = RIGHT_BRACE_STRING;
+  private String objectOpenString  = LEFT_BRACE_STRING;
+  private String prefix            = EMPTY_STRING;
+  private String suffix            = EMPTY_STRING;
   private List<StringProcessor> processors;
 
   /**
@@ -64,17 +66,19 @@ public class JoinerFormat {
     this.quoteStrings = exemplar.quoteStrings;
     this.skipNulls = exemplar.skipNulls;
     this.withFieldNames = exemplar.withFieldNames;
+    this.withIndent = exemplar.withIndent;
     this.openQuoteCharacter = exemplar.openQuoteCharacter;
     this.closeQuoteCharacter = exemplar.closeQuoteCharacter;
-    this.arrayOpenCharacter = exemplar.arrayOpenCharacter;
-    this.arrayCloseCharacter = exemplar.arrayCloseCharacter;
-    this.listOpenCharacter = exemplar.listOpenCharacter;
-    this.listCloseCharacter = exemplar.listCloseCharacter;
-    this.mapOpenCharacter = exemplar.mapOpenCharacter;
-    this.mapCloseCharacter = exemplar.mapCloseCharacter;
+    this.arrayOpenString = exemplar.arrayOpenString;
+    this.arrayCloseString = exemplar.arrayCloseString;
+    this.listOpenString = exemplar.listOpenString;
+    this.listCloseString = exemplar.listCloseString;
+    this.mapOpenString = exemplar.mapOpenString;
+    this.mapCloseString = exemplar.mapCloseString;
     this.maxDepth = exemplar.maxDepth;
     this.defaultSeparator = exemplar.defaultSeparator;
     this.fieldSeparator = exemplar.fieldSeparator;
+    this.indentString = exemplar.indentString;
     this.itemSeparator = exemplar.itemSeparator;
     this.mapKeySeparator = exemplar.mapKeySeparator;
     this.nameSeparator = exemplar.nameSeparator;
@@ -260,163 +264,194 @@ public class JoinerFormat {
   }
 
   /**
-   * Sets the array open character.
+   * Sets the array open string.
    *
-   * @param openCharacter   the new array open character.
+   * @param openString   the new array open string.
    * @return this format.
    */
-  public JoinerFormat withArrayOpenCharacter(final char openCharacter) {
-    this.arrayOpenCharacter = openCharacter;
+  public JoinerFormat withArrayOpenString(final String openString) {
+    this.arrayOpenString = openString;
     return this;
   }
 
   /**
-   * Returns the array open character.
+   * Returns the array open string.
    *
-   * @return the array open character.
+   * @return the array open string.
    */
-  public char getArrayOpenCharacter() {
-    return arrayOpenCharacter;
+  public String getArrayOpenString() {
+    return arrayOpenString;
   }
 
   /**
-   * Sets the array close character.
+   * Sets the array close string.
    *
-   * @param closeCharacter   the new array close character.
+   * @param closeString   the new array close string.
    * @return this format.
    */
-  public JoinerFormat withArrayCloseCharacter(final char closeCharacter) {
-    this.arrayCloseCharacter = closeCharacter;
+  public JoinerFormat withArrayCloseString(final String closeString) {
+    this.arrayCloseString = closeString;
     return this;
   }
 
   /**
-   * Returns the array close character.
+   * Returns the array close string.
    *
-   * @return the array close character.
+   * @return the array close string.
    */
-  public char getArrayCloseCharacter() {
-    return arrayCloseCharacter;
+  public String getArrayCloseString() {
+    return arrayCloseString;
   }
 
   /**
-   * Sets the list open character.
+   * Sets indent string and enable indentation if the string
+   * is not null.
    *
-   * @param openCharacter  the new list open character.
+   * @param indentString  the indent string.
    * @return this format.
    */
-  public JoinerFormat withListOpenCharacter(final char openCharacter) {
-    this.listOpenCharacter = openCharacter;
+  public JoinerFormat withIndent(final String indentString) {
+    this.withIndent = indentString != null;
+    this.indentString = indentString;
     return this;
   }
 
   /**
-   * Returns the list open character.
+   * Returns true if indentation is enabled.
    *
-   * @return the list open character.
+   * @return true if indentation is enabled.
    */
-  public char getListOpenCharacter() {
-    return listOpenCharacter;
+  public boolean withIndent() {
+    return withIndent;
   }
 
   /**
-   * Sets the list close character.
+   * Returns the indent string.
    *
-   * @param closeCharacter   the new list close character.
+   * @return the indent string.
+   */
+  public String getIndentString() {
+    return indentString;
+  }
+
+  /**
+   * Sets the list open string.
+   *
+   * @param openString  the new list open string.
    * @return this format.
    */
-  public JoinerFormat withListCloseCharacter(final char closeCharacter) {
-    this.listCloseCharacter = closeCharacter;
+  public JoinerFormat withListOpenString(final String openString) {
+    this.listOpenString = openString;
     return this;
   }
 
   /**
-   * Returns the list close character.
+   * Returns the list open string.
    *
-   * @return the list close character.
+   * @return the list open string.
    */
-  public char getListCloseCharacter() {
-    return listCloseCharacter;
+  public String getListOpenString() {
+    return listOpenString;
   }
 
   /**
-   * Sets the map open character.
+   * Sets the list close string.
    *
-   * @param openCharacter   the new map open character.
+   * @param closeString   the new list close string.
    * @return this format.
    */
-  public JoinerFormat withMapOpenCharacter(final char openCharacter) {
-    this.mapOpenCharacter = openCharacter;
+  public JoinerFormat withListCloseString(final String closeString) {
+    this.listCloseString = closeString;
     return this;
   }
 
   /**
-   * Returns the map open character.
+   * Returns the list close string.
    *
-   * @return the map open character.
+   * @return the list close string.
    */
-  public char getMapOpenCharacter() {
-    return mapOpenCharacter;
+  public String getListCloseString() {
+    return listCloseString;
   }
 
   /**
-   * Sets the map close character.
+   * Sets the map open string.
    *
-   * @param closeCharacter   the new map close character.
+   * @param openString   the new map open string.
    * @return this format.
    */
-  public JoinerFormat withMapCloseCharacter(final char closeCharacter) {
-    this.mapCloseCharacter = closeCharacter;
+  public JoinerFormat withMapOpenString(final String openString) {
+    this.mapOpenString = openString;
     return this;
   }
 
   /**
-   * Returns the map close character.
+   * Returns the map open string.
    *
-   * @return the map close character.
+   * @return the map open string.
    */
-  public char getMapCloseCharacter() {
-    return mapCloseCharacter;
+  public String getMapOpenString() {
+    return mapOpenString;
   }
 
   /**
-   * Sets the object open character.
+   * Sets the map close string.
    *
-   * @param openCharacter   the new object open character.
+   * @param closeString   the new map close string.
    * @return this format.
    */
-  public JoinerFormat withObjectOpenCharacter(final char openCharacter) {
-    this.objectOpenCharacter = openCharacter;
+  public JoinerFormat withMapCloseString(final String closeString) {
+    this.mapCloseString = closeString;
     return this;
   }
 
   /**
-   * Returns the object open character.
+   * Returns the map close string.
    *
-   * @return the object open character.
+   * @return the map close string.
    */
-  public char getObjectOpenCharacter() {
-    return objectOpenCharacter;
+  public String getMapCloseString() {
+    return mapCloseString;
   }
 
   /**
-   * Sets the object close character.
+   * Sets the object open string.
    *
-   * @param closeCharacter   the new object close character.
+   * @param openString   the new object open string.
    * @return this format.
    */
-  public JoinerFormat withObjectCloseCharacter(final char closeCharacter) {
-    this.objectCloseCharacter = closeCharacter;
+  public JoinerFormat withObjectOpenString(final String openString) {
+    this.objectOpenString = openString;
     return this;
   }
 
   /**
-   * Returns the object close character.
+   * Returns the object open string.
    *
-   * @return the object close character.
+   * @return the object open string.
    */
-  public char getObjectCloseCharacter() {
-    return objectCloseCharacter;
+  public String getObjectOpenString() {
+    return objectOpenString;
+  }
+
+  /**
+   * Sets the object close string.
+   *
+   * @param closeString   the new object close string.
+   * @return this format.
+   */
+  public JoinerFormat withObjectCloseString(final String closeString) {
+    this.objectCloseString = closeString;
+    return this;
+  }
+
+  /**
+   * Returns the object close string.
+   *
+   * @return the object close string.
+   */
+  public String getObjectCloseString() {
+    return objectCloseString;
   }
 
   /**

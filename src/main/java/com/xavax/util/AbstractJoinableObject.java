@@ -13,6 +13,11 @@ abstract public class AbstractJoinableObject implements Joinable {
   final static int DEFAULT_BUFFER_SIZE = 256;
 
   /**
+   * Construct an AbstractJoinableObject.
+   */
+  public AbstractJoinableObject() {}
+
+  /**
    * Returns a string representation of this object.
    * @return a string representation of this object.
    */

@@ -7,6 +7,8 @@ import com.xavax.util.Joiner;
  * SegmentMapEntry encapsulates an entry in the segment map (a reference to a
  * segment). It reduces thread contention by allowing us to synchronize on one
  * entry rather than the entire segment map.
+ *
+ * @param <T>  the type of pages in this segment.
  */
 public class SegmentMapEntry<T extends AbstractPage> extends AbstractJoinableObject {
   final static int SEGMAP_BUFFER_SIZE = 8192;

@@ -12,6 +12,9 @@ import com.xavax.util.AbstractJoinableObject;
  * AbstractPage is the base class for pages in a pageable object.
  */
 public abstract class AbstractPage extends AbstractJoinableObject {
+  /**
+   * The parent object.
+   */
   protected final AbstractPageableObject<?> parent;
 
   /**
