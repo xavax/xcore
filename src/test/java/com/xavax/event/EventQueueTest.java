@@ -1,9 +1,9 @@
 package com.xavax.event;
 
-import static org.testng.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the EventQueue class.
@@ -17,7 +17,7 @@ public class EventQueueTest {
   /**
    * Common test setup.
    */
-  @BeforeMethod
+  @Before
   public void setUp() {
     queue = new EventQueue();
   }

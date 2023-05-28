@@ -6,12 +6,10 @@
 
 package com.xavax.concurrent;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test the BitSetPage class.
@@ -35,7 +33,7 @@ public class BitSetPageTest {
   /**
    * Set up performed before each test.
    */
-  @BeforeMethod
+  @Before
   public void beforeMethod() {
     bitSet = new ConcurrentBitSet(BIT_SET_SIZE, LOG2_SEGMENT_SIZE, LOG2_PAGE_SIZE);
     page = new BitSetPage(bitSet);

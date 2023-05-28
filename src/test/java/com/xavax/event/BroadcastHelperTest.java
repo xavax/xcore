@@ -5,15 +5,15 @@
 //
 package com.xavax.event;
 
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for classes in the event package.
  */
-public class TestBroadcastHelper  {
+public class BroadcastHelperTest  {
   private final static int MAX_COUNT = 10;
   private final static int MAX_OBSERVERS = 5;
   private final static int MAX_TYPES = 5;
@@ -28,7 +28,7 @@ public class TestBroadcastHelper  {
    * Construct a TestBroadcastHelper.
    */
   @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
-  public TestBroadcastHelper() {
+  public BroadcastHelperTest() {
     for ( int i= 0; i < MAX_OBSERVERS; ++i ) {
       observers[i] = new SampleObserver(broadcaster, i);
     }
@@ -38,7 +38,7 @@ public class TestBroadcastHelper  {
     }
   }
 
-  @BeforeTest
+  @Before
   public void setUp() {
     broadcaster = new BroadcastHelper();
   }

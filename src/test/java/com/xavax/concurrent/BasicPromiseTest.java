@@ -1,9 +1,9 @@
 package com.xavax.concurrent;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 import static com.xavax.concurrent.DelayedWriter.delayedWrite;
 
 /**
@@ -24,7 +24,7 @@ public class BasicPromiseTest {
   /**
    * @throws java.lang.Exception
    */
-  @BeforeMethod
+  @Before
   public void setUp() throws Exception {
     promise1 = new BasicPromise<>(NAME1);
     promise2 = new BasicPromise<>(NAME2, TIMEOUT);

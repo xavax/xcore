@@ -5,15 +5,15 @@
 //
 package com.xavax.json;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
 
 import com.xavax.util.CollectionFactory;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test the JSON class.
@@ -91,7 +91,7 @@ public class JSONTest {
   /**
    * Test setup.
    */
-  @BeforeMethod
+  @Before
   public void setUp() {
     parser = new JSONParser();
   }
@@ -202,7 +202,7 @@ public class JSONTest {
     final long xvalue = json.getLong("x");
     assertEquals(xvalue, 100);
     final double tupie = json.getDouble("tupie");
-    assertEquals(tupie, TUPIE);
+    assertTrue(tupie == TUPIE);
     final boolean flag = json.getBoolean("flag");
     assertTrue(flag);
     final String zvalue = json.getString("z");

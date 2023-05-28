@@ -6,12 +6,12 @@
 
 package com.xavax.logging;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 public class Log4jLoggingManagerTest {
   private final static Logger logger =
@@ -19,7 +19,7 @@ public class Log4jLoggingManagerTest {
 
   private LoggingManager manager;
 
-  @BeforeMethod
+  @Before
   public void setUp() throws Exception {
     manager = LoggingManager.getInstance();
   }

@@ -1,8 +1,8 @@
 package com.xavax.metrics;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test case for the Timer class.

@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import com.xavax.test.Joiner;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the Varargs class.

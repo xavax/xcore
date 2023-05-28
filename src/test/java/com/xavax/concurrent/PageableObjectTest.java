@@ -1,9 +1,9 @@
 package com.xavax.concurrent;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 public class PageableObjectTest {
 
@@ -18,7 +18,7 @@ public class PageableObjectTest {
 
   private ConcurrentBitSet bitSet;
 
-  @BeforeMethod
+  @Before
   public void setUp() {
     bitSet = new ConcurrentBitSet(INITIAL_SIZE, LOG2_PAGE_SIZE, LOG2_SEGMENT_SIZE);
   }

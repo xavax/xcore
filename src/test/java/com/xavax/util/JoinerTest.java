@@ -12,11 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
-
+import static org.junit.Assert.*;
 import static com.xavax.util.JoinerFormats.*;
 import static com.xavax.util.JoinerTestConstants.*;
 import static com.xavax.util.StringProcessors.*;
@@ -133,7 +132,7 @@ public class JoinerTest {
   /**
    * Common test set up.
    */
-  @BeforeMethod
+  @Before
   public void setUp() {
     person = new Person(FIRST_NAME, LAST_NAME, 25);
     person.add(ADDRESSES[0]);

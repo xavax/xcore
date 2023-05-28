@@ -10,10 +10,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the IterableEnumeration class.
@@ -28,7 +28,7 @@ public class IterableEnumerationTest {
   /**
    * Perform set up before tests.
    */
-  @BeforeMethod
+  @Before
   public void setUp() {
     cityList = Collections.enumeration(Arrays.asList(CITIES));
   }
@@ -63,10 +63,17 @@ public class IterableEnumerationTest {
   /**
    * Test the remove method throwing an exception.
    */
-  @Test(expectedExceptions = UnsupportedOperationException.class)
+  @Test
   public void testRemove() {
     final IterableEnumeration<String> enumeration = new IterableEnumeration<String>(cityList);
     final Iterator<String> iterator = enumeration.iterator();
-    iterator.remove();
+    boolean caught = false;
+    try {
+      iterator.remove();
+    }
+    catch (UnsupportedOperationException e) {
+      caught = true;
+    }
+    assertTrue(caught);
   }
 }

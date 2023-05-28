@@ -1,8 +1,8 @@
 package com.xavax.exception;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the RangeException class.

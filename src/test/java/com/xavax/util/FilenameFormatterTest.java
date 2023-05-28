@@ -9,10 +9,10 @@ package com.xavax.util;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test case for FilenameFormatter.
@@ -37,7 +37,7 @@ public class FilenameFormatterTest {
   /**
    * Setup before each test.
    */
-  @BeforeMethod
+  @Before
   public void setUp() {
     final Calendar calendar = Calendar.getInstance();
     calendar.set(1959, 6, 19, 12, 34, 56);

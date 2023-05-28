@@ -8,12 +8,12 @@ package com.xavax.concurrent;
 
 import java.util.Random;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
+import org.junit.Before;
+import org.junit.Test;
 
 import com.xavax.exception.RangeException;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for ConcurrentBitSet.
@@ -36,7 +36,7 @@ public class ConcurrentBitSetTest {
   /**
    * Set up performed before each test.
    */
-  @BeforeMethod
+  @Before
   public void beforeMethod() {
     bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE);
   }
@@ -57,25 +57,46 @@ public class ConcurrentBitSetTest {
   /**
    * Test the error of having a segment size that is too large.
    */
-  @Test(expectedExceptions = RangeException.class)
+  @Test
   public void testSegmentSizeTooLarge() {
-    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, INVALID_SEGMENT_SIZE, LOG2_PAGE_SIZE);
+    boolean caught = false;
+    try {
+      bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, INVALID_SEGMENT_SIZE, LOG2_PAGE_SIZE);
+    }
+    catch (RangeException e) {
+      caught = true;
+    }
+    assertTrue(caught);
   }
 
   /**
    * Test the error of having a negative segment size.
    */
-  @Test(expectedExceptions = RangeException.class)
+  @Test
   public void testSegmentSizeNegative() {
-    bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, -1, LOG2_PAGE_SIZE);
+    boolean caught = false;
+    try {
+      bitSet = new ConcurrentBitSet(SMALL_BIT_SET_SIZE, -1, LOG2_PAGE_SIZE);
+    }
+    catch (RangeException e) {
+      caught = true;
+    }
+    assertTrue(caught);
   }
 
   /**
    * Test the error of having the initial size negative.
    */
-  @Test(expectedExceptions = RangeException.class)
+  @Test
   public void testInitialSizeNegative() {
-    bitSet = new ConcurrentBitSet(-1, LOG2_SEGMENT_SIZE, LOG2_PAGE_SIZE);
+    boolean caught = false;
+    try {
+      bitSet = new ConcurrentBitSet(-1, LOG2_SEGMENT_SIZE, LOG2_PAGE_SIZE);
+    }
+    catch (RangeException e) {
+      caught = true;
+    }
+    assertTrue(caught);
   }
 
   /**

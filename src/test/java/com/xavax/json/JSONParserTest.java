@@ -12,10 +12,10 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the JSON parser.
@@ -95,7 +95,7 @@ public class JSONParserTest {
   /**
    * Test setup.
    */
-  @BeforeMethod
+  @Before
   public void setUp() {
     parser = new JSONParser().quiet(false);
   }
@@ -230,13 +230,13 @@ public class JSONParserTest {
     assertEquals(foo, 123);
     result = parser.parse(INPUT5B);
     assertTrue(parser.isValid());
-    assertEquals(result.getDouble(TUPIE_NAME), TUPIE_VALUE);
-    assertEquals(result.getDouble(RAD_NAME), RAD_VALUE);
+    assertTrue(result.getDouble(TUPIE_NAME) == TUPIE_VALUE);
+    assertTrue(result.getDouble(RAD_NAME) == RAD_VALUE);
     result = parser.parse(INPUT5C);
     assertTrue(parser.isValid());
-    assertEquals(result.getDouble(FAB_NAME), FAB_VALUE);
-    assertEquals(result.getDouble(XYZ_NAME), XYZ_VALUE);
-    assertEquals(result.getDouble(ABC), ABC_VALUE);
+    assertTrue(result.getDouble(FAB_NAME) == FAB_VALUE);
+    assertTrue(result.getDouble(XYZ_NAME) == XYZ_VALUE);
+    assertTrue(result.getDouble(ABC) == ABC_VALUE);
     result = parser.parse(INPUT5D);
     assertFalse(parser.isValid());
     assertEquals(parser.errorCount(), 1);

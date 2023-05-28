@@ -5,10 +5,11 @@
 //
 package com.xavax.util;
 
-import static org.testng.Assert.*;
-import static com.xavax.util.JoinerTestConstants.*;
+import org.junit.Test;
 
-import org.testng.annotations.Test;
+import static org.junit.Assert.*;
+import static com.xavax.util.JoinerFormats.*;
+import static com.xavax.util.JoinerTestConstants.*;
 
 /**
  * Test cases for testing the Joiner nesting feature.
@@ -164,41 +165,41 @@ public class JoinerNestingTest {
   @Test
   public void testMaxDepth() {
     String output = NODE1.toString();
-    assertEquals(output, EXPECT_NODE1A);
+    assertEquals(EXPECT_NODE1A, output);
     output = NODE3.toString();
-    assertEquals(output, EXPECT_NODE3A);
+    assertEquals(EXPECT_NODE3A, output);
     output = NODE2.toString();
-    assertEquals(output, EXPECT_NODE2A);
+    assertEquals(EXPECT_NODE2A, output);
 
     output = NODE5.toString();
-    assertEquals(output, EXPECT_NODE5A);
+    assertEquals(EXPECT_NODE5A, output);
     output = NODE7.toString();
-    assertEquals(output, EXPECT_NODE7A);
+    assertEquals(EXPECT_NODE7A, output);
     output = NODE6.toString();
-    assertEquals(output, EXPECT_NODE6A);
+    assertEquals(EXPECT_NODE6A, output);
 
     output = NODE9.toString();
-    assertEquals(output, EXPECT_NODE9A);
+    assertEquals(EXPECT_NODE9A, output);
     output = NODE11.toString();
-    assertEquals(output, EXPECT_NODE11A);
+    assertEquals(EXPECT_NODE11A, output);
     output = NODE10.toString();
-    assertEquals(output, EXPECT_NODE10A);
+    assertEquals(EXPECT_NODE10A, output);
 
     output = NODE13.toString();
-    assertEquals(output, EXPECT_NODE13A);
+    assertEquals(EXPECT_NODE13A, output);
     output = NODE15.toString();
-    assertEquals(output, EXPECT_NODE15A);
+    assertEquals(EXPECT_NODE15A, output);
     output = NODE14.toString();
-    assertEquals(output, EXPECT_NODE14A);
+    assertEquals(EXPECT_NODE14A, output);
 
     output = NODE4.toString();
-    assertEquals(output, EXPECT_NODE4A);
+    assertEquals(EXPECT_NODE4A, output);
     output = NODE12.toString();
-    assertEquals(output, EXPECT_NODE12A);
+    assertEquals(EXPECT_NODE12A, output);
     output = NODE8.toString();
-    assertEquals(output, EXPECT_NODE8A);
+    assertEquals(EXPECT_NODE8A, output);
     output = TREE.toString();
-    assertEquals(output, EXPECT_TREE);
+    assertEquals(EXPECT_TREE, output);
 
     
     output = Joiner.create()
@@ -206,48 +207,57 @@ public class JoinerNestingTest {
 		   .append(TREE)
 		   .toString();
     System.out.println(String.format(FORMAT, 6, output));
-    assertEquals(output, EXPECT_TREE_A);
+    assertEquals(EXPECT_TREE_A, output);
 
     output = Joiner.create()
 	   	   .withMaxDepth(5)
 	   	   .append(TREE)
 	   	   .toString();
     System.out.println(String.format(FORMAT, 5, output));
-    assertEquals(output, EXPECT_TREE_B); 
+    assertEquals(EXPECT_TREE_B, output); 
  
     output = Joiner.create()
 	   	   .withMaxDepth(4)
 	   	   .append(TREE)
 	   	   .toString();
     System.out.println(String.format(FORMAT, 4, output));
-    assertEquals(output, EXPECT_TREE_C);
+    assertEquals(EXPECT_TREE_C, output);
 
     output = Joiner.create()
 		   .withMaxDepth(3)
 		   .append(TREE)
 		   .toString();
     System.out.println(String.format(FORMAT, 3, output));
-    assertEquals(output, EXPECT_TREE_D);
+    assertEquals(EXPECT_TREE_D, output);
 
     output = Joiner.create()
 		   .withMaxDepth(2)
 		   .append(TREE)
 		   .toString();
     System.out.println(String.format(FORMAT, 2, output));
-    assertEquals(output, EXPECT_TREE_E);
+    assertEquals(EXPECT_TREE_E, output);
 
     output = Joiner.create()
-	   .withMaxDepth(1)
-	   .append(TREE)
-	   .toString();
+		   .withMaxDepth(1)
+		   .append(TREE)
+		   .toString();
     System.out.println(String.format(FORMAT, 1, output));
-    assertEquals(output, EXPECT_TREE_F);
+    assertEquals(EXPECT_TREE_F, output);
 
-output = Joiner.create()
+    output = Joiner.create()
 		   .append(TREE)
 		   .toString();
     System.out.println(String.format(FORMAT, 0, output));
-    assertEquals(output, EXPECT_TREE_A); 
+    assertEquals(EXPECT_TREE_A, output);
+  }
+
+  @Test
+  public void testVerbose() {
+    String output = Joiner.create(VERBOSE_DEBUG_FORMAT)
+		   .append("tree", TREE)
+		   .toString();
+    System.out.println("Verbose Debug:");
+    System.out.println(output);
   }
 
   /**

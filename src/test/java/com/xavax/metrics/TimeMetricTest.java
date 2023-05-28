@@ -1,9 +1,9 @@
 package com.xavax.metrics;
 
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the TimeMetric class.
@@ -18,7 +18,7 @@ public class TimeMetricTest {
   /**
    * Test setup.
    */
-  @BeforeMethod
+  @Before
   public void setUp() {
     metric = new TimeMetric();
   }
@@ -102,9 +102,9 @@ public class TimeMetricTest {
     final TimeMetric.Result result = metric.result();
     assertEquals(result.min(), 100);
     assertEquals(result.max(), 104);
-    assertEquals(result.mean(), 102.0);
+    assertTrue(result.mean() == 102.0);
     assertEquals(result.totalTime(), 510);
     assertEquals(result.totalTimeSquared(), 52030);
-    assertEquals(result.deviation(), 1.4142135623730951);
+    assertTrue(result.deviation() == 1.4142135623730951);
   }
 }

@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.xavax</groupId>
   <artifactId>xcore</artifactId>
-  <version>1.1.6</version>
+  <version>1.1.7</version>
   <name>Xavax Core Library</name>
   <url>http://www.xavax.com</url>
   <description>Core classes used by other Xavax projects.</description>
@@ -44,17 +44,17 @@
     <testSourceDirectory>src/test/java</testSourceDirectory>
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.3</version>
+        <version>3.11.0</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <release>11</release>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
-        <version>1.6</version>
+        <version>3.1.0</version>
         <executions>
           <execution>
             <id>sign-artifacts</id>
@@ -68,9 +68,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
+        <version>3.5.0</version>
         <configuration>
-          <show>protected</show>
+          <doclint>none</doclint>
         </configuration>
         <executions>  
           <execution>
@@ -82,13 +82,15 @@
         </executions>
       </plugin>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>2.4</version>
+        <version>3.3.0</version>
         <executions>
           <execution>
             <id>attach-sources</id>
             <goals>
               <goal>jar</goal>
+              <goal>test-jar</goal>
             </goals>
           </execution>
         </executions>
@@ -97,9 +99,10 @@
   </build>
   <dependencies>
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>6.9.9</version>
+      <groupId>junit</groupId>
+  	  <artifactId>junit</artifactId>
+  	  <version>4.13</version>
+  	  <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -117,14 +120,24 @@
   	  <version>1.8.0-beta2</version>
 	</dependency>
     <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.14</version>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.20.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.20.0</version>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.10.19</version>
+      <version>2.0.2-beta</version>
+    </dependency>
+	<dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.10.2</version>
     </dependency>
   </dependencies>
   <distributionManagement>

@@ -8,9 +8,9 @@ package com.xavax.util;
 
 import java.util.Comparator;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the Strings utility class.

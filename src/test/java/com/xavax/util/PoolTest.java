@@ -2,9 +2,9 @@ package com.xavax.util;
 
 import java.util.Arrays;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * PoolTest is the test case for the Pool class.

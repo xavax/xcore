@@ -7,9 +7,9 @@ package com.xavax.util;
 
 import java.util.Iterator;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the IterableStringTokenizer class.
@@ -78,10 +78,17 @@ public class IterableStringTokenizerTest {
   /**
    * Test the remove method throwing an exception.
    */
-  @Test(expectedExceptions = UnsupportedOperationException.class)
+  @Test
   public void testRemove() {
     final IterableStringTokenizer tokenizer = new IterableStringTokenizer(INPUT1);
     final Iterator<String> iterator = tokenizer.iterator();
-    iterator.remove();
+    boolean caught = false;
+    try {
+      iterator.remove();
+    }
+    catch (UnsupportedOperationException e) {
+      caught = true;
+    }
+    assertTrue(caught);
   }
 }

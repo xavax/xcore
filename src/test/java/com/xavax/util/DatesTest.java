@@ -3,9 +3,9 @@ package com.xavax.util;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
-import static org.testng.Assert.*;
+import static org.junit.Assert.*;
 
 /**
  * Test cases for the Dates utility class.

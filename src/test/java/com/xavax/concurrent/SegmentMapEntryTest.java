@@ -6,11 +6,10 @@
 
 package com.xavax.concurrent;
 
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeMethod;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Test the ConcurrentBitSet.SegmentMapEntry class.
@@ -26,7 +25,7 @@ public class SegmentMapEntryTest {
   /**
    * Set up performed before each test.
    */
-  @BeforeMethod
+  @Before
   public void setUp() {
     bitSet = new ConcurrentBitSet();
     entry = new SegmentMapEntry<>();
