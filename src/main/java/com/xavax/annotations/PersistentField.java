@@ -34,6 +34,35 @@ public @interface PersistentField {
   int position() default -1;
 
   /**
+   * Returns true if the relationship is an aggregation.
+   * 
+   * @return true if the relationship is an aggregation.
+   */
+  boolean aggregation() default false;
+
+  /**
+   * Returns true if the relationship is an association.
+   *
+   * @return true if the relationship is an association.
+   */
+  boolean association() default false;
+
+  /**
+   * Returns true if the relationship is composition.
+   *
+   * @return true if the relationship is composition.
+   */
+  boolean composition() default false;
+
+  /**
+   * Returns true if this field serves as the modified flag
+   * indicating the object needs to be persisted.
+   *
+   * @return true if this field serves as the modified flag.
+   */
+  boolean modifiedFlag() default false;
+
+  /**
    * Returns true if this field is transient and should not
    * be persisted.
    *

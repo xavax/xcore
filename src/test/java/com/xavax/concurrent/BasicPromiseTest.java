@@ -47,8 +47,8 @@ public class BasicPromiseTest {
    */
   @Test
   public void testGetName() {
-    assertEquals(promise1.getName(), NAME1);
-    assertEquals(promise2.getName(), NAME2);
+    assertEquals(NAME1, promise1.getName());
+    assertEquals(NAME2, promise2.getName());
   }
 
   /**
@@ -69,8 +69,8 @@ public class BasicPromiseTest {
   public void testGet() {
     delayedWrite(SLEEP_TIME, promise1, RESULT);
     delayedWrite(SLEEP_TIME, promise2, RESULT);
-    assertEquals(promise1.get(), RESULT);
-    assertEquals(promise2.get(), RESULT);
+    assertEquals(RESULT, promise1.get());
+    assertEquals(RESULT, promise2.get());
   }
 
   /**

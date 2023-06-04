@@ -11,9 +11,10 @@ import java.util.Date;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-// import org.junit.Before;
-// import org.junit.Test;
-import org.mockito.MockitoAnnotations;
+import org.junit.runner.RunWith;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.Mock;
 
 import static org.junit.Assert.*;
@@ -22,6 +23,7 @@ import static org.mockito.Mockito.*;
 /**
  * Test cases for the XLogger class.
  */
+@RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings({"PMD.MoreThanOneLogger", "PMD.TooManyMethods"})
 public class XLoggerTest {
   private final static Logger LOGGER = Logger.getLogger(XLoggerTest.class);
@@ -60,15 +62,14 @@ public class XLoggerTest {
   /**
    * Common set up for all test cases.
    */
-  // @Before
+  @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
   }
 
   /**
    * Test the logger.
    */
-  // @Test
+  @Test
   public void testTraceLogging() {
     foo();
   }
@@ -119,7 +120,7 @@ public class XLoggerTest {
   /**
    * Test format.
    */
-  // @Test
+  @Test
   public void testFormat() {
     String result = XLogger.format(LOGGER, METHOD, MESSAGE);
     assertEquals(result, EXPECT1);
@@ -130,7 +131,7 @@ public class XLoggerTest {
   /**
    * Test format varargs.
    */
-  // @Test
+  @Test
   public void testFormatVarargs() {
     String result = XLogger.format(LOGGER, METHOD, FORMAT, PARAM1, 123, 5.678);
     assertEquals(result, EXPECT2);
@@ -141,7 +142,7 @@ public class XLoggerTest {
   /**
    * Test formatLeave.
    */
-  // @Test
+  @Test
   public void testFormatLeave() {
     String result = XLogger.formatLeave(LOGGER, METHOD, RESULT);
     assertEquals(result, EXPECT3);
@@ -156,7 +157,7 @@ public class XLoggerTest {
   /**
    * Test the debug methods.
    */
-  // @Test
+  @Test
   public void testDebug() {
     XLogger.debug(null, METHOD, MESSAGE);
     verify(logger, times(0)).debug(any());
@@ -176,7 +177,7 @@ public class XLoggerTest {
   /**
    * Test the trace method.
    */
-  // @Test
+  @Test
   public void testTrace() {
     XLogger.trace(null, METHOD, MESSAGE);
     verify(logger, times(0)).trace(any());
@@ -190,7 +191,7 @@ public class XLoggerTest {
   /**
    * Test the enter method.
    */
-  // @Test
+  @Test
   public void testEnter() {
     XLogger.enter(null, METHOD);
     verify(logger, times(0)).trace(any());
@@ -204,7 +205,7 @@ public class XLoggerTest {
   /**
    * Test the leave method.
    */
-  // @Test
+  @Test
   public void testLeave() {
     XLogger.leave(null, METHOD);
     verify(logger, times(0)).trace(any());
@@ -232,7 +233,7 @@ public class XLoggerTest {
   /**
    * Test the info methods.
    */
-  // @Test
+  @Test
   public void testInfo() {
     final Exception cause = new FileNotFoundException(MESSAGE);
     XLogger.info(null, METHOD, MESSAGE);
@@ -265,7 +266,7 @@ public class XLoggerTest {
   /**
    * Test the error methods.
    */
-  // @Test
+  @Test
   public void testError() {
     final Exception cause = new FileNotFoundException(MESSAGE);
     XLogger.error(null, METHOD, MESSAGE);
@@ -298,7 +299,7 @@ public class XLoggerTest {
   /**
    * Test the fatal methods.
    */
-  // @Test
+  @Test
   public void testFatal() {
     final Exception cause = new FileNotFoundException(MESSAGE);
     XLogger.fatal(null, METHOD, MESSAGE);
@@ -322,7 +323,7 @@ public class XLoggerTest {
   /**
    * Test the warn methods.
    */
-  // @Test
+  @Test
   public void testWarn() {
     final Exception cause = new FileNotFoundException(MESSAGE);
     XLogger.warn(null, METHOD, MESSAGE);

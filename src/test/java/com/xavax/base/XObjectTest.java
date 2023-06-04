@@ -10,10 +10,11 @@ import java.io.FileNotFoundException;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-// import org.junit.Before;
-// import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.*;
  *
  * @author alvitar@xavax.com
  */
+@RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings("PMD.AccessorMethodGeneration")
 public class XObjectTest extends XObject {
   private final static String FORMAT = "p1=[%s], p2=[%d] p3=[%f]";
@@ -34,15 +36,14 @@ public class XObjectTest extends XObject {
   /**
    * Common set up for all test cases.
    */
-  // @Before
+  @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
   }
 
   /**
    * Test the debug logging method.
    */
-  // @Test
+  @Test
   public void testLogging()
   {
     Widget widget = new Widget();
@@ -65,7 +66,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the trace logging method.
    */
-  // @Test
+  @Test
   public void testTrace()
   {
     final Widget widget = new Widget(logger);
@@ -83,7 +84,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the info logging method.
    */
-  // @Test
+  @Test
   public void testInfo()
   {
     final Widget widget = new Widget(logger);
@@ -96,7 +97,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the warn logging method.
    */
-  // @Test
+  @Test
   public void testWarn()
   {
     final Widget widget = new Widget(logger);
@@ -109,7 +110,7 @@ public class XObjectTest extends XObject {
   /**
    * Test the error logging method.
    */
-  // @Test
+  @Test
   public void testError()
   {
     final Widget widget = new Widget(logger);
@@ -122,11 +123,10 @@ public class XObjectTest extends XObject {
   /**
    * Test the fatal logging method.
    */
-  // @Test
+  @Test
   public void testFatal()
   {
     final Widget widget = new Widget(logger);
-    when(logger.isEnabledFor(Level.FATAL)).thenReturn(true);
     widget.testFatal();
     verify(logger, times(2)).fatal(any());
     verify(logger, times(2)).fatal(any(), any());
