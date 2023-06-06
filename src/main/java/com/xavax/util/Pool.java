@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
 /**
- * PoolManager manages a pool of objects of type T. Idle objects
+ * Pool manages a pool of objects of type T. Idle objects
  * are kept in a queue until they are allocated and returned to
  * the queue when deallocated. The pool can grow either by adding
  * elements or calling a builder function. The default builder
@@ -46,7 +46,7 @@ public class Pool<T> extends AbstractJoinableObject {
   };
 
   /**
-   * Construct a PoolManager for the specified type of objects. The pool is
+   * Construct a Pool for the specified type of objects. The pool is
    * empty and must be grown by adding elements.
    *
    * @param name  the name of this pool (for debugging).
@@ -64,9 +64,9 @@ public class Pool<T> extends AbstractJoinableObject {
   }
 
   /**
-   * Construct a PoolManager for the specified type of objects with the
-   * specified capacity. The elements of the pool will be created automatically
-   * by calling Class.newInstance.
+   * Construct a Pool for the specified type of objects with the
+   * specified capacity. The elements of the pool will be created
+   * automatically by calling Class.newInstance.
    *
    * @param name      the name of this pool (for debugging).
    * @param type      the type of T.
@@ -79,7 +79,7 @@ public class Pool<T> extends AbstractJoinableObject {
   }
 
   /**
-   * PoolManager manages a pool of objects of type T. An initial list of
+   * Pool manages a pool of objects of type T. An initial list of
    * elements is added to the pool.
    *
    * @param name      the name of this pool (for debugging).
@@ -93,7 +93,7 @@ public class Pool<T> extends AbstractJoinableObject {
   }
 
   /**
-   * PoolManager manages a pool of objects of type T. An initial list of
+   * Pool manages a pool of objects of type T. An initial list of
    * elements is added to the pool.
    *
    * @param name      the name of this pool (for debugging).
@@ -174,7 +174,20 @@ public class Pool<T> extends AbstractJoinableObject {
     T result = queue.poll();
     if ( result == null && autoGrow ) {
       add(1);
-      result = queue.peek();
+      while ( result == null ) {
+	result = queue.poll();
+	if ( result == null ) {
+	  try {
+	    queue.wait(1000);
+	  }
+	  catch (InterruptedException e) {
+	    System.out.println("retry!");
+	  }
+	}
+	else {
+	  break;
+	}
+      }
     }
     return result;
   }
@@ -288,10 +301,10 @@ public class Pool<T> extends AbstractJoinableObject {
   @Override
   protected Joiner doJoin(final Joiner joiner) {
     joiner.appendField(NAME, name)
-	.appendField(TYPE, type.getSimpleName())
-	.appendField(CAPACITY, capacity)
-	.appendField(AUTOGROW, autoGrow)
-	.appendField(QUEUE, queue);
+	  .appendField(TYPE, type.getSimpleName())
+	  .appendField(CAPACITY, capacity)
+	  .appendField(AUTOGROW, autoGrow)
+	  .appendField(QUEUE, queue);
     return joiner;
   }
 

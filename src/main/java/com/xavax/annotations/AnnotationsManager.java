@@ -25,8 +25,8 @@ public class AnnotationsManager extends AbstractJoinableObject {
   private final static String CLASSNAME = AnnotationsManager.class.getSimpleName();
   private final static Logger logger = LoggerFactory.getLogger(AnnotationsManager.class);
 
-  private final List<AnnotatedClass> classes;
-  private final Map<String, AnnotatedClass> classMap;
+  protected final List<AnnotatedClass> classes;
+  protected final Map<String, AnnotatedClass> classMap;
 
   /**
    * Construct an AnnotationsManager.
@@ -71,7 +71,6 @@ public class AnnotationsManager extends AbstractJoinableObject {
     }
   }
 
- 
   /**
    * Output this object to the specified joiner.
    *

@@ -24,8 +24,11 @@ public final class XLogger {
   public final static int EXTRA_LENGTH = 64;
   public final static String ENTER = "enter";
   public final static String LEAVE = "leave";
-  public final static String UNKNOWN = "<unknown>";
   public final static String LEAVE_MESSAGE = "leave, return value = [";
+  public final static String TRACE_ENTER = "{}.{}: enter";
+  public final static String TRACE_LEAVE = "{}.{}: leave";
+  public final static String TRACE_RETURN = "{}.{}: returns {}";
+  public final static String UNKNOWN = "<unknown>";
 
   /**
    * Private constructor provided to keep the compiler from generating
